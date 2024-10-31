@@ -97,9 +97,9 @@
 
   ## User agent
   u <- getOption("HTTPUserAgent")
-    u <- sprintf("R/%s; R (%s)",
-                 getRversion(),
-                 paste(getRversion(), R.version$platform, R.version$arch, R.version$os))
+  u <- sprintf("R/%s; R (%s)",
+               getRversion(),
+               paste(getRversion(), R.version$platform, R.version$arch, R.version$os))
 
   # Add wildrtrax version information:
   u <- paste0("wildrtrax ", as.character(packageVersion("wildrtrax")), "; ", u)
@@ -176,8 +176,8 @@
   crs <- terra::crs(.rtree)
 
   #get vars
-  date <- str_sub(data$recording_date_time, 1, 10)
-  time <- str_sub(data$recording_date_time, 12, 19)
+  date <- substr(data$recording_date_time, 1, 10)
+  time <- substr(data$recording_date_time, 12, 19)
   lon <- as.numeric(data$longitude)
   lat <- as.numeric(data$latitude)
   dur <- as.numeric(data$task_duration)
@@ -262,13 +262,13 @@
   dtm[is.na(dtm)] <- mean(dtm, na.rm=TRUE)
   if(tz=="local"){
     sr <- suntools::sunriset(cbind("X"=xydf$x, "Y"=xydf$y),
-                   as.POSIXct(dtm, tz="America/Edmonton"),
-                   direction="sunrise", POSIXct.out=FALSE) * 24
+                             as.POSIXct(dtm, tz="America/Edmonton"),
+                             direction="sunrise", POSIXct.out=FALSE) * 24
   }
   if(tz=="utc"){
     sr <- suntools::sunriset(cbind("X"=xydf$x, "Y"=xydf$y),
-                   as.POSIXct(dtm, tz="GMT"),
-                   direction="sunrise", POSIXct.out=FALSE) * 24
+                             as.POSIXct(dtm, tz="GMT"),
+                             direction="sunrise", POSIXct.out=FALSE) * 24
   }
   TSSR <- round(unname((hour - sr + ltz) / 24), 4)
 
@@ -599,4 +599,3 @@
   wav_files <- list.files(path = dir, pattern = "\\.wav$", recursive = TRUE, full.names = TRUE)
   file.remove(wav_files)
 }
-

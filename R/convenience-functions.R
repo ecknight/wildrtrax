@@ -8,7 +8,6 @@
 #' @import dplyr tibble sf
 #' @importFrom readr read_csv
 #' @importFrom tidyr pivot_longer
-#' @importFrom stringr str_replace
 #' @export
 #'
 #' @examples
@@ -67,7 +66,7 @@ wt_location_distances <- function(input_from_tibble = NULL, input_from_file = NU
     tibble::as_tibble() |>
     tibble::rownames_to_column(var = "location_from") |>
     tidyr::pivot_longer(cols = -location_from, names_to = "distance_to", values_to = "distance") |>
-    dplyr::mutate(distance_to = str_replace(distance_to, "V","")) |>
+    dplyr::mutate(distance_to = gsub("V", "", distance_to)) |>
     dplyr::mutate_at(vars(location_from, distance, distance_to), as.numeric) |>
     dplyr::filter(!distance == 0) |>
     dplyr::left_join(location_ids, by = c("location_from" = "id")) |>
@@ -90,7 +89,6 @@ wt_location_distances <- function(input_from_tibble = NULL, input_from_file = NU
 #' @param zerofill Logical; indicates if zerofilling should be completed. If TRUE, unique surveys with no observations after filtering are added to the dataset with "NONE" as the value for species_code and/or species_common_name. If FALSE, only surveys with observations of the retained groups are returned. Default is TRUE.
 #'
 #' @import dplyr
-#' @importFrom stringr str_sub
 #' @export
 #'
 #' @examples
@@ -141,7 +139,7 @@ wt_tidy_species <- function(data,
   #Add the unknowns if requested
   if("unknown" %in% remove){
     species.remove <- .species %>%
-      dplyr::filter(str_sub(species_common_name, 1, 12)=="Unidentified") %>%
+      dplyr::filter(substr(species_common_name, 1, 12) == "Unidentified") %>%
       rbind(species.remove)
   }
 
@@ -270,7 +268,6 @@ wt_replace_tmtt <- function(data, calc="round"){
 #'
 #' @import dplyr
 #' @importFrom tidyr pivot_wider
-#' @importFrom stringr str_to_title str_sub str_locate_all
 #' @export
 #'
 #' @examples
@@ -295,7 +292,7 @@ wt_make_wide <- function(data, sound="all"){
 
     #Remove undesired sound types
     if(!"all" %in% sound){
-      sound <- str_to_title(sound)
+      sound <- gsub("\\b(\\w)", "\\U\\1", tolower(sound), perl = TRUE)
       summed <- dplyr::filter(summed, vocalization %in% sound)
     }
 
@@ -499,22 +496,22 @@ wt_format_occupancy <- function(data,
 
 wt_qpad_offsets <- function(data, species = c("all"), version = 3, together=FALSE) {
 
-  #Rename fields if PC
-  if("survey_url" %in% colnames(data)){
+  # Rename fields if PC
+  if ("survey_url" %in% colnames(data)) {
     data <- data |>
-      rename(task_id=survey_id,
+      rename(task_id = survey_id,
              recording_date_time = survey_date,
              observer_id = observer) |>
       rowwise() |>
-      mutate(durationMethod = ifelse(str_sub(survey_duration_method, -1, -1)=="+",
-                                     str_sub(survey_duration_method, -100, -2),
+      mutate(durationMethod = ifelse(substr(survey_duration_method, nchar(survey_duration_method), nchar(survey_duration_method)) == "+",
+                                     substr(survey_duration_method, 1, nchar(survey_duration_method) - 2),
                                      survey_duration_method),
-             chardur = str_locate_all(durationMethod, "-"),
-             chardurmax = max(chardur),
-             task_duration = as.numeric(str_sub(durationMethod, chardurmax+1, -4))*60,
-             chardis = str_locate_all(survey_distance_method, "-"),
-             chardismax = max(chardis),
-             distance1 = str_sub(survey_distance_method, chardismax+1, -2),
+             chardur = gregexpr("-", durationMethod, fixed = TRUE),
+             chardurmax = max(unlist(chardur)),
+             task_duration = as.numeric(substr(durationMethod, chardurmax + 1, nchar(durationMethod) - 3)) * 60,
+             chardis = gregexpr("-", survey_distance_method, fixed = TRUE),
+             chardismax = max(unlist(chardis)),
+             distance1 = substr(survey_distance_method, chardismax + 1, nchar(survey_distance_method) - 1),
              task_distance = ifelse(distance1 %in% c("AR", "IN"), Inf, as.numeric(distance1))) |>
       ungroup()
   }

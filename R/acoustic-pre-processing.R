@@ -9,7 +9,6 @@
 #' @import fs tibble dplyr tuneR purrr seewave
 #' @importFrom rlang env_has current_env
 #' @importFrom tidyr separate pivot_longer unnest_longer
-#' @importFrom stringr str_replace
 #' @export
 #'
 #' @examples
@@ -60,23 +59,23 @@ wt_audio_scanner <- function(path, file_type, extra_cols = F) {
   }
 
   # Create the main tibble
-  df <- df %>%
-    tidyr::unnest_longer(file_path) %>%
+  df <- df |>
+    tidyr::unnest_longer(file_path) |>
     dplyr::mutate(size_Mb = round(purrr::map_dbl(.x = file_path, .f = ~ fs::file_size(.x)) / 10e5, digits = 2), # Convert file sizes to megabytes
-                  file_path = as.character(file_path)) %>%
-    dplyr::select(file_path, size_Mb) %>%
-    dplyr::mutate(file_name = stringr::str_replace(basename(file_path), "\\..*", ""),
-                  file_type = sub('.*\\.(\\w+)$', '\\1', basename(file_path))) %>%
+                  file_path = as.character(file_path)) |>
+    dplyr::select(file_path, size_Mb) |>
+    dplyr::mutate(file_name = sub("\\..*", "", basename(file_path)),
+                  file_type = sub('.*\\.(\\w+)$', '\\1', basename(file_path))) |>
     # Parse location, recording date time and other temporal columns
-    tidyr::separate(file_name, into = c("location", "recording_date_time"), sep = "(?:_0\\+1_|_|__0__|__1__)", extra = "merge", remove = FALSE) %>%
-    dplyr::mutate(recording_date_time = str_remove(recording_date_time, '.+?(?:__)')) %>%
-    dplyr::mutate(recording_date_time = as.POSIXct(strptime(recording_date_time, format = "%Y%m%d_%H%M%S"))) %>%
+    tidyr::separate(file_name, into = c("location", "recording_date_time"), sep = "(?:_0\\+1_|_|__0__|__1__)", extra = "merge", remove = FALSE) |>
+    dplyr::mutate(recording_date_time = sub('.+?(?:__)', '', recording_date_time)) |>
+    dplyr::mutate(recording_date_time = as.POSIXct(strptime(recording_date_time, format = "%Y%m%d_%H%M%S"))) |>
     dplyr::mutate(julian = as.POSIXlt(recording_date_time)$yday + 1,
            year = as.numeric(format(recording_date_time,"%Y")),
-           gps_enabled = dplyr::case_when(grepl('\\$', file_name) ~ TRUE)) %>%
-    dplyr::arrange(location, recording_date_time) %>%
-    dplyr::group_by(location, year, julian) %>%
-    dplyr::mutate(time_index = dplyr::row_number()) %>% # Create time index - this is an ordered list of the recording per day, e.g. first recording of the day = 1, second equals 2, etc.
+           gps_enabled = dplyr::case_when(grepl('\\$', file_name) ~ TRUE)) |>
+    dplyr::arrange(location, recording_date_time) |>
+    dplyr::group_by(location, year, julian) |>
+    dplyr::mutate(time_index = dplyr::row_number()) |> # Create time index - this is an ordered list of the recording per day, e.g. first recording of the day = 1, second equals 2, etc.
     dplyr::ungroup()
 
   if (extra_cols == FALSE) {
@@ -277,7 +276,6 @@ wt_flac_info <- function(path) {
 #' @param delete_media Logical; when TRUE, removes the underlying sectioned wav files from the Towsey output. Leave to TRUE to save on space after runs.
 #'
 #' @import dplyr
-#' @importFrom stringr str_detect
 #' @export
 #'
 #' @return Output will return to the specific root directory
@@ -319,7 +317,7 @@ wt_run_ap <- function(x = NULL, fp_col = file_path, audio_dir = NULL, output_dir
       stop("The value in fp_col does not refer to a column in x.")
     }
     files <- x %>%
-      dplyr::filter(stringr::str_detect({{fp_col}}, supported_formats)) %>%
+      dplyr::filter(grepl(supported_formats, {{fp_col}})) %>%
       dplyr::select({{fp_col}}) %>%
       dplyr::pull()
   } else {
@@ -400,7 +398,7 @@ wt_glean_ap <- function(x = NULL, input_dir, purpose = c("quality","abiotic","bi
       fs::dir_info(input_dir, regexp = "*__2Maps.png", recurse = T) %>%
       dplyr::select(path) %>%
       dplyr::rename("image" = 1) %>%
-      dplyr::mutate(file_name = str_replace(basename(image), '__2Maps.png', ''))
+      dplyr::mutate(file_name = sub('__2Maps.png$', '', basename(image)))
 
   } else {
     stop("Cannot find this directory")
@@ -775,7 +773,6 @@ wt_make_aru_tasks <- function(input, output=NULL, task_method = c("1SPM","1SPT",
 #' @import dplyr tibble
 #' @importFrom readr read_csv
 #' @importFrom tidyr drop_na separate
-#' @importFrom stringr str_remove
 #' @export
 #'
 #' @examples
@@ -795,54 +792,54 @@ wt_kaleidoscope_tags <- function (input, output, freq_bump = T) {
   }
 
   #Cleaning things up for the tag template
-  in_tbl_wtd <- in_tbl %>%
-    dplyr::select(INDIR, `IN FILE`, DURATION, OFFSET, Dur, DATE, TIME, `AUTO ID*`, Fmin, Fmax) %>%
-    tidyr::separate(`IN FILE`, into = c("location", "recordingDate"), sep = "(?:_0\\+1_|_|__0__|__1__)", extra = "merge", remove = F) %>%
-    dplyr::select(-(DATE:TIME)) %>%
-    dplyr::relocate(location) %>%
-    dplyr::relocate(recordingDate, .after = location) %>%
-    dplyr::mutate(recordingDate = stringr::str_remove(recordingDate,'.+?(?:__)')) %>%
+  in_tbl_wtd <- in_tbl |>
+    dplyr::select(INDIR, `IN FILE`, DURATION, OFFSET, Dur, DATE, TIME, `AUTO ID*`, Fmin, Fmax) |>
+    tidyr::separate(`IN FILE`, into = c("location", "recordingDate"), sep = "(?:_0\\+1_|_|__0__|__1__)", extra = "merge", remove = F) |>
+    dplyr::select(-(DATE:TIME)) |>
+    dplyr::relocate(location) |>
+    dplyr::relocate(recordingDate, .after = location) |>
+    dplyr::mutate(recordingDate = sub('.+?(?:__)', '', recordingDate))
     # Create date/time fields
-    dplyr::mutate(recording_date_time = as.POSIXct(strptime(recording_date_time, format = "%Y-%m-%d %H:%M:%S"))) %>% #Apply a time zone if necessary
+    dplyr::mutate(recording_date_time = as.POSIXct(strptime(recording_date_time, format = "%Y-%m-%d %H:%M:%S"))) |> #Apply a time zone if necessary
     dplyr::rename("taskLength" = 5,
                   "startTime" = 6,
                   "tagLength" = 7,
                   "species" = 8,
                   "minFreq" = 9,
-                  "maxFreq" = 10) %>%
-    dplyr::select(-(INDIR:`IN FILE`)) %>%
+                  "maxFreq" = 10) |>
+    dplyr::select(-(INDIR:`IN FILE`)) |>
     # Updating names to WildTrax species codes
     dplyr::mutate(species = case_when(species == "NoID" ~ "UBAT",
                                       species == "H_freq_Bat" ~ "HighF",
                                       species == "L_freq_Bat" ~ "LowF",
                                       TRUE ~ species),
-                  startTime = dplyr::case_when(startTime == 0 ~ 0.1, TRUE ~ startTime)) %>% #Adjusting startTime parameter
-    tibble::add_column(method = "1SPT", .after = "recordingDate") %>%
-    tibble::add_column(transcriber = "Not Assigned", .after = "taskLength") %>%
-    dplyr::group_by(location, recordingDate, taskLength, species) %>%
-    dplyr::mutate(speciesIndividualNumber = row_number()) %>%
-    dplyr::ungroup() %>%
-    tibble::add_column(vocalization = "", .after = "speciesIndividualNumber") %>%
-    tibble::add_column(abundance = 1, .after= "vocalization") %>%
-    dplyr::mutate(vocalization = case_when(species == "Noise" ~ "Non-vocal", TRUE ~ "Call")) %>%
-    tibble::add_column(internal_tag_id = "", .after = "maxFreq") %>%
-    dplyr::mutate(recordingDate = as.character(recordingDate)) %>%
-    dplyr::rowwise() %>%
-    dplyr::mutate(tagLength = dplyr::case_when(tagLength > taskLength ~ taskLength, TRUE ~ tagLength)) %>%
+                  startTime = dplyr::case_when(startTime == 0 ~ 0.1, TRUE ~ startTime)) |> #Adjusting startTime parameter
+    tibble::add_column(method = "1SPT", .after = "recordingDate") |>
+    tibble::add_column(transcriber = "Not Assigned", .after = "taskLength") |>
+    dplyr::group_by(location, recordingDate, taskLength, species) |>
+    dplyr::mutate(speciesIndividualNumber = row_number()) |>
+    dplyr::ungroup() |>
+    tibble::add_column(vocalization = "", .after = "speciesIndividualNumber") |>
+    tibble::add_column(abundance = 1, .after= "vocalization") |>
+    dplyr::mutate(vocalization = case_when(species == "Noise" ~ "Non-vocal", TRUE ~ "Call")) |>
+    tibble::add_column(internal_tag_id = "", .after = "maxFreq") |>
+    dplyr::mutate(recordingDate = as.character(recordingDate)) |>
+    dplyr::rowwise() |>
+    dplyr::mutate(tagLength = dplyr::case_when(tagLength > taskLength ~ taskLength, TRUE ~ tagLength)) |>
     dplyr::mutate(tagLength = dplyr::case_when(is.na(tagLength) ~ taskLength - startTime, TRUE ~ tagLength),
                   minFreq = dplyr::case_when(is.na(minFreq) ~ 12000, TRUE ~ minFreq * 1000),
-                  maxFreq = dplyr::case_when(is.na(maxFreq) ~ 96000, TRUE ~ maxFreq * 1000)) %>%
-    dplyr::ungroup() %>%
-    dplyr::mutate_at(vars(taskLength,minFreq,maxFreq), ~round(.,2)) %>%
+                  maxFreq = dplyr::case_when(is.na(maxFreq) ~ 96000, TRUE ~ maxFreq * 1000)) |>
+    dplyr::ungroup() |>
+    dplyr::mutate_at(vars(taskLength,minFreq,maxFreq), ~round(.,2)) |>
     #Apply the frequency bump (+/- 10000 Hz)
     dplyr::mutate(minFreq = dplyr::case_when(freq_bump == TRUE ~ minFreq - 10000, TRUE ~ minFreq),
-                  maxFreq = dplyr::case_when(freq_bump == TRUE ~ maxFreq + 10000, TRUE ~ maxFreq)) %>%
-    dplyr::relocate(taskLength, .after = method) %>%
-    dplyr::relocate(startTime, .after = abundance) %>%
-    dplyr::relocate(tagLength, .after = startTime) %>%
-    dplyr::relocate(minFreq, .after = tagLength) %>%
-    dplyr::relocate(maxFreq, .after = minFreq) %>%
-    dplyr::relocate(internal_tag_id, .after = maxFreq) %>%
+                  maxFreq = dplyr::case_when(freq_bump == TRUE ~ maxFreq + 10000, TRUE ~ maxFreq)) |>
+    dplyr::relocate(taskLength, .after = method) |>
+    dplyr::relocate(startTime, .after = abundance) |>
+    dplyr::relocate(tagLength, .after = startTime) |>
+    dplyr::relocate(minFreq, .after = tagLength) |>
+    dplyr::relocate(maxFreq, .after = minFreq) |>
+    dplyr::relocate(internal_tag_id, .after = maxFreq) |>
     tidyr::drop_na()
 
   #Write the file
@@ -901,7 +898,7 @@ wt_songscope_tags <- function (input, output = c("env","csv"),
     tidyr::separate(file_name, into = c("location", "recordingDate"),
                     sep = "(?:_0\\+1_|_|__0__|__1__)", extra = "merge", remove = F) %>%
     dplyr::mutate(startTime = as.numeric(startTime)) %>%
-    dplyr::mutate(recordingDate = str_remove(recordingDate, '.+?(?:__)')) %>%
+    dplyr::mutate(recordingDate = sub('.+?(?:__)', '', recordingDate)) |>
     dplyr::mutate(recording_date_time = as.POSIXct(strptime(recording_date_time, format = "%Y-%m-%d %H:%M:%S")))
 
   if (method == "USPM") {

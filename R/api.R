@@ -63,13 +63,13 @@ wt_get_download_summary <- function(sensor_id) {
   if(is.null(r)) {stop('')}
 
   x <- data.frame(do.call(rbind, resp_body_json(r)$results)) |>
-       dplyr::select(organization_id = organizationId,
-                     organization = organizationName,
-                     project = fullNm,
-                     project_id = id,
-                     sensor = sensorId,
-                     tasks,
-                     status) |>
+    dplyr::select(organization_id = organizationId,
+                  organization = organizationName,
+                  project = fullNm,
+                  project_id = id,
+                  sensor = sensorId,
+                  tasks,
+                  status) |>
     dplyr::mutate(dplyr::across(dplyr::everything(), unlist))
 
   return(x)
@@ -230,6 +230,7 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
   files.less <- basename(files.full)
   x <- purrr::map(.x = files.full, .f = ~ suppressWarnings(readr::read_csv(., show_col_types = F,
                                                                            skip_empty_rows = T, col_types = list(abundance = readr::col_character(),
+                                                                                                                 individual_count = readr::col_character(),
                                                                                                                  image_fire = readr::col_logical(),
                                                                                                                  image_snow_depth_m = readr::col_number())))) %>%
     purrr::set_names(files.less)
@@ -284,15 +285,15 @@ wt_get_species <- function(){
   spp <- resp_body_json(spp)
 
   spp_table <- tibble(
-      species_id = map_dbl(spp, ~ ifelse(!is.null(.x$id), .x$id, NA)),
-      species_code = map_chr(spp, ~ ifelse(!is.null(.x$code), .x$code, NA)),
-      species_common_name = map_chr(spp, ~ ifelse(!is.null(.x$commonName), .x$commonName, NA)),
-      species_class = map_chr(spp, ~ ifelse(!is.null(.x$className), .x$className, NA)),
-      species_order = map_chr(spp, ~ ifelse(!is.null(.x$order), .x$order, NA)),
-      species_scientific_name = map_chr(spp, ~ ifelse(!is.null(.x$scientificName), .x$scientificName, NA))
-    )
+    species_id = map_dbl(spp, ~ ifelse(!is.null(.x$id), .x$id, NA)),
+    species_code = map_chr(spp, ~ ifelse(!is.null(.x$code), .x$code, NA)),
+    species_common_name = map_chr(spp, ~ ifelse(!is.null(.x$commonName), .x$commonName, NA)),
+    species_class = map_chr(spp, ~ ifelse(!is.null(.x$className), .x$className, NA)),
+    species_order = map_chr(spp, ~ ifelse(!is.null(.x$order), .x$order, NA)),
+    species_scientific_name = map_chr(spp, ~ ifelse(!is.null(.x$scientificName), .x$scientificName, NA))
+  )
 
- return(spp_table)
+  return(spp_table)
 
 }
 
@@ -351,7 +352,7 @@ wt_download_media <- function(input, output, type = c("recording","image", "tag_
         clip_file_name = paste0(output, "/", location, "_", format(recording_date_time, "%Y%m%d_%H%M%S"), ".", file_type)
       ) %>%
       { purrr::map2_chr(.$recording_url, .$clip_file_name, download_file) }
-  # Tag spectrograms
+    # Tag spectrograms
   } else if (type == "tag_clip_spectrogram" & "spectrogram_url" %in% colnames(input_data)) {
     output_data <- input_data %>%
       mutate(
@@ -362,7 +363,7 @@ wt_download_media <- function(input, output, type = c("recording","image", "tag_
         ))
       ) %>%
       { purrr::map2_chr(.$spectrogram_url, .$clip_file_name, download_file) }
-  # Tag spectrogram and tag clip
+    # Tag spectrogram and tag clip
   } else if (all(c("spectrogram_url", "clip_url") %in% colnames(input_data)) & any(type %in% c("tag_clip_spectrogram", "tag_clip_audio"))) {
     output_data <- input_data %>%
       mutate(
@@ -381,7 +382,7 @@ wt_download_media <- function(input, output, type = c("recording","image", "tag_
         purrr::map2_chr(.$spectrogram_url, .$clip_file_name_spec, download_file)
         purrr::map2_chr(.$clip_url, .$clip_file_name_audio, download_file)
       }
-  # Images
+    # Images
   } else if ("media_url" %in% colnames(input_data)){
     output_data <- input_data %>%
       mutate(image_name = file.path(output, "/", paste0(location, "_", format(recording_date_time, "%Y%m%d_%H%M%S"),".jpeg"))) %>%
@@ -666,6 +667,3 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
   # Return list containing combined project summaries and result tables
   return(list(combined_rpps_tibble, combined_result_table))
 }
-
-
-
