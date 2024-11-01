@@ -21,7 +21,7 @@
 
 * Addition of five new functions: 
   * `wt_dd_summary()` for querying data from Data Discover. See [APIs](https://abbiodiversity.github.io/wildrtrax/articles/apis.html#data-discover) for more information
-  * `wt_evaluate_classifier()`, `wt_get_threshold()`, and `wt_additional_species()` for wrangling acoustic automated classification results. See [Acoustic classifiers](https://abbiodiversity.github.io/wildrtrax/articles/acoustic-classifiers.html) for more information.
+  * `wt_evaluate_classifier()`, `wt_get_threshold()`, and `wt_additional_species()` for wrangling acoustic automated classification results. See [Acoustic classifiers](https://abbiodiversity.github.io/wildrtrax/articles/classifiers-tutorial.html) for more information.
   * `wt_add_grts()` to intersect locations with GRTS IDs from [NABat](https://www.nabatmonitoring.org/)
 * `wt_download_tags()` now becomes `wt_download_media()` to support broader media downloads in batch from WildTrax
 * Deprecated `wt_report()`
