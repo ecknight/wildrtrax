@@ -14,8 +14,8 @@
 <link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="APIs">
 </head>
 <body>
@@ -182,7 +182,7 @@ by WildTrax.</p>
 <span><span class="va">spp_table</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/wt_get_species.html">wt_get_species</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">spp_table</span> <span class="op">|&gt;</span> <span class="fu">arrange</span><span class="op">(</span><span class="va">species_code</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5,114 × 6</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5,136 × 6</span></span></span>
 <span><span class="co">#&gt;    species_id species_code species_common_name       species_class species_order</span></span>
 <span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>       <span style="text-decoration: underline;">2</span>780 10           Wolves, Coyotes and Alli… MAMMALIA      Carnivora    </span></span>
@@ -195,7 +195,7 @@ by WildTrax.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>       <span style="text-decoration: underline;">2</span>694 110          Train                     NONE          <span style="color: #BB0000;">NA</span>           </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>       <span style="text-decoration: underline;">2</span>728 114          Kermode Bear              MAMMALIA      Carnivora    </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>       <span style="text-decoration: underline;">2</span>819 129          Opossum                   MAMMALIA      Didelphimorp…</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5,104 more rows</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5,126 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: species_scientific_name &lt;chr&gt;</span></span></span></code></pre></div>
 <p>WildTrax also pre-formats ARU to point count (PC) data depending on
 the type of analysis you wish to perform. See the <a href="https://borealbirds.ca/" class="external-link">Boreal Avian Modelling project</a>

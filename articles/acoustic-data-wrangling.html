@@ -14,8 +14,8 @@
 <link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Acoustic data wrangling">
 </head>
 <body>
@@ -148,7 +148,7 @@ to tag) counts to numeric:</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   task_method &lt;chr&gt;, AMCR &lt;dbl&gt;, AMRE &lt;dbl&gt;, AMRO &lt;dbl&gt;, BAOR &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   BBMA &lt;dbl&gt;, BCCH &lt;dbl&gt;, BHCO &lt;dbl&gt;, BHGR &lt;dbl&gt;, CANG &lt;dbl&gt;, CEDW &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   CHSP &lt;dbl&gt;, CONI &lt;dbl&gt;, COPO &lt;dbl&gt;, CORA &lt;dbl&gt;, COYE &lt;dbl&gt;, DEJU &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   DUFL &lt;dbl&gt;, EAPH &lt;dbl&gt;, GCKI &lt;dbl&gt;, GHOW &lt;dbl&gt;, HAWO &lt;dbl&gt;, HOWR &lt;dbl&gt;, …</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;">#   DUFL &lt;dbl&gt;, EAPH &lt;dbl&gt;, GCKI &lt;dbl&gt;, GHOW &lt;dbl&gt;, HAWO &lt;dbl&gt;, LAZB &lt;dbl&gt;, …</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="offsets">Offsets<a class="anchor" aria-label="anchor" href="#offsets"></a>
@@ -179,7 +179,6 @@ method</a>.</p>
 <span><span class="co">#&gt;  EAPH</span></span>
 <span><span class="co">#&gt;  GCKI</span></span>
 <span><span class="co">#&gt;  HAWO</span></span>
-<span><span class="co">#&gt;  HOWR</span></span>
 <span><span class="co">#&gt;  LEFL</span></span>
 <span><span class="co">#&gt;  LISP</span></span>
 <span><span class="co">#&gt;  MODO</span></span>
@@ -232,13 +231,13 @@ method</a>.</p>
 <span><span class="co">#&gt; 4    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0</span></span>
 <span><span class="co">#&gt; 5    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0</span></span>
 <span><span class="co">#&gt; 6    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0</span></span>
-<span><span class="co">#&gt;   HAWO HOWR LAZB LEFL LIBA LIRA LISP LITF LIWI MGWA MOBA MODO MORA MOWI OCWA</span></span>
-<span><span class="co">#&gt; 1    0    0    0    2    0    0    0    0    0    0    0    1    0    0    0</span></span>
-<span><span class="co">#&gt; 2    0    3    1    2    0    0    0    0    0    0    0    0    0    0    0</span></span>
-<span><span class="co">#&gt; 3    0    2    0    1    0    0    0    0    0    0    0    1    0    0    0</span></span>
+<span><span class="co">#&gt;   HAWO LAZB LEFL LIBA LIRA LISP LITF LIWI MGWA MOBA MODO MORA MOWI NHWR OCWA</span></span>
+<span><span class="co">#&gt; 1    0    0    2    0    0    0    0    0    0    0    1    0    0    0    0</span></span>
+<span><span class="co">#&gt; 2    0    1    2    0    0    0    0    0    0    0    0    0    0    3    0</span></span>
+<span><span class="co">#&gt; 3    0    0    1    0    0    0    0    0    0    0    1    0    0    2    0</span></span>
 <span><span class="co">#&gt; 4    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0</span></span>
-<span><span class="co">#&gt; 5    0    0    0    0    0    0    0    0    1    0    0    0    0    0    0</span></span>
-<span><span class="co">#&gt; 6    0    0    0    0    0    1    0    0    0    0    0    0    0    1    0</span></span>
+<span><span class="co">#&gt; 5    0    0    0    0    0    0    0    1    0    0    0    0    0    0    0</span></span>
+<span><span class="co">#&gt; 6    0    0    0    0    1    0    0    0    0    0    0    0    1    0    0</span></span>
 <span><span class="co">#&gt;   PISI RBNU RCKI RECR RNSA RTHU SAVS SWTH TEWA TRES UNBI UNKN UNPA UNSA UNTR</span></span>
 <span><span class="co">#&gt; 1    0    0    0    0    0    0    0    0    0    0    0    0    0    0    0</span></span>
 <span><span class="co">#&gt; 2    0    2    0    0    0    0    0    0    0    0    0    0    0    0    0</span></span>
@@ -267,34 +266,34 @@ method</a>.</p>
 <span><span class="co">#&gt; 4 0.5916778 -1.506756 0.8976880 -0.2123905 0.1678111 0.9805074 -1.2850892</span></span>
 <span><span class="co">#&gt; 5 0.5916778  1.972791 0.8977079  0.9107690 0.1678111 0.9805074 -0.5905167</span></span>
 <span><span class="co">#&gt; 6 0.5916778  1.972791 0.8977079  0.9107690 0.1678111 0.9805074 -0.5905167</span></span>
-<span><span class="co">#&gt;    HAWO.off  HOWR.off   LEFL.off   LISP.off MODO.off  OCWA.off   PISI.off</span></span>
-<span><span class="co">#&gt; 1 0.4959508  1.083148 0.06602909  0.8481771 1.195639 0.6732180  0.1894495</span></span>
-<span><span class="co">#&gt; 2 0.4959508  1.083148 0.06602909  0.8481771 1.195639 0.6732178  0.1894495</span></span>
-<span><span class="co">#&gt; 3 0.4959508  1.083148 0.06602909  0.8481771 1.195639 0.6732158  0.1894495</span></span>
-<span><span class="co">#&gt; 4 0.4959508 -1.376223 0.06590519 -2.3580608 1.109186 0.6732180 -5.6283000</span></span>
-<span><span class="co">#&gt; 5 0.4959508  1.083148 0.06602909  0.8481771 1.195639 0.6732178  0.1894495</span></span>
-<span><span class="co">#&gt; 6 0.4959508  1.083148 0.06602909  0.8481771 1.195639 0.6732176  0.1894495</span></span>
-<span><span class="co">#&gt;    RBNU.off RCKI.off   RECR.off  RTHU.off   SAVS.off  SWTH.off TEWA.off</span></span>
-<span><span class="co">#&gt; 1 0.7345163 1.092762 0.08661238 -2.474842  0.9633483 1.1630042 0.271135</span></span>
-<span><span class="co">#&gt; 2 0.7345163 1.092710 0.08661238 -2.474842  0.9633483 1.1630042 0.271135</span></span>
-<span><span class="co">#&gt; 3 0.7345163 1.092650 0.08661238 -2.474842  0.9633483 1.1630042 0.271135</span></span>
-<span><span class="co">#&gt; 4 0.7345163 1.090702 0.08661238 -2.474842 -1.3818771 0.8410931 0.271135</span></span>
-<span><span class="co">#&gt; 5 0.7345163 1.092762 0.08661238 -2.474842  0.9633483 1.1630042 0.271135</span></span>
-<span><span class="co">#&gt; 6 0.7345163 1.092762 0.08661238 -2.474842  0.9633483 1.1630042 0.271135</span></span>
-<span><span class="co">#&gt;    TRES.off VEER.off  WAVI.off  WBNU.off WCSP.off  WEWP.off WISN.off  YBSA.off</span></span>
-<span><span class="co">#&gt; 1  1.020597 1.310133 0.3371337 0.6905176 1.277016 0.8691736 1.917213 0.8460558</span></span>
-<span><span class="co">#&gt; 2  1.020597 1.310133 0.3371337 0.6905176 1.277016 0.8691736 1.917213 0.8460558</span></span>
-<span><span class="co">#&gt; 3  1.020597 1.310133 0.3371337 0.6905176 1.277016 0.8691736 1.917213 0.8460558</span></span>
-<span><span class="co">#&gt; 4 -3.446437 1.310133 0.3371337 0.6905176 1.277016 0.8691736 1.917213 0.8460557</span></span>
-<span><span class="co">#&gt; 5  1.020597 1.310133 0.3371337 0.6905176 1.277016 0.8691736 1.917213 0.8460558</span></span>
-<span><span class="co">#&gt; 6  1.020597 1.310133 0.3371337 0.6905176 1.277016 0.8691736 1.917213 0.8460558</span></span>
-<span><span class="co">#&gt;    YEWA.off  YRWA.off</span></span>
-<span><span class="co">#&gt; 1  0.441793 0.3537681</span></span>
-<span><span class="co">#&gt; 2  0.441793 0.3537681</span></span>
-<span><span class="co">#&gt; 3  0.441793 0.3537681</span></span>
-<span><span class="co">#&gt; 4 -4.234049 0.2395314</span></span>
-<span><span class="co">#&gt; 5  0.441793 0.3537681</span></span>
-<span><span class="co">#&gt; 6  0.441793 0.3537681</span></span></code></pre></div>
+<span><span class="co">#&gt;    HAWO.off   LEFL.off   LISP.off MODO.off  OCWA.off   PISI.off  RBNU.off</span></span>
+<span><span class="co">#&gt; 1 0.4959508 0.06602909  0.8481771 1.195639 0.6732180  0.1894495 0.7345163</span></span>
+<span><span class="co">#&gt; 2 0.4959508 0.06602909  0.8481771 1.195639 0.6732178  0.1894495 0.7345163</span></span>
+<span><span class="co">#&gt; 3 0.4959508 0.06602909  0.8481771 1.195639 0.6732158  0.1894495 0.7345163</span></span>
+<span><span class="co">#&gt; 4 0.4959508 0.06590519 -2.3580608 1.109186 0.6732180 -5.6283000 0.7345163</span></span>
+<span><span class="co">#&gt; 5 0.4959508 0.06602909  0.8481771 1.195639 0.6732178  0.1894495 0.7345163</span></span>
+<span><span class="co">#&gt; 6 0.4959508 0.06602909  0.8481771 1.195639 0.6732176  0.1894495 0.7345163</span></span>
+<span><span class="co">#&gt;   RCKI.off   RECR.off  RTHU.off   SAVS.off  SWTH.off TEWA.off  TRES.off</span></span>
+<span><span class="co">#&gt; 1 1.092762 0.08661238 -2.474842  0.9633483 1.1630042 0.271135  1.020597</span></span>
+<span><span class="co">#&gt; 2 1.092710 0.08661238 -2.474842  0.9633483 1.1630042 0.271135  1.020597</span></span>
+<span><span class="co">#&gt; 3 1.092650 0.08661238 -2.474842  0.9633483 1.1630042 0.271135  1.020597</span></span>
+<span><span class="co">#&gt; 4 1.090702 0.08661238 -2.474842 -1.3818771 0.8410931 0.271135 -3.446437</span></span>
+<span><span class="co">#&gt; 5 1.092762 0.08661238 -2.474842  0.9633483 1.1630042 0.271135  1.020597</span></span>
+<span><span class="co">#&gt; 6 1.092762 0.08661238 -2.474842  0.9633483 1.1630042 0.271135  1.020597</span></span>
+<span><span class="co">#&gt;   VEER.off  WAVI.off  WBNU.off WCSP.off  WEWP.off WISN.off  YBSA.off  YEWA.off</span></span>
+<span><span class="co">#&gt; 1 1.310133 0.3371337 0.6905176 1.277016 0.8691736 1.917213 0.8460558  0.441793</span></span>
+<span><span class="co">#&gt; 2 1.310133 0.3371337 0.6905176 1.277016 0.8691736 1.917213 0.8460558  0.441793</span></span>
+<span><span class="co">#&gt; 3 1.310133 0.3371337 0.6905176 1.277016 0.8691736 1.917213 0.8460558  0.441793</span></span>
+<span><span class="co">#&gt; 4 1.310133 0.3371337 0.6905176 1.277016 0.8691736 1.917213 0.8460557 -4.234049</span></span>
+<span><span class="co">#&gt; 5 1.310133 0.3371337 0.6905176 1.277016 0.8691736 1.917213 0.8460558  0.441793</span></span>
+<span><span class="co">#&gt; 6 1.310133 0.3371337 0.6905176 1.277016 0.8691736 1.917213 0.8460558  0.441793</span></span>
+<span><span class="co">#&gt;    YRWA.off</span></span>
+<span><span class="co">#&gt; 1 0.3537681</span></span>
+<span><span class="co">#&gt; 2 0.3537681</span></span>
+<span><span class="co">#&gt; 3 0.3537681</span></span>
+<span><span class="co">#&gt; 4 0.2395314</span></span>
+<span><span class="co">#&gt; 5 0.3537681</span></span>
+<span><span class="co">#&gt; 6 0.3537681</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="occupancy-modelling">Occupancy modelling<a class="anchor" aria-label="anchor" href="#occupancy-modelling"></a>
