@@ -1,19 +1,36 @@
-comment: false
+name: R-CI
 
-coverage:
-  status:
-    project:
-      default:
-        target: auto
-        threshold: 1%
-        informational: true
-    patch:
-      default:
-        target: auto
-        threshold: 1%
-        informational: true
+on:
+  push:
+    branches:
+      - main
+  pull_request:
 
-- name: Upload coverage reports to Codecov
-  uses: codecov/codecov-action@v4.0.1
-  with:
-    token: ${{ secrets.CODECOV_TOKEN }}
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: Run R-CI and Codecov
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+
+      - name: Install dependencies
+        run: |
+          R -e 'install.packages("remotes")'
+          R -e 'remotes::install_deps(dependencies = TRUE)'
+
+      - name: Run tests and coverage
+        run: |
+          R -e 'install.packages("covr")'
+          R -e 'covr::codecov()'
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: unittests
+          files: coverage.xml
+          fail_ci_if_error: true
