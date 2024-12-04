@@ -366,7 +366,7 @@ wt_run_ap <- function(x = NULL, fp_col = file_path, audio_dir = NULL, output_dir
 #'
 #' @return Output will return the merged tibble with all information, the summary plots of the indices and the LDFC
 
-wt_glean_ap <- function(x = NULL, input_dir, purpose = c("quality","abiotic","biotic"), include_ind = TRUE, include_ldfcs = TRUE) {
+wt_glean_ap <- function(x = NULL, input_dir, purpose = c("quality","abiotic","biotic"), include_ind = TRUE, include_ldfcs = TRUE, borders = F) {
 
   # Check to see if the input exists and reading it in
   files <- x
@@ -386,8 +386,8 @@ wt_glean_ap <- function(x = NULL, input_dir, purpose = c("quality","abiotic","bi
   # Check to see if the input exists and reading it in
   if (dir.exists(input_dir)) {
     ind <-
-      fs::dir_ls(input_dir, regexp = "*.Indices.csv", recurse = T) |>
-      purrr::map_dfr( ~ readr::read_csv(show_col_types = F)) |>
+      fs::dir_ls(input_dir, regexp = "*.Indices.csv", recurse = T) %>%
+      purrr::map_dfr( ~ readr::read_csv(.x, show_col_types = F)) |>
       dplyr::relocate(c(FileName, ResultMinute)) |>
       dplyr::select(-c(ResultStartSeconds, SegmentDurationSeconds,RankOrder,ZeroSignal)) |>
       tidyr::pivot_longer(!c(FileName, ResultMinute),
@@ -412,8 +412,14 @@ wt_glean_ap <- function(x = NULL, input_dir, purpose = c("quality","abiotic","bi
   ) %>%
     discard(is.null)
 
-  # Perform inner joins conditionally
-  joined <- purrr::reduce(data_to_join, ~ dplyr::inner_join(.x, .y, by = c("file_name" = "FileName")), .init = files)
+  data_to_join <- purrr::map(data_to_join, function(df) {
+    if ("file_name" %in% names(df)) {
+      df <- dplyr::rename(df, FileName = file_name)
+    }
+    df
+  })
+
+  joined <- purrr::reduce(data_to_join, ~ dplyr::inner_join(.x, .y, by = "FileName"))
 
   if(nrow(joined) > 0){
     print('Files joined!')
@@ -437,14 +443,37 @@ wt_glean_ap <- function(x = NULL, input_dir, purpose = c("quality","abiotic","bi
     ggplot2::ggtitle("Summary of indices")
 
   # Plot the LDFC
-  ldfc <- joined_purpose |>
-    dplyr::select(image) |>
-    dplyr::distinct() |>
-    purrr::map(function(x){magick::image_read(x)}) |>
-    do.call("c", .) |>
+  ldfc <- joined_purpose %>%
+    dplyr::select(image) %>%
+    dplyr::distinct() %>%
+    purrr::map(function(x) {
+      # Define your condition
+
+      # Apply border only if the condition is TRUE
+      img <- magick::image_read(x)
+      if (borders == TRUE) {
+        img <- magick::image_border(img, color = "#00008B", geometry = "0.75x0.75")
+      }
+      return(img)
+    }) %>%
+    do.call("c", .) %>%
     magick::image_append()
 
-  return(list(joined,plotted,ldfc))
+  img_info <- image_info(ldfc)
+  img_width <- img_info$width
+  img_height <- img_info$height
+
+  top_crop_height <- as.integer(img_height * 0.061)
+  bottom_crop_height <- as.integer(img_height * 0.028)
+  remaining_height <- as.integer(img_height - top_crop_height - bottom_crop_height)
+
+  cropped_img <- ldfc %>%
+    image_crop(geometry = sprintf("%dx%d+0+%d",
+                                  img_width,
+                                  remaining_height,
+                                  top_crop_height))
+
+  return(list(joined,plotted,cropped_img))
 
 }
 

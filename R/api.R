@@ -221,7 +221,7 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
   list.files(td, pattern = "*.csv", full.names = TRUE) %>% map(~ {
     directory <- dirname(.x)
     old_filename <- basename(.x)
-    new_filename <- gsub("[:()?!~;]", "", old_filename)
+    new_filename <- gsub("[:()?!~;/]", "", old_filename)
     new_path <- file.path(directory, new_filename)
     file.rename(.x, new_path)
   })
@@ -339,8 +339,8 @@ wt_download_media <- function(input, output, type = c("recording","image", "tag_
 
   download_file <- function(url, output_file) {
     req <- httr2::request(url)
-    req %>%
-      httr2::req_perform(path = output_file)
+    httr2::req_perform(req, path = output_file)
+    return(paste("Downloaded to", output_file))
   }
 
   # Process based on type
@@ -385,8 +385,11 @@ wt_download_media <- function(input, output, type = c("recording","image", "tag_
     # Images
   } else if ("media_url" %in% colnames(input_data)){
     output_data <- input_data %>%
-      mutate(image_name = file.path(output, "/", paste0(location, "_", format(recording_date_time, "%Y%m%d_%H%M%S"),".jpeg"))) %>%
+      mutate(image_name = file.path(output,
+                                    paste0(location, "_", format(image_date_time, "%Y%m%d_%H%M%S"), ".jpeg"))) %>%
       {
+        print(paste("Media URL:", .$media_url))
+        print(paste("Image Name:", .$image_name))
         purrr::map2_chr(.$media_url, .$image_name, download_file)
       }
   } else {
