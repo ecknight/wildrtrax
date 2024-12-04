@@ -469,24 +469,18 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
   })
 
   # Fetch species if provided
-  if (!is.null(species)) {
+  if (is.null(species)) {
+    spp <- species_tibble$species_id
+    if (length(spp) == 0) {
+      stop("No species data available for the selected sensor.")
+    }
+  } else {
     spp <- species_tibble |>
       filter(species_common_name %in% species) |>
       pull(species_id)
 
     if (length(spp) == 0) {
       stop("No species were found.")
-    }
-
-  } else {
-    if (.wt_auth_expired()) {
-      stop("Please authenticate with wt_auth().", call. = FALSE)
-    } else if (!is.null(species)) { # Ensure species is provided before fetching
-      spp <- wt_get_species() |>
-        filter(species_common_name %in% species) |>
-        pull(species_id)
-    } else {
-      stop("Species parameter is missing.")
     }
   }
 
