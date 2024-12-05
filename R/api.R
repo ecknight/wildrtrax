@@ -405,8 +405,8 @@ wt_download_media <- function(input, output, type = c("recording","image", "tag_
 #' @description Download Data Discover results from projects across WildTrax
 #'
 #' @param sensor  The sensor you wish to query from either 'ARU', 'CAM' or 'PC'
-#' @param species The species you want to search for (e.g. 'WTSP'). Multiple species can be included.
-#' @param boundary The custom boundary you want to use. Defined as at least a four vertex polygon. Definition can also be a bbox
+#' @param species The species you want to search for (e.g. 'White-throated Sparrow'). Multiple species can be included.
+#' @param boundary The custom boundary you want to use. Must be a list of at least four latitude and longitude points where the last point is a duplicate of the first, or an object of class "bbox" (as produced by sf::st_bbox)
 #'
 #' @import dplyr tibble httr2
 #' @export
@@ -418,7 +418,7 @@ wt_download_media <- function(input, output, type = c("recording","image", "tag_
 #' c(-110.85438, 57.13472),
 #' c(-114.14364, 54.74858),
 #' c(-110.69368, 52.34150),
-#' c(-110.854385, 57.13472)
+#' c(-110.85438, 57.13472)
 #' )
 #'
 #' dd <- wt_dd_summary(sensor = 'ARU', species = 'White-throated Sparrow', boundary = aoi)
@@ -554,10 +554,13 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
   # Iterate over each species
   for (sp in spp) {
 
-    # Construct payload for first request
-    payload <- list(
+    if(is.null(boundary)) {payload_ll$polygonBoundary <- NULL}
+
+    # Construct payload for second request (small)
+    payload_ll <- list(
+      polygonBoundary = boundary,
       sensorId = sensor,
-      speciesIds = list(sp)  # Wrap the integer value in a list to make it an array
+      speciesIds = list(sp)
     )
 
     rr <- request("https://www-api.wildtrax.ca") |>
@@ -569,20 +572,18 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
         Referer = "https://discover.wildtrax.ca/"
       ) |>
       req_user_agent(u) |>
-      req_body_json(payload) |>
+      req_body_json(payload_ll) |>
       req_perform()
 
-    # Construct payload for second request
-    payload_small <- list(
+    # Construct payload for first request
+    payload_mp <- list(
       isSpeciesTab = FALSE,
-      zoomLevel = 20,
-      bounds = full_bounds,
       sensorId = sensor,
+      speciesIds = list(sp),
       polygonBoundary = boundary,
-      speciesIds = list(sp)
+      bounds = full_bounds,
+      zoomLevel = 20
     )
-
-    if(is.null(boundary)) {payload_small$polygonBoundary <- NULL}
 
     rr2 <- request("https://www-api.wildtrax.ca") |>
       req_url_path_append("/bis/get-data-discoverer-map-and-projects") |>
@@ -593,7 +594,7 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
         Referer = "https://discover.wildtrax.ca/"
       ) |>
       req_user_agent(u) |>
-      req_body_json(payload_small) |>
+      req_body_json(payload_mp) |>
       req_perform()
 
     # Extract content from the second request
@@ -662,5 +663,11 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
   }
 
   # Return list containing combined project summaries and result tables
-  return(list(combined_rpps_tibble, combined_result_table))
+
+  names(dd) <- c("1", "2")
+
+  return(list(
+    "lat-long" = combined_rpps_tibble,
+    "map-projects" = combined_result_table
+  ))
 }
