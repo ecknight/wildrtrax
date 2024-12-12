@@ -351,12 +351,13 @@ wt_run_ap <- function(x = NULL, fp_col = file_path, audio_dir = NULL, output_dir
 #' @param purpose Character; type of filtering you can choose from
 #' @param include_ind Logical; Include index results
 #' @param include_ldfcs Logical; Include LDFC results
+#' @param borders Logical; Include borders to define different recordings
 #'
 #' @import dplyr ggplot2
 #' @importFrom tidyr pivot_longer
 #' @importFrom purrr reduce
 #' @importFrom readr read_csv
-#' @importFrom magick image_read image_append
+#' @importFrom magick image_read image_append image_border
 #' @export
 #'
 #' @examples
