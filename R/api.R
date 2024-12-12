@@ -554,14 +554,14 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
   # Iterate over each species
   for (sp in spp) {
 
-    if(is.null(boundary)) {payload_ll$polygonBoundary <- NULL}
-
     # Construct payload for second request (small)
     payload_ll <- list(
       polygonBoundary = boundary,
       sensorId = sensor,
       speciesIds = list(sp)
     )
+
+    if(is.null(boundary)) {payload_ll$polygonBoundary <- NULL}
 
     rr <- request("https://www-api.wildtrax.ca") |>
       req_url_path_append("/bis/get-data-discoverer-long-lat-summary") |>
@@ -662,12 +662,8 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
     stop("No results were found on any of the search layers. Broaden your search and try again.")
   }
 
-  # Return list containing combined project summaries and result tables
-
-  names(dd) <- c("1", "2")
-
   return(list(
-    "lat-long" = combined_rpps_tibble,
+    "lat-long-summary" = combined_rpps_tibble,
     "map-projects" = combined_result_table
   ))
 }
