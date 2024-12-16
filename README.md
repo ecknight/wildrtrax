@@ -33,43 +33,21 @@ The development version of the package will be periodically merged and will be r
 
 All functions begin with a `wt_*` prefix. Column names and metadata align with the WildTrax infrastructure. The goal is to follow the work flow of pre-processing, linking with WildTrax, download and analysis.
 
-ARUs :sound:
-Cameras :camera:
-Point counts :bird:
-Bats :bat:
+### ARU work flow
 
-- Pre-process acoustic data
-  - `wt_audio_scanner()` :sound: :bat:
-  - `wt_run_ap()` :sound:
-  - `wt_glean_ap()` :sound:
-  - `wt_signal_level()` :sound:
-  - `wt_chop()` :sound: :bat:
-  - `wt_make_aru_tasks()` :sound: :bat:
-  - `wt_songscope_tags()` :sound:
-  - `wt_kaleidoscope_tags()` :sound: :bat:
-- Download data from WildTrax
-  - `wt_auth()` :camera: :sound: :bird: :bat:
-  - `wt_get_download_summary()` :camera: :sound: :bird: :bat:
-  - `wt_download_report()` :camera: :sound: :bird: :bat:
-    - Available reports: `main, project, location, recording, image_set, image, tag, point_count, megadetector, megaclassifer, birdnet, daylight`
-  - `wt_dd_summary()` :camera: :sound: :bird: :bat:
-  - `wt_get_species()` :camera: :sound: :bird: :bat:
-  - `wt_download_media()` :sound: :bat: :camera:
-- Analyze data
-  - `wt_summarise_cam()` :camera:
-  - `wt_ind_detect()` :camera:
-- Convenience functions
-  - `wt_location_distances()` :sound: :camera: :bird: :bat:
-  - `wt_tidy_species()` :sound: :camera: :bird: :bat:
-  - `wt_replace_tmtt()` :sound:
-  - `wt_make_wide()` :sound: :bird: :bat:
-  - `wt_format_occupancy()` :sound: :bird:
-  - `wt_qpad_offsets()` :sound: :bird:
-  - `wt_add_grts()` :bat:
-- Acoustic classification :sound:
-  - `wt_evaluate_classifier()`:sound:
-  - `wt_get_threshold()` :sound:
-  - `wt_additional_species()` :sound:
+Coming soon!
+
+### Camera work flow
+
+Coming soon!
+
+### Ultrasonic work flow
+
+Coming soon!
+
+### Point count work flow
+
+Coming soon!
 
 ## Issues
 
