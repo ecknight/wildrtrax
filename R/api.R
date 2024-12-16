@@ -32,6 +32,7 @@ wt_auth <- function(force = FALSE) {
 #' @param sensor_id Can be one of "ARU", "CAM", or "PC"
 #'
 #' @import dplyr
+#' @import httr2
 #'
 #' @export
 #'
@@ -42,8 +43,9 @@ wt_auth <- function(force = FALSE) {
 #' wt_get_download_summary(sensor_id = "ARU")
 #' }
 #'
-#' @return A dataframe listing the projects that the user can download data for, including: project name, id, year, number of tasks, a geographic bounding box and project status.
+#' @return A data frame listing the projects that the user can download data for, including: project name, id, year, number of tasks, a geographic bounding box and project status.
 #'
+
 wt_get_download_summary <- function(sensor_id) {
 
   sens <- c("PC", "ARU", "CAM")
@@ -62,7 +64,7 @@ wt_get_download_summary <- function(sensor_id) {
 
   if(is.null(r)) {stop('')}
 
-  x <- data.frame(do.call(rbind, resp_body_json(r)$results)) |>
+  x <- data.frame(do.call(rbind, httr2::resp_body_json(r)$results)) |>
     dplyr::select(organization_id = organizationId,
                   organization = organizationName,
                   project = fullNm,
@@ -666,4 +668,48 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
     "lat-long-summary" = combined_rpps_tibble,
     "map-projects" = combined_result_table
   ))
+}
+
+#' Get locations from a WildTrax Organization
+#'
+#' @description Obtain a table listing locations emulating the Locations tab in a WildTrax Organization
+#'
+#' @param organization Either the short letter or numeric digit representing the Organization
+#'
+#' @import httr2
+#' @import dplyr
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' # Authenticate first:
+#' wt_auth()
+#' wt_get_locations(organization = 5)
+#' }
+#'
+#' @return A data frame listing the projects that the user can download data for, including: project name, id, year, number of tasks, a geographic bounding box and project status.
+#'
+
+wt_get_locations <- function(organization) {
+
+  if (is.numeric(organization)) {
+      org_numeric <- organization
+      # do other stuff for org codes
+  }
+
+  r <- .wt_api_gr(
+    path = "/bis/get-location-summary",
+    organizationId = org_numeric,
+    sort = "locationName",
+    order = "asc",
+    limit = 1000
+  )
+
+  if(is.null(r)) {stop('')}
+
+  x <- data.frame(do.call(rbind, httr2::resp_body_json(r)$results))
+
+  return(x)
+
 }
