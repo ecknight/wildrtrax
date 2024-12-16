@@ -134,6 +134,61 @@
 
 }
 
+#' An internal function to handle generic GET requests to WildTrax API
+#'
+#' @description Generic function to handle certain GET requests
+#'
+#' @param path The path to the API
+#' @param ... Argument to pass along into GET query
+#'
+#' @keywords internal
+#'
+#' @import httr2
+
+.wt_api_gr <- function(path, ...) {
+
+  # Check if authentication has expired:
+  if (.wt_auth_expired()) {stop("Please authenticate with wt_auth().", call. = FALSE)}
+
+  ## User agent
+  u <- getOption("HTTPUserAgent")
+  u <- sprintf("R/%s; R (%s)",
+               getRversion(),
+               paste(getRversion(), R.version$platform, R.version$arch, R.version$os))
+
+  # Add wildrtrax version information:
+  u <- paste0("wildrtrax ", as.character(packageVersion("wildrtrax")), "; ", u)
+
+  # Convert ... into a list
+  query_params <- list(...)
+
+  # Check if query_params is a list; if not, ensure it is treated as a list
+  if (length(query_params) == 1 && is.character(query_params[[1]])) {
+    # If there's only one element and it's a character, treat it as a named query
+    query_params <- as.list(query_params)
+  }
+
+  r <- request("https://www-api.wildtrax.ca") |>
+    req_url_path_append(path) |>
+    req_url_query(!!!query_params) |>  # Unpack the list of query parameters
+    req_headers(Authorization = paste("Bearer", ._wt_auth_env_$access_token)) |>
+    req_user_agent(u) |>
+    req_method("GET") |>
+    req_perform()
+
+  # Handle errors
+  if (resp_status(r) >= 400) {
+    stop(sprintf(
+      "Authentication failed [%s]\n%s",
+      resp_status(r),
+      message),
+      call. = FALSE)
+  } else {
+    return(r)
+  }
+
+}
+
 #' Internal function for QPAD offsets
 #'
 #' QPAD offsets, wrapped by the `wt_qpad_offsets` function.
