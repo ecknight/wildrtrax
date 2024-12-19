@@ -113,44 +113,61 @@
 <h3 id="acoustic-work-flow">Acoustic work flow<a class="anchor" aria-label="anchor" href="#acoustic-work-flow"></a>
 </h3>
 <p>Download data and run and a single-season single-species occupancy analysis. Consult <a href="https://abbiodiversity.github.io/wildrtrax/articles/apis.html">APIs</a> and <a href="https://abbiodiversity.github.io/wildrtrax/articles/acoustic-data-wrangling.html">Acoustic data wrangling</a> for more information.</p>
-<pre><code>library(wildrtrax)
-
-# OAuth tokens only. Google OAuth2 will be supported soon
-Sys.setenv(WT_USERNAME = "*****", WT_PASSWORD = "*****")
-
-wt_auth()
-
-projects &lt;- wt_get_download_summary("ARU") |&gt;
-  filter(project == "ABMI Ecosystem Health 2023") |&gt;
-  select(project_id) |&gt;
-  pull()
-
-data &lt;- map_dfr(.x = projects, .f = ~wt_download_report(.x, "ARU", weather_cols = F, reports = "main")
-
-dat.occu &lt;- wt_format_occupancy(my_report, species="OVEN", siteCovs=NULL)
-mod &lt;- unmarked::occu(~ 1 ~ 1, dat.occu)
-mod</code></pre>
-<p>Conduct some pre-processing</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">library</span>(wildrtrax)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co"># OAuth tokens only. Google OAuth2 will be supported soon</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="fu">Sys.setenv</span>(<span class="at">WT_USERNAME =</span> <span class="st">"*****"</span>, <span class="at">WT_PASSWORD =</span> <span class="st">"*****"</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>       </span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="fu">wt_auth</span>()</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>projects <span class="ot">&lt;-</span> <span class="fu">wt_get_download_summary</span>(<span class="st">"ARU"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>  <span class="fu">filter</span>(project <span class="sc">==</span> <span class="st">"ABMI Ecosystem Health 2023"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>  <span class="fu">select</span>(project_id) <span class="sc">|&gt;</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>  <span class="fu">pull</span>()</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">map_dfr</span>(<span class="at">.x =</span> projects, <span class="at">.f =</span> <span class="sc">~</span><span class="fu">wt_download_report</span>(.x, <span class="st">"ARU"</span>, <span class="at">weather_cols =</span> F, <span class="at">reports =</span> <span class="st">"main"</span>)</span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>dat.occu <span class="ot">&lt;-</span> <span class="fu">wt_format_occupancy</span>(my_report, <span class="at">species=</span><span class="st">"OVEN"</span>, <span class="at">siteCovs=</span><span class="cn">NULL</span>)</span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>mod <span class="ot">&lt;-</span> unmarked<span class="sc">::</span><span class="fu">occu</span>(<span class="sc">~</span> <span class="dv">1</span> <span class="sc">~</span> <span class="dv">1</span>, dat.occu)</span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a>mod</span></code></pre></div>
+<p>Conduct some pre-processing on various types of acoustic data. See more in <a href="https://abbiodiversity.github.io/wildrtrax/articles/acoustic-pre-processing.html">Acousitc pre-processing</a>.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://abbiodiversity.github.io/wildrtrax/">wildrtrax</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Scan files and filter results</span></span>
+<span><span class="va">files</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_audio_scanner.html">wt_audio_scanner</a></span><span class="op">(</span>path <span class="op">=</span> <span class="st">"."</span>, file_type <span class="op">=</span> <span class="st">"wav"</span>, extra_cols <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>              <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>hour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">recording_date_time</span>, <span class="st">"%H"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>              <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">julian</span> <span class="op">==</span> <span class="fl">176</span>, <span class="va">hour</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span><span class="op">:</span><span class="fl">8</span><span class="op">)</span><span class="op">)</span></span>
+<span>              </span>
+<span><span class="co"># Run acoustic indices and LDFCs</span></span>
+<span><span class="fu"><a href="reference/wt_run_ap.html">wt_run_ap</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">my_files</span>, output_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">root</span>, <span class="st">'ap_outputs'</span><span class="op">)</span>, path_to_ap <span class="op">=</span> <span class="st">'/where/you/store/AP'</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/wt_glean_ap.html">wt_glean_ap</a></span><span class="op">(</span><span class="va">my_files</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>hour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">recording_date_time</span>, <span class="st">"%H"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/between.html" class="external-link">between</a></span><span class="op">(</span><span class="va">julian</span>,<span class="fl">110</span>,<span class="fl">220</span><span class="op">)</span>, <span class="va">hour</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">3</span>,<span class="fl">22</span><span class="op">:</span><span class="fl">23</span><span class="op">)</span><span class="op">)</span>, input_dir <span class="op">=</span> <span class="st">".../ap_outputs"</span>, purpose <span class="op">=</span> <span class="st">"biotic"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="camera-work-flow">Camera work flow<a class="anchor" aria-label="anchor" href="#camera-work-flow"></a>
 </h3>
-<pre><code>library(wildrtrax)
-
-Sys.setenv(WT_USERNAME = "*****", WT_PASSWORD = "*****")
-
-wt_auth()
-
-
-projects &lt;- wt_get_download_summary("CAM") |&gt;
-  filter(project == "ABMI Ecosystem Health 2014") |&gt;
-  select(project_id) |&gt;
-  pull()
-
-raw_data &lt;- map_dfr(.x = projects, .f = ~wt_download_report(.x, "CAM", weather_cols = F, reports = "main")
-
-summarised &lt;- wt_ind_detect(raw_data, 30, "minutes") |&gt;
-              wt_summarise_cam(raw_data, "day", "detections", "long")</code></pre>
+<p>The ultimate pipeline for your camera data work flows. See <a href="https://abbiodiversity.github.io/wildrtrax/articles/camera-data-wrangling.html">Camera data wrangling</a> for more information.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">library</span>(wildrtrax)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="fu">Sys.setenv</span>(<span class="at">WT_USERNAME =</span> <span class="st">"*****"</span>, <span class="at">WT_PASSWORD =</span> <span class="st">"*****"</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="fu">wt_auth</span>()</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>projects <span class="ot">&lt;-</span> <span class="fu">wt_get_download_summary</span>(<span class="st">"CAM"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>  <span class="fu">filter</span>(project <span class="sc">==</span> <span class="st">"ABMI Ecosystem Health 2014"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>  <span class="fu">select</span>(project_id) <span class="sc">|&gt;</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>  <span class="fu">pull</span>()</span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>raw_data <span class="ot">&lt;-</span> <span class="fu">map_dfr</span>(<span class="at">.x =</span> projects, <span class="at">.f =</span> <span class="sc">~</span><span class="fu">wt_download_report</span>(.x, <span class="st">"CAM"</span>, <span class="at">weather_cols =</span> F, <span class="at">reports =</span> <span class="st">"main"</span>)</span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a>summarised <span class="ot">&lt;-</span> <span class="fu">wt_ind_detect</span>(raw_data, <span class="dv">30</span>, <span class="st">"minutes"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>              <span class="fu">wt_summarise_cam</span>(raw_data, <span class="st">"day"</span>, <span class="st">"detections"</span>, <span class="st">"long"</span>)</span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="ultrasonic-work-flow">Ultrasonic work flow<a class="anchor" aria-label="anchor" href="#ultrasonic-work-flow"></a>

@@ -35,8 +35,9 @@ All functions begin with a `wt_*` prefix. Column names and metadata align with t
 
 Download data and run and a single-season single-species occupancy analysis. Consult [APIs](https://abbiodiversity.github.io/wildrtrax/articles/apis.html) and [Acoustic data wrangling](https://abbiodiversity.github.io/wildrtrax/articles/acoustic-data-wrangling.html) for more information.
 
-```         
+```R         
 library(wildrtrax)
+library(tidyverse)
 
 # OAuth tokens only. Google OAuth2 will be supported soon
 Sys.setenv(WT_USERNAME = "*****", WT_PASSWORD = "*****")
@@ -55,17 +56,37 @@ mod <- unmarked::occu(~ 1 ~ 1, dat.occu)
 mod
 ```
 
-Conduct some pre-processing
+Conduct some pre-processing on various types of acoustic data. See more in [Acousitc pre-processing](https://abbiodiversity.github.io/wildrtrax/articles/acoustic-pre-processing.html). 
+
+```R         
+library(wildrtrax)
+library(tidyverse)
+
+# Scan files and filter results
+files <- wt_audio_scanner(path = ".", file_type = "wav", extra_cols = T) |>
+              mutate(hour = as.numeric(format(recording_date_time, "%H"))) |>
+              filter(julian == 176, hour %in% c(4:8))
+              
+# Run acoustic indices and LDFCs
+wt_run_ap(x = my_files, output_dir = paste0(root, 'ap_outputs'), path_to_ap = '/where/you/store/AP')
+
+wt_glean_ap(my_files |>
+    mutate(hour = as.numeric(format(recording_date_time, "%H"))) |>
+    filter(between(julian,110,220), hour %in% c(0:3,22:23)), input_dir = ".../ap_outputs", purpose = "biotic")
+
+```
 
 ### Camera work flow
 
-```         
+The ultimate pipeline for your camera data work flows. See [Camera data wrangling](https://abbiodiversity.github.io/wildrtrax/articles/camera-data-wrangling.html) for more information.
+
+```R         
 library(wildrtrax)
+library(tidyverse)
 
 Sys.setenv(WT_USERNAME = "*****", WT_PASSWORD = "*****")
 
 wt_auth()
-
 
 projects <- wt_get_download_summary("CAM") |>
   filter(project == "ABMI Ecosystem Health 2014") |>

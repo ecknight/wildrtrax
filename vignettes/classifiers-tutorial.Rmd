@@ -61,7 +61,7 @@ dat <- curl::curl_download('https://raw.githubusercontent.com/ABbiodiversity/wil
 
 ```
 
-```{r, eval=T, include=T, echo=F, message=F, warning=F}
+```{r Plots, eval=T, include=T, echo=F, message=F, warning=F}
 plot.p <- ggplot(dat) +
   geom_line(aes(x=thresh, y=p), size=1.5) +
   xlab("Score threshold") +
@@ -150,7 +150,7 @@ tail(eval, 5)
 
 We can plot the results of our evaluation to get an idea of how BirdNET is performing:
 
-```{r, message=F, warning=F}
+```{r More plots, message=F, warning=F}
 plot.p.e <- ggplot(eval) +
   geom_line(aes(x=threshold, y=precision), size=1.5) +
   xlab("Score threshold") +
@@ -276,7 +276,7 @@ detections_ccsp <- data[[1]] |>
 
 As before, you'll probably want to upload your detections to WildTrax for verification, even though BirdNET performance for Clay-coloured Sparrow is pretty good. Let's take a look at our BirdNET output as call rate to see if it's higher at the beginning of the season, as we would expect:
 
-```{r, include=T, message=F, warning=F}
+```{r CCSP plot, include=T, message=F, warning=F}
 #Calculate detections per second and mean confidence in each recording
 rate_ccsp <- detections_ccsp |> 
   group_by(location_id, recording_date_time, recording_length) |>
