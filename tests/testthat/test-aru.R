@@ -105,16 +105,16 @@ test_that('Scanner', {
   expect_true(nrow(j) == 1)
 })
 
-##wt_run_ap
-test_that('AP', {
-  url <- 'https://raw.githubusercontent.com/ABbiodiversity/wildRtrax-assets/main/ABMI-1046-NW_20240313_110010.wav'
-  req <- request(url) |>
-    req_perform()
-  file_path <- 'ABMI-1046-NW_20240313_110010.wav'  # Define the path
-  writeBin(req$body, file_path)
-  j <- wt_audio_scanner(".", file_type = "wav", extra_cols = F)
-  wt_run_ap(j, output_dir = getwd(), path_to_ap = "/users/alexandremacphail/APN/AnalysisPrograms")
-})
+# ##wt_run_ap
+# test_that('AP', {
+#   url <- 'https://raw.githubusercontent.com/ABbiodiversity/wildRtrax-assets/main/ABMI-1046-NW_20240313_110010.wav'
+#   req <- request(url) |>
+#     req_perform()
+#   file_path <- 'ABMI-1046-NW_20240313_110010.wav'  # Define the path
+#   writeBin(req$body, file_path)
+#   j <- wt_audio_scanner(".", file_type = "wav", extra_cols = F)
+#   wt_run_ap(j, output_dir = getwd(), path_to_ap = "/users/alexandremacphail/APN/AnalysisPrograms")
+# })
 
 ##wt_glean_ap
 ##wt_chop

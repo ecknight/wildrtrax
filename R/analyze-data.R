@@ -93,20 +93,20 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
 
       # Expand the time ranges into individual days of operation (smallest unit)
       x <- x |>
-        group_by({{ project_col }}, {{station_col}}) |>
+        group_by({{project_col}}, {{station_col}}) |>
         mutate(day = list(seq.Date(start_date, end_date, by = "day"))) |>
         tidyr::unnest(day) |>
         mutate(year = as.integer(format(day, "%Y"))) |>
-        select({{ project_col }}, {{station_col}}, year, day)
+        select({{project_col}}, {{station_col}}, year, day)
     }
     ## if exclude_out_of_range == TRUE then include remove periods of non operation
     if (exclude_out_of_range == TRUE) {
       x <- raw_data |>
-        group_by({{ project_col }}, {{station_col}}) |>
+        group_by({{project_col}}, {{station_col}}) |>
         arrange(image_date_time) %>%
         mutate(period = rep(seq_along(rle(image_fov)$lengths), rle(image_fov)$lengths)) %>%
         filter(image_fov == "WITHIN") %>%
-        group_by({{ project_col }}, {{station_col}}, period) |>
+        group_by({{project_col}}, {{station_col}}, period) |>
         summarise(
           start_date = as.Date(min(image_date_time)),
           end_date = as.Date(max(image_date_time))
@@ -115,11 +115,11 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
 
       # Expand the time ranges into individual days of operation (smallest unit)
       x <- x |>
-        group_by({{ project_col }}, {{station_col}}, period) |>
+        group_by({{project_col}}, {{station_col}}, period) |>
         mutate(day = list(seq.Date(start_date, end_date, by = "day"))) |>
         tidyr::unnest(day) |>
         mutate(year = as.integer(format(day, "%Y"))) |>
-        select({{ project_col }}, {{station_col}}, year, day)
+        select({{project_col}}, {{station_col}}, year, day)
     }
 
     if (any(c(is.na(x$start_date), is.na(x$end_date)))) {
@@ -132,22 +132,22 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
   # Based on the desired timeframe, assess when each detection occurred
   if (time_interval == "day" | time_interval == "full") {
     y <- detect_data |>
-      mutate(year = as.integer(format({{ start_col_det }}, "%Y")),
-             day = as.Date({{ start_col_det }}))
+      mutate(year = as.integer(format({{start_col_det}}, "%Y")),
+             day = as.Date({{start_col_det}}))
     time_interval <- "day"
   } else if (time_interval == "week") {
     y <- detect_data |>
-      mutate(year = as.integer(format({{ start_col_det }}, "%Y")),
-             week = as.integer(format({{ start_col_det }}, "%V")))  # ISO week
+      mutate(year = as.integer(format({{start_col_det}}, "%Y")),
+             week = as.integer(format({{start_col_det}}, "%V")))  # ISO week
   } else if (time_interval == "month") {
     y <- detect_data |>
-      mutate(year = as.integer(format({{ start_col_det }}, "%Y")),
-             month = format({{start_col_det }}, "%B"))  # Full month name
+      mutate(year = as.integer(format({{start_col_det}}, "%Y")),
+             month = format({{start_col_det}}, "%B"))  # Full month name
   }
 
   # Summarise variable of interest
   y <- y |>
-    group_by({{project_col}}, {{ station_col }}, {{species_col}}, year, {{ time_interval}}) |>
+    group_by({{project_col}}, {{station_col}}, {{species_col}}, year, {{time_interval}}) |>
     summarise(detections = n(),
               counts = sum(max_animals)) |>
     ungroup() |>
@@ -166,7 +166,7 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
   } else if (time_interval == "week") {
     x <- x |>
       mutate(week = isoweek(day)) |>
-      group_by({{project_col}}, {{ station_col }}, year, week) |>
+      group_by({{project_col}}, {{station_col}}, year, week) |>
       tally(name = "n_days_effort") |>
       ungroup()
     z <- x |>
@@ -176,7 +176,7 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
   } else if (time_interval == "month") {
     x <- x |>
       mutate(month = month(day, label = TRUE, abbr = FALSE)) |>
-      group_by({{project_col}}, {{ station_col }}, year, month) |>
+      group_by({{project_col}}, {{station_col}}, year, month) |>
       tally(name = "n_days_effort") |>
       ungroup()
     z <- x |>
