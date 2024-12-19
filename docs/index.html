@@ -108,111 +108,26 @@
 <h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
 </h2>
 <p>All functions begin with a <code>wt_*</code> prefix. Column names and metadata align with the WildTrax infrastructure. The goal is to follow the work flow of pre-processing, linking with WildTrax, download and analysis.</p>
-<p>ARUs <span class="emoji" data-emoji="sound">🔉</span> Cameras <span class="emoji" data-emoji="camera">📷</span> Point counts <span class="emoji" data-emoji="bird">🐦</span> Bats <span class="emoji" data-emoji="bat">🦇</span></p>
-<ul>
-<li>Pre-process acoustic data
-<ul>
-<li>
-<code><a href="reference/wt_audio_scanner.html">wt_audio_scanner()</a></code> <span class="emoji" data-emoji="sound">🔉</span> <span class="emoji" data-emoji="bat">🦇</span>
-</li>
-<li>
-<code><a href="reference/wt_run_ap.html">wt_run_ap()</a></code> <span class="emoji" data-emoji="sound">🔉</span>
-</li>
-<li>
-<code><a href="reference/wt_glean_ap.html">wt_glean_ap()</a></code> <span class="emoji" data-emoji="sound">🔉</span>
-</li>
-<li>
-<code><a href="reference/wt_signal_level.html">wt_signal_level()</a></code> <span class="emoji" data-emoji="sound">🔉</span>
-</li>
-<li>
-<code><a href="reference/wt_chop.html">wt_chop()</a></code> <span class="emoji" data-emoji="sound">🔉</span> <span class="emoji" data-emoji="bat">🦇</span>
-</li>
-<li>
-<code><a href="reference/wt_make_aru_tasks.html">wt_make_aru_tasks()</a></code> <span class="emoji" data-emoji="sound">🔉</span> <span class="emoji" data-emoji="bat">🦇</span>
-</li>
-<li>
-<code><a href="reference/wt_songscope_tags.html">wt_songscope_tags()</a></code> <span class="emoji" data-emoji="sound">🔉</span>
-</li>
-<li>
-<code><a href="reference/wt_kaleidoscope_tags.html">wt_kaleidoscope_tags()</a></code> <span class="emoji" data-emoji="sound">🔉</span> <span class="emoji" data-emoji="bat">🦇</span>
-</li>
-</ul>
-</li>
-<li>Download data from WildTrax
-<ul>
-<li>
-<code><a href="reference/wt_auth.html">wt_auth()</a></code> <span class="emoji" data-emoji="camera">📷</span> <span class="emoji" data-emoji="sound">🔉</span> <span class="emoji" data-emoji="bird">🐦</span> <span class="emoji" data-emoji="bat">🦇</span>
-</li>
-<li>
-<code><a href="reference/wt_get_download_summary.html">wt_get_download_summary()</a></code> <span class="emoji" data-emoji="camera">📷</span> <span class="emoji" data-emoji="sound">🔉</span> <span class="emoji" data-emoji="bird">🐦</span> <span class="emoji" data-emoji="bat">🦇</span>
-</li>
-<li>
-<code><a href="reference/wt_download_report.html">wt_download_report()</a></code> <span class="emoji" data-emoji="camera">📷</span> <span class="emoji" data-emoji="sound">🔉</span> <span class="emoji" data-emoji="bird">🐦</span> <span class="emoji" data-emoji="bat">🦇</span>
-<ul>
-<li>Available reports: <code>main, project, location, recording, image_set, image, tag, point_count, megadetector, megaclassifer, birdnet, daylight</code>
-</li>
-</ul>
-</li>
-<li>
-<code><a href="reference/wt_dd_summary.html">wt_dd_summary()</a></code> <span class="emoji" data-emoji="camera">📷</span> <span class="emoji" data-emoji="sound">🔉</span> <span class="emoji" data-emoji="bird">🐦</span> <span class="emoji" data-emoji="bat">🦇</span>
-</li>
-<li>
-<code><a href="reference/wt_get_species.html">wt_get_species()</a></code> <span class="emoji" data-emoji="camera">📷</span> <span class="emoji" data-emoji="sound">🔉</span> <span class="emoji" data-emoji="bird">🐦</span> <span class="emoji" data-emoji="bat">🦇</span>
-</li>
-<li>
-<code><a href="reference/wt_download_media.html">wt_download_media()</a></code> <span class="emoji" data-emoji="sound">🔉</span> <span class="emoji" data-emoji="bat">🦇</span> <span class="emoji" data-emoji="camera">📷</span>
-</li>
-</ul>
-</li>
-<li>Analyze data
-<ul>
-<li>
-<code><a href="reference/wt_summarise_cam.html">wt_summarise_cam()</a></code> <span class="emoji" data-emoji="camera">📷</span>
-</li>
-<li>
-<code><a href="reference/wt_ind_detect.html">wt_ind_detect()</a></code> <span class="emoji" data-emoji="camera">📷</span>
-</li>
-</ul>
-</li>
-<li>Convenience functions
-<ul>
-<li>
-<code><a href="reference/wt_location_distances.html">wt_location_distances()</a></code> <span class="emoji" data-emoji="sound">🔉</span> <span class="emoji" data-emoji="camera">📷</span> <span class="emoji" data-emoji="bird">🐦</span> <span class="emoji" data-emoji="bat">🦇</span>
-</li>
-<li>
-<code><a href="reference/wt_tidy_species.html">wt_tidy_species()</a></code> <span class="emoji" data-emoji="sound">🔉</span> <span class="emoji" data-emoji="camera">📷</span> <span class="emoji" data-emoji="bird">🐦</span> <span class="emoji" data-emoji="bat">🦇</span>
-</li>
-<li>
-<code><a href="reference/wt_replace_tmtt.html">wt_replace_tmtt()</a></code> <span class="emoji" data-emoji="sound">🔉</span>
-</li>
-<li>
-<code><a href="reference/wt_make_wide.html">wt_make_wide()</a></code> <span class="emoji" data-emoji="sound">🔉</span> <span class="emoji" data-emoji="bird">🐦</span> <span class="emoji" data-emoji="bat">🦇</span>
-</li>
-<li>
-<code><a href="reference/wt_format_occupancy.html">wt_format_occupancy()</a></code> <span class="emoji" data-emoji="sound">🔉</span> <span class="emoji" data-emoji="bird">🐦</span>
-</li>
-<li>
-<code><a href="reference/wt_qpad_offsets.html">wt_qpad_offsets()</a></code> <span class="emoji" data-emoji="sound">🔉</span> <span class="emoji" data-emoji="bird">🐦</span>
-</li>
-<li>
-<code><a href="reference/wt_add_grts.html">wt_add_grts()</a></code> <span class="emoji" data-emoji="bat">🦇</span>
-</li>
-</ul>
-</li>
-<li>Acoustic classification <span class="emoji" data-emoji="sound">🔉</span>
-<ul>
-<li>
-<code><a href="reference/wt_evaluate_classifier.html">wt_evaluate_classifier()</a></code><span class="emoji" data-emoji="sound">🔉</span>
-</li>
-<li>
-<code><a href="reference/wt_get_threshold.html">wt_get_threshold()</a></code> <span class="emoji" data-emoji="sound">🔉</span>
-</li>
-<li>
-<code><a href="reference/wt_additional_species.html">wt_additional_species()</a></code> <span class="emoji" data-emoji="sound">🔉</span>
-</li>
-</ul>
-</li>
-</ul>
+<div class="section level3">
+<h3 id="aru-work-flow">ARU work flow<a class="anchor" aria-label="anchor" href="#aru-work-flow"></a>
+</h3>
+<p>Coming soon!</p>
+</div>
+<div class="section level3">
+<h3 id="camera-work-flow">Camera work flow<a class="anchor" aria-label="anchor" href="#camera-work-flow"></a>
+</h3>
+<p>Coming soon!</p>
+</div>
+<div class="section level3">
+<h3 id="ultrasonic-work-flow">Ultrasonic work flow<a class="anchor" aria-label="anchor" href="#ultrasonic-work-flow"></a>
+</h3>
+<p>Coming soon!</p>
+</div>
+<div class="section level3">
+<h3 id="point-count-work-flow">Point count work flow<a class="anchor" aria-label="anchor" href="#point-count-work-flow"></a>
+</h3>
+<p>Coming soon!</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="issues">Issues<a class="anchor" aria-label="anchor" href="#issues"></a>

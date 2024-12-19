@@ -460,7 +460,8 @@ wt_glean_ap <- function(x = NULL, input_dir, purpose = c("quality","abiotic","bi
     do.call("c", .) %>%
     magick::image_append()
 
-  img_info <- image_info(ldfc)
+  # Trim top and bottom and crop
+  img_info <- magick::image_info(ldfc)
   img_width <- img_info$width
   img_height <- img_info$height
 
@@ -469,7 +470,7 @@ wt_glean_ap <- function(x = NULL, input_dir, purpose = c("quality","abiotic","bi
   remaining_height <- as.integer(img_height - top_crop_height - bottom_crop_height)
 
   cropped_img <- ldfc %>%
-    image_crop(geometry = sprintf("%dx%d+0+%d",
+    magick::image_crop(geometry = sprintf("%dx%d+0+%d",
                                   img_width,
                                   remaining_height,
                                   top_crop_height))

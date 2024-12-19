@@ -30,6 +30,7 @@ reference:
     - wt_format_data
     - wt_format_occupancy
     - wt_get_download_summary
+    - wt_get_locations
     - wt_get_species
     - wt_get_threshold
     - wt_glean_ap

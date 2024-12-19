@@ -55,7 +55,7 @@ wt_get_download_summary <- function(sensor_id) {
     stop("A valid value for sensor_id must be supplied. See ?wt_get_download_summary for a list of possible values", call. = TRUE)
   }
 
-  r <- .wt_api_pr(
+  r <- .wt_api_gr(
     path = "/bis/get-download-summary",
     sensorId = sensor_id,
     sort = "fullNm",

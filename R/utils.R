@@ -79,6 +79,26 @@
   ._wt_auth_env_$expiry_time <= Sys.time()
 }
 
+#' Generate user agent
+#'
+#' @description Generic function to to encapsulate user agents
+#'
+#' @keywords internal
+#'
+
+.gen_ua <- function() {
+  user_agent <- getOption("HTTPUserAgent")
+  if (is.null(user_agent)) {
+    user_agent <- sprintf(
+      "R/%s; R (%s)",
+      getRversion(),
+      paste(getRversion(), R.version$platform, R.version$arch, R.version$os)
+    )
+  }
+  user_agent <- paste0("wildRtrax ", as.character(packageVersion("wildRtrax")), "; ", user_agent)
+  return(user_agent)
+}
+
 #' An internal function to handle generic POST requests to WildTrax API
 #'
 #' @description Generic function to handle certain POST requests
@@ -96,13 +116,7 @@
   if (.wt_auth_expired()) {stop("Please authenticate with wt_auth().", call. = FALSE)}
 
   ## User agent
-  u <- getOption("HTTPUserAgent")
-  u <- sprintf("R/%s; R (%s)",
-               getRversion(),
-               paste(getRversion(), R.version$platform, R.version$arch, R.version$os))
-
-  # Add wildrtrax version information:
-  u <- paste0("wildrtrax ", as.character(packageVersion("wildrtrax")), "; ", u)
+  u <- .gen_ua()
 
   # Convert ... into a list
   query_params <- list(...)
@@ -151,13 +165,7 @@
   if (.wt_auth_expired()) {stop("Please authenticate with wt_auth().", call. = FALSE)}
 
   ## User agent
-  u <- getOption("HTTPUserAgent")
-  u <- sprintf("R/%s; R (%s)",
-               getRversion(),
-               paste(getRversion(), R.version$platform, R.version$arch, R.version$os))
-
-  # Add wildrtrax version information:
-  u <- paste0("wildrtrax ", as.character(packageVersion("wildrtrax")), "; ", u)
+  u <- .gen_ua()
 
   # Convert ... into a list
   query_params <- list(...)
@@ -456,8 +464,9 @@
 #'
 
 .wt_col_types <- function(data) {
-  # Define a list of column names and their corresponding conversion functions
-  column_types <- list(
+
+  # Corresponding column types
+    column_types <- list(
     abundance = as.character,
     age_class = as.character,
     behaviours = as.character,
@@ -601,7 +610,6 @@
     }
   }
 
-  # Return the modified data
   return(data)
 }
 
@@ -621,6 +629,7 @@
 #' @return A vector of precision, recall, F-score, and threshold
 
 .wt_calculate_prf <- local({
+
   message_shown <- FALSE
 
   function(threshold, data, human_total){
@@ -648,7 +657,6 @@
 #'
 #' @keywords internal
 #' @export
-#'
 
 .delete_wav_files <- function(dir) {
   wav_files <- list.files(path = dir, pattern = "\\.wav$", recursive = TRUE, full.names = TRUE)

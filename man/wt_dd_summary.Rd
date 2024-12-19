@@ -9,9 +9,9 @@ wt_dd_summary(sensor = c("ARU", "CAM", "PC"), species = NULL, boundary = NULL)
 \arguments{
 \item{sensor}{The sensor you wish to query from either 'ARU', 'CAM' or 'PC'}
 
-\item{species}{The species you want to search for (e.g. 'WTSP'). Multiple species can be included.}
+\item{species}{The species you want to search for (e.g. 'White-throated Sparrow'). Multiple species can be included.}
 
-\item{boundary}{The custom boundary you want to use. Defined as at least a four vertex polygon. Definition can also be a bbox}
+\item{boundary}{The custom boundary you want to use. Must be a list of at least four latitude and longitude points where the last point is a duplicate of the first, or an object of class "bbox" (as produced by sf::st_bbox)}
 }
 \value{
 Return
@@ -26,7 +26,7 @@ aoi <- list(
 c(-110.85438, 57.13472),
 c(-114.14364, 54.74858),
 c(-110.69368, 52.34150),
-c(-110.854385, 57.13472)
+c(-110.85438, 57.13472)
 )
 
 dd <- wt_dd_summary(sensor = 'ARU', species = 'White-throated Sparrow', boundary = aoi)
