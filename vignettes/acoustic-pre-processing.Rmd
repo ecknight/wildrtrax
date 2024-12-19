@@ -89,9 +89,9 @@ wt_glean_ap(my_files %>%
 
 ```
 
-![](986-se-indices.png)
+![Indices of all recordings from julian date 110-220 and from 22h00-03h00](986-se-indices.png)
 
-![](986-se.png)
+![Long-duration false-colour spectrogram (LDFC) of all recordings from julian date 110-220 and from 22h00-03h00](986-se.png)
 
 ## Applying a limited amplitude filter
 

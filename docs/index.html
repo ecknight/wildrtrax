@@ -87,6 +87,7 @@
 </div>
 <!-- badges: start -->
 
+<!-- badges: end -->
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
@@ -109,14 +110,47 @@
 </h2>
 <p>All functions begin with a <code>wt_*</code> prefix. Column names and metadata align with the WildTrax infrastructure. The goal is to follow the work flow of pre-processing, linking with WildTrax, download and analysis.</p>
 <div class="section level3">
-<h3 id="aru-work-flow">ARU work flow<a class="anchor" aria-label="anchor" href="#aru-work-flow"></a>
+<h3 id="acoustic-work-flow">Acoustic work flow<a class="anchor" aria-label="anchor" href="#acoustic-work-flow"></a>
 </h3>
-<p>Coming soon!</p>
+<p>Download data and run and a single-season single-species occupancy analysis. Consult <a href="https://abbiodiversity.github.io/wildrtrax/articles/apis.html">APIs</a> and <a href="https://abbiodiversity.github.io/wildrtrax/articles/acoustic-data-wrangling.html">Acoustic data wrangling</a> for more information.</p>
+<pre><code>library(wildrtrax)
+
+# OAuth tokens only. Google OAuth2 will be supported soon
+Sys.setenv(WT_USERNAME = "*****", WT_PASSWORD = "*****")
+
+wt_auth()
+
+projects &lt;- wt_get_download_summary("ARU") |&gt;
+  filter(project == "ABMI Ecosystem Health 2023") |&gt;
+  select(project_id) |&gt;
+  pull()
+
+data &lt;- map_dfr(.x = projects, .f = ~wt_download_report(.x, "ARU", weather_cols = F, reports = "main")
+
+dat.occu &lt;- wt_format_occupancy(my_report, species="OVEN", siteCovs=NULL)
+mod &lt;- unmarked::occu(~ 1 ~ 1, dat.occu)
+mod</code></pre>
+<p>Conduct some pre-processing</p>
 </div>
 <div class="section level3">
 <h3 id="camera-work-flow">Camera work flow<a class="anchor" aria-label="anchor" href="#camera-work-flow"></a>
 </h3>
-<p>Coming soon!</p>
+<pre><code>library(wildrtrax)
+
+Sys.setenv(WT_USERNAME = "*****", WT_PASSWORD = "*****")
+
+wt_auth()
+
+
+projects &lt;- wt_get_download_summary("CAM") |&gt;
+  filter(project == "ABMI Ecosystem Health 2014") |&gt;
+  select(project_id) |&gt;
+  pull()
+
+raw_data &lt;- map_dfr(.x = projects, .f = ~wt_download_report(.x, "CAM", weather_cols = F, reports = "main")
+
+summarised &lt;- wt_ind_detect(raw_data, 30, "minutes") |&gt;
+              wt_summarise_cam(raw_data, "day", "detections", "long")</code></pre>
 </div>
 <div class="section level3">
 <h3 id="ultrasonic-work-flow">Ultrasonic work flow<a class="anchor" aria-label="anchor" href="#ultrasonic-work-flow"></a>
