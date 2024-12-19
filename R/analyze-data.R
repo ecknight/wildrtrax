@@ -226,7 +226,6 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
 #'
 #' @import dplyr
 #' @importFrom rlang is_missing
-#' @importFrom stringr str_detect
 #' @export
 #'
 #' @examples
@@ -278,7 +277,7 @@ wt_ind_detect <- function(x, threshold, units = "minutes", datetime_col = image_
   x <- filter(x, !species_common_name %in% t)
   if (remove_domestic) {
     # All tags in WildTrax that refer to domestic animals begin with 'Domestic __'
-    x <- filter(x, !stringr::str_detect(species_common_name, "^Domestic"))
+    x <- filter(x, !grepl("^Domestic", species_common_name))
   }
 
   # Create ordered dataframe, and calculate time interval between images.

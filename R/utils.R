@@ -79,6 +79,26 @@
   ._wt_auth_env_$expiry_time <= Sys.time()
 }
 
+#' Generate user agent
+#'
+#' @description Generic function to to encapsulate user agents
+#'
+#' @keywords internal
+#'
+
+.gen_ua <- function() {
+  user_agent <- getOption("HTTPUserAgent")
+  if (is.null(user_agent)) {
+    user_agent <- sprintf(
+      "R/%s; R (%s)",
+      getRversion(),
+      paste(getRversion(), R.version$platform, R.version$arch, R.version$os)
+    )
+  }
+  user_agent <- paste0("wildRtrax ", as.character(packageVersion("wildRtrax")), "; ", user_agent)
+  return(user_agent)
+}
+
 #' An internal function to handle generic POST requests to WildTrax API
 #'
 #' @description Generic function to handle certain POST requests
@@ -96,13 +116,7 @@
   if (.wt_auth_expired()) {stop("Please authenticate with wt_auth().", call. = FALSE)}
 
   ## User agent
-  u <- getOption("HTTPUserAgent")
-    u <- sprintf("R/%s; R (%s)",
-                 getRversion(),
-                 paste(getRversion(), R.version$platform, R.version$arch, R.version$os))
-
-  # Add wildrtrax version information:
-  u <- paste0("wildrtrax ", as.character(packageVersion("wildrtrax")), "; ", u)
+  u <- .gen_ua()
 
   # Convert ... into a list
   query_params <- list(...)
@@ -119,6 +133,55 @@
     req_headers(Authorization = paste("Bearer", ._wt_auth_env_$access_token)) |>
     req_user_agent(u) |>
     req_method("POST") |>
+    req_perform()
+
+  # Handle errors
+  if (resp_status(r) >= 400) {
+    stop(sprintf(
+      "Authentication failed [%s]\n%s",
+      resp_status(r),
+      message),
+      call. = FALSE)
+  } else {
+    return(r)
+  }
+
+}
+
+#' An internal function to handle generic GET requests to WildTrax API
+#'
+#' @description Generic function to handle certain GET requests
+#'
+#' @param path The path to the API
+#' @param ... Argument to pass along into GET query
+#'
+#' @keywords internal
+#'
+#' @import httr2
+
+.wt_api_gr <- function(path, ...) {
+
+  # Check if authentication has expired:
+  if (.wt_auth_expired()) {stop("Please authenticate with wt_auth().", call. = FALSE)}
+
+  ## User agent
+  u <- .gen_ua()
+
+  # Convert ... into a list
+  query_params <- list(...)
+
+  # Check if query_params is a list; if not, ensure it is treated as a list
+  if (length(query_params) == 1 && is.character(query_params[[1]])) {
+    # If there's only one element and it's a character, treat it as a named query
+    query_params <- as.list(query_params)
+  }
+
+  r <- request("https://www-api.wildtrax.ca") |>
+    req_url_path_append(path) |>
+    req_url_query(!!!query_params) |>  # Unpack the list of query parameters
+    req_headers(Authorization = paste("Bearer", ._wt_auth_env_$access_token)) |>
+    req_user_agent(u) |>
+    req_method("GET") |>
     req_perform()
 
   # Handle errors
@@ -176,8 +239,8 @@
   crs <- terra::crs(.rtree)
 
   #get vars
-  date <- str_sub(data$recording_date_time, 1, 10)
-  time <- str_sub(data$recording_date_time, 12, 19)
+  date <- substr(data$recording_date_time, 1, 10)
+  time <- substr(data$recording_date_time, 12, 19)
   lon <- as.numeric(data$longitude)
   lat <- as.numeric(data$latitude)
   dur <- as.numeric(data$task_duration)
@@ -262,13 +325,13 @@
   dtm[is.na(dtm)] <- mean(dtm, na.rm=TRUE)
   if(tz=="local"){
     sr <- suntools::sunriset(cbind("X"=xydf$x, "Y"=xydf$y),
-                   as.POSIXct(dtm, tz="America/Edmonton"),
-                   direction="sunrise", POSIXct.out=FALSE) * 24
+                             as.POSIXct(dtm, tz="America/Edmonton"),
+                             direction="sunrise", POSIXct.out=FALSE) * 24
   }
   if(tz=="utc"){
     sr <- suntools::sunriset(cbind("X"=xydf$x, "Y"=xydf$y),
-                   as.POSIXct(dtm, tz="GMT"),
-                   direction="sunrise", POSIXct.out=FALSE) * 24
+                             as.POSIXct(dtm, tz="GMT"),
+                             direction="sunrise", POSIXct.out=FALSE) * 24
   }
   TSSR <- round(unname((hour - sr + ltz) / 24), 4)
 
@@ -401,8 +464,9 @@
 #'
 
 .wt_col_types <- function(data) {
-  # Define a list of column names and their corresponding conversion functions
-  column_types <- list(
+
+  # Corresponding column types
+    column_types <- list(
     abundance = as.character,
     age_class = as.character,
     behaviours = as.character,
@@ -546,7 +610,6 @@
     }
   }
 
-  # Return the modified data
   return(data)
 }
 
@@ -566,6 +629,7 @@
 #' @return A vector of precision, recall, F-score, and threshold
 
 .wt_calculate_prf <- local({
+
   message_shown <- FALSE
 
   function(threshold, data, human_total){
@@ -593,10 +657,8 @@
 #'
 #' @keywords internal
 #' @export
-#'
 
 .delete_wav_files <- function(dir) {
   wav_files <- list.files(path = dir, pattern = "\\.wav$", recursive = TRUE, full.names = TRUE)
   file.remove(wav_files)
 }
-

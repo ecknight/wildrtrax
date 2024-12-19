@@ -1,5 +1,4 @@
-
-# wildrtrax <img src="man/figures/logo.png" width="50%" align="right" />
+# wildrtrax <img src="man/figures/logo.png" width="50%" align="right"/>
 
 <!-- badges: start -->
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
@@ -11,7 +10,7 @@
 
 ## Overview
 
-`wildrtrax` (pronounced *wild-r-tracks*) is an R package containing functions to help manage and analyze environmental sensor data. It helps to simplify the entire data life cycle by offering tools for data pre-processing, wrangling, and analysis, facilitating seamless data transfer to and from [WildTrax](https://www.wildtrax.ca/home.html). With `wildrtrax`, users can effortlessly establish end-to-end workflows and ensure reproducibility in their analyses. By providing a consistent and organized framework, the package promotes transparency and integrity in research, making it effortless to share and replicate results.
+`wildrtrax` (pronounced *wild-r-tracks*) is an R package containing functions to help manage and analyze environmental sensor data. It helps to simplify the entire data life cycle by offering tools for data pre-processing, wrangling, and analysis, facilitating seamless data transfer to and from [WildTrax](https://wildtrax.ca/). With `wildrtrax`, users can effortlessly establish end-to-end workflows and ensure reproducibility in their analyses. By providing a consistent and organized framework, the package promotes transparency and integrity in research, making it effortless to share and replicate results.
 
 ## Installation
 
@@ -22,9 +21,9 @@ You can install the most recent version of `wildrtrax` directly from this reposi
 remotes::install_github("ABbiodiversity/wildrtrax")
 ```
 
-The [development](https://github.com/ABbiodiversity/wildrtrax/tree/development) version of this package contains experimental features and recent fixes. It can be installed with: 
+The [development](https://github.com/ABbiodiversity/wildrtrax/tree/development) version of this package contains experimental features and recent fixes. It can be installed with:
 
-```r
+``` r
 remotes::install_github("ABbiodiversity/wildrtrax@development")
 ```
 
@@ -34,48 +33,85 @@ The development version of the package will be periodically merged and will be r
 
 All functions begin with a `wt_*` prefix. Column names and metadata align with the WildTrax infrastructure. The goal is to follow the work flow of pre-processing, linking with WildTrax, download and analysis.
 
-ARUs :sound:
-Cameras :camera:
-Point counts :bird:
-Bats :bat:
+### Acoustic work flow
 
-- Pre-process acoustic data
-  - `wt_audio_scanner()` :sound: :bat:
-  - `wt_run_ap()` :sound:
-  - `wt_glean_ap()` :sound:
-  - `wt_signal_level()` :sound:
-  - `wt_chop()` :sound: :bat:
-  - `wt_make_aru_tasks()` :sound: :bat:
-  - `wt_songscope_tags()` :sound:
-  - `wt_kaleidoscope_tags()` :sound: :bat:
-- Download data from WildTrax
-  - `wt_auth()` :camera: :sound: :bird: :bat:
-  - `wt_get_download_summary()` :camera: :sound: :bird: :bat:
-  - `wt_download_report()` :camera: :sound: :bird: :bat:
-    - Available reports: `main, project, location, recording, image_set, image, tag, point_count, megadetector, megaclassifer, birdnet, daylight`
-  - `wt_dd_summary()` :camera: :sound: :bird: :bat:
-  - `wt_get_species()` :camera: :sound: :bird: :bat:
-  - `wt_download_media()` :sound: :bat: :camera:
-- Analyze data
-  - `wt_summarise_cam()` :camera:
-  - `wt_ind_detect()` :camera:
-- Convenience functions
-  - `wt_location_distances()` :sound: :camera: :bird: :bat:
-  - `wt_tidy_species()` :sound: :camera: :bird: :bat:
-  - `wt_replace_tmtt()` :sound:
-  - `wt_make_wide()` :sound: :bird: :bat:
-  - `wt_format_occupancy()` :sound: :bird:
-  - `wt_qpad_offsets()` :sound: :bird:
-  - `wt_add_grts()` :bat:
-- Acoustic classification :sound:
-  - `wt_evaluate_classifier()`:sound:
-  - `wt_get_threshold()` :sound:
-  - `wt_additional_species()` :sound:
+Download data and run and a single-season single-species occupancy analysis. Consult [APIs](https://abbiodiversity.github.io/wildrtrax/articles/apis.html) and [Acoustic data wrangling](https://abbiodiversity.github.io/wildrtrax/articles/acoustic-data-wrangling.html) for more information.
+
+```R         
+library(wildrtrax)
+library(tidyverse)
+
+# OAuth tokens only. Google OAuth2 will be supported soon
+Sys.setenv(WT_USERNAME = "*****", WT_PASSWORD = "*****")
+       
+wt_auth()
+
+projects <- wt_get_download_summary("ARU") |>
+  filter(project == "ABMI Ecosystem Health 2023") |>
+  select(project_id) |>
+  pull()
+
+data <- map_dfr(.x = projects, .f = ~wt_download_report(.x, "ARU", weather_cols = F, reports = "main")
+
+dat.occu <- wt_format_occupancy(my_report, species="OVEN", siteCovs=NULL)
+mod <- unmarked::occu(~ 1 ~ 1, dat.occu)
+mod
+```
+
+Conduct some pre-processing on various types of acoustic data. See more in [Acoustic pre-processing](https://abbiodiversity.github.io/wildrtrax/articles/acoustic-pre-processing.html). 
+
+```R         
+library(wildrtrax)
+library(tidyverse)
+
+# Scan files and filter results
+files <- wt_audio_scanner(path = ".", file_type = "wav", extra_cols = T) |>
+              mutate(hour = as.numeric(format(recording_date_time, "%H"))) |>
+              filter(julian == 176, hour %in% c(4:8))
+              
+# Run acoustic indices and LDFCs
+wt_run_ap(x = my_files, output_dir = paste0(root, 'ap_outputs'), path_to_ap = '/where/you/store/AP')
+
+wt_glean_ap(my_files |>
+    mutate(hour = as.numeric(format(recording_date_time, "%H"))) |>
+    filter(between(julian,110,220), hour %in% c(0:3,22:23)), input_dir = ".../ap_outputs", purpose = "biotic")
+
+```
+
+### Camera work flow
+
+The ultimate pipeline for your camera data work flows. See [Camera data wrangling](https://abbiodiversity.github.io/wildrtrax/articles/camera-data-wrangling.html) for more information.
+
+```R         
+library(wildrtrax)
+library(tidyverse)
+
+Sys.setenv(WT_USERNAME = "*****", WT_PASSWORD = "*****")
+
+wt_auth()
+
+projects <- wt_get_download_summary("CAM") |>
+  filter(project == "ABMI Ecosystem Health 2014") |>
+  select(project_id) |>
+  pull()
+
+raw_data <- map_dfr(.x = projects, .f = ~wt_download_report(.x, "CAM", weather_cols = F, reports = "main")
+
+summarised <- wt_ind_detect(raw_data, 30, "minutes") |>
+              wt_summarise_cam(raw_data, "day", "detections", "long")
+```
+
+### Ultrasonic work flow
+
+Coming soon!
+
+### Point count work flow
+
+Coming soon!
 
 ## Issues
 
-To report bugs, request additional features, or get help using the package, please file an
-[issue](https://github.com/ABbiodiversity/wildrtrax/issues).
+To report bugs, request additional features, or get help using the package, please file an [issue](https://github.com/ABbiodiversity/wildrtrax/issues).
 
 ## Contributors
 
@@ -87,4 +123,4 @@ This R package is licensed under [MIT license](https://github.com/ABbiodiversity
 
 ## Code of Conduct
 
-Please note that `wildrtrax` is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By contributing to this project, you agree to abide by its terms.
+Please note that `wildrtrax` is released with a [Contributor Code of Conduct](https://github.com/ABbiodiversity/wildRtrax?tab=coc-ov-file). By contributing to this project, you agree to abide by its terms.

@@ -23,11 +23,11 @@ library(wildrtrax)
 
 ### What is `wildrtrax`?
 
-`wildrtrax`, pronounced *'wild-R-tracks'*, is an R package for ecologists and advanced users who work with environmental sensors such as autonomous recording units (ARUs) and remote cameras. It contains functions designed to meet most needs in order to organize, analyze and standardize data with the [WildTrax](https://wwww.wildtrax.ca) infrastructure. `wildrtrax` is self-contained and must be run under an R statistical environment, and it also depends on many other R packages. `wildrtrax` is free software and distributed under [MIT License (c) 2023](https://github.com/ABbiodiversity/wildrtrax/blob/master/LICENSE).
+`wildrtrax`, pronounced *'wild-R-tracks'*, is an R package for ecologists and advanced users who work with environmental sensors such as autonomous recording units (ARUs) and remote cameras. It contains functions designed to meet most needs in order to organize, analyze and standardize data with the [WildTrax](https://www.wildtrax.ca) infrastructure. `wildrtrax` is self-contained and must be run under an R statistical environment, and it also depends on many other R packages. `wildrtrax` is free software and distributed under [MIT License (c) 2023](https://github.com/ABbiodiversity/wildrtrax/blob/master/LICENSE).
 
 ### What is **WildTrax**?
 
-[**WildTrax**](https://www.wildtrax.ca) is a web-enabled portal designed to manage, store, process, share and discover environmental sensor data and the biological data extracted from the media. WildTrax was developed by the [Alberta Biodiversity Monitoring Institute](https://abmi.ca) and the [Bioacoustic Unit](https://bioacoustic.abmi.ca).
+[**WildTrax**](https://wildtrax.ca/) is a web-enabled portal designed to manage, store, process, share and discover environmental sensor data and the biological data extracted from the media. WildTrax was developed by the [Alberta Biodiversity Monitoring Institute](https://abmi.ca) and the [Bioacoustic Unit](https://apps.ualberta.ca/directory/person/bayne).
 
 ### Why did you build `wildrtrax`?
 
@@ -35,7 +35,7 @@ library(wildrtrax)
 
 ### What R packages does `wildrtrax` depend on?
 
-`wildrtrax` depends on a multitude of packages to provide flexible routines and work flows for data management. [`tidyverse`](https://tidyverse.org) for piping functions, standard grammar and tidy data manipulation, [`furrr`](https://davisvaughan.github.io/furrr/) for parallel computing, and acoustic analysis packages: [`bioacoustics`](https://cran.r-project.org/web/packages/bioacoustics/index.html), [`tuneR`](https://cran.r-project.org/web/packages/tuneR/index.html), [`seewave`](https://cran.r-project.org/web/packages/seewave/seewave.pdf). The `wt_run_ap` function and associated work flows are indebted to the [QUT Ecoacoustics Audio Analysis Software](https://github.com/QutEcoacoustics/audio-analysis). 
+`wildrtrax` depends on a multitude of packages to provide flexible routines and work flows for data management. [`tidyverse`](https://www.tidyverse.org/) for piping functions, standard grammar and tidy data manipulation, [`furrr`](https://furrr.futureverse.org/) for parallel computing, and acoustic analysis packages: [`bioacoustics`](https://CRAN.R-project.org/package=bioacoustics), [`tuneR`](https://CRAN.R-project.org/package=tuneR), [`seewave`](https://CRAN.R-project.org/package=seewave). The `wt_run_ap` function and associated work flows are indebted to the [QUT Ecoacoustics Audio Analysis Software](https://github.com/QutEcoacoustics/audio-analysis). 
 
 ### How do I report a bug in `wildrtrax`?
 

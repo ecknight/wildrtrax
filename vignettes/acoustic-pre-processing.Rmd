@@ -35,15 +35,8 @@ load("package.RData")
 The `wt_audio_scanner()` function reads in audio files (either wac, wav or flac format) from a local directory and outputs useful metadata.
 
 ```{r, echo=TRUE, include=TRUE, eval=F, warning = F, message = F}
-# Plan futures
-future::plan(multisession)
 
-# Scan data
-if (dir.exists(".")) {
-  wt_audio_scanner(path = ".", file_type = "wav", extra_cols = T)
-} else {
-  'Can\'\t find this directory'
-}
+wt_audio_scanner(path = ".", file_type = "wav", extra_cols = T)
 
 ```
 
@@ -89,9 +82,9 @@ wt_glean_ap(my_files %>%
 
 ```
 
-![](986-se-indices.png)
+![Indices of all recordings from julian date 110-220 and from 22h00-03h00](986-se-indices.png)
 
-![](986-se.png)
+![Long-duration false-colour spectrogram (LDFC) of all recordings from julian date 110-220 and from 22h00-03h00](986-se.png)
 
 ## Applying a limited amplitude filter
 

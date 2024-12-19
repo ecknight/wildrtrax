@@ -32,6 +32,7 @@ wt_auth <- function(force = FALSE) {
 #' @param sensor_id Can be one of "ARU", "CAM", or "PC"
 #'
 #' @import dplyr
+#' @import httr2
 #'
 #' @export
 #'
@@ -42,8 +43,9 @@ wt_auth <- function(force = FALSE) {
 #' wt_get_download_summary(sensor_id = "ARU")
 #' }
 #'
-#' @return A dataframe listing the projects that the user can download data for, including: project name, id, year, number of tasks, a geographic bounding box and project status.
+#' @return A data frame listing the projects that the user can download data for, including: project name, id, year, number of tasks, a geographic bounding box and project status.
 #'
+
 wt_get_download_summary <- function(sensor_id) {
 
   sens <- c("PC", "ARU", "CAM")
@@ -53,7 +55,7 @@ wt_get_download_summary <- function(sensor_id) {
     stop("A valid value for sensor_id must be supplied. See ?wt_get_download_summary for a list of possible values", call. = TRUE)
   }
 
-  r <- .wt_api_pr(
+  r <- .wt_api_gr(
     path = "/bis/get-download-summary",
     sensorId = sensor_id,
     sort = "fullNm",
@@ -62,14 +64,14 @@ wt_get_download_summary <- function(sensor_id) {
 
   if(is.null(r)) {stop('')}
 
-  x <- data.frame(do.call(rbind, resp_body_json(r)$results)) |>
-       dplyr::select(organization_id = organizationId,
-                     organization = organizationName,
-                     project = fullNm,
-                     project_id = id,
-                     sensor = sensorId,
-                     tasks,
-                     status) |>
+  x <- data.frame(do.call(rbind, httr2::resp_body_json(r)$results)) |>
+    dplyr::select(organization_id = organizationId,
+                  organization = organizationName,
+                  project = fullNm,
+                  project_id = id,
+                  sensor = sensorId,
+                  tasks,
+                  status) |>
     dplyr::mutate(dplyr::across(dplyr::everything(), unlist))
 
   return(x)
@@ -221,7 +223,7 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
   list.files(td, pattern = "*.csv", full.names = TRUE) %>% map(~ {
     directory <- dirname(.x)
     old_filename <- basename(.x)
-    new_filename <- gsub("[:()?!~;]", "", old_filename)
+    new_filename <- gsub("[:()?!~;/]", "", old_filename)
     new_path <- file.path(directory, new_filename)
     file.rename(.x, new_path)
   })
@@ -230,6 +232,7 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
   files.less <- basename(files.full)
   x <- purrr::map(.x = files.full, .f = ~ suppressWarnings(readr::read_csv(., show_col_types = F,
                                                                            skip_empty_rows = T, col_types = list(abundance = readr::col_character(),
+                                                                                                                 individual_count = readr::col_character(),
                                                                                                                  image_fire = readr::col_logical(),
                                                                                                                  image_snow_depth_m = readr::col_number())))) %>%
     purrr::set_names(files.less)
@@ -284,15 +287,15 @@ wt_get_species <- function(){
   spp <- resp_body_json(spp)
 
   spp_table <- tibble(
-      species_id = map_dbl(spp, ~ ifelse(!is.null(.x$id), .x$id, NA)),
-      species_code = map_chr(spp, ~ ifelse(!is.null(.x$code), .x$code, NA)),
-      species_common_name = map_chr(spp, ~ ifelse(!is.null(.x$commonName), .x$commonName, NA)),
-      species_class = map_chr(spp, ~ ifelse(!is.null(.x$className), .x$className, NA)),
-      species_order = map_chr(spp, ~ ifelse(!is.null(.x$order), .x$order, NA)),
-      species_scientific_name = map_chr(spp, ~ ifelse(!is.null(.x$scientificName), .x$scientificName, NA))
-    )
+    species_id = map_dbl(spp, ~ ifelse(!is.null(.x$id), .x$id, NA)),
+    species_code = map_chr(spp, ~ ifelse(!is.null(.x$code), .x$code, NA)),
+    species_common_name = map_chr(spp, ~ ifelse(!is.null(.x$commonName), .x$commonName, NA)),
+    species_class = map_chr(spp, ~ ifelse(!is.null(.x$className), .x$className, NA)),
+    species_order = map_chr(spp, ~ ifelse(!is.null(.x$order), .x$order, NA)),
+    species_scientific_name = map_chr(spp, ~ ifelse(!is.null(.x$scientificName), .x$scientificName, NA))
+  )
 
- return(spp_table)
+  return(spp_table)
 
 }
 
@@ -338,8 +341,8 @@ wt_download_media <- function(input, output, type = c("recording","image", "tag_
 
   download_file <- function(url, output_file) {
     req <- httr2::request(url)
-    req %>%
-      httr2::req_perform(path = output_file)
+    httr2::req_perform(req, path = output_file)
+    return(paste("Downloaded to", output_file))
   }
 
   # Process based on type
@@ -351,7 +354,7 @@ wt_download_media <- function(input, output, type = c("recording","image", "tag_
         clip_file_name = paste0(output, "/", location, "_", format(recording_date_time, "%Y%m%d_%H%M%S"), ".", file_type)
       ) %>%
       { purrr::map2_chr(.$recording_url, .$clip_file_name, download_file) }
-  # Tag spectrograms
+    # Tag spectrograms
   } else if (type == "tag_clip_spectrogram" & "spectrogram_url" %in% colnames(input_data)) {
     output_data <- input_data %>%
       mutate(
@@ -362,7 +365,7 @@ wt_download_media <- function(input, output, type = c("recording","image", "tag_
         ))
       ) %>%
       { purrr::map2_chr(.$spectrogram_url, .$clip_file_name, download_file) }
-  # Tag spectrogram and tag clip
+    # Tag spectrogram and tag clip
   } else if (all(c("spectrogram_url", "clip_url") %in% colnames(input_data)) & any(type %in% c("tag_clip_spectrogram", "tag_clip_audio"))) {
     output_data <- input_data %>%
       mutate(
@@ -381,11 +384,14 @@ wt_download_media <- function(input, output, type = c("recording","image", "tag_
         purrr::map2_chr(.$spectrogram_url, .$clip_file_name_spec, download_file)
         purrr::map2_chr(.$clip_url, .$clip_file_name_audio, download_file)
       }
-  # Images
+    # Images
   } else if ("media_url" %in% colnames(input_data)){
     output_data <- input_data %>%
-      mutate(image_name = file.path(output, "/", paste0(location, "_", format(recording_date_time, "%Y%m%d_%H%M%S"),".jpeg"))) %>%
+      mutate(image_name = file.path(output,
+                                    paste0(location, "_", format(image_date_time, "%Y%m%d_%H%M%S"), ".jpeg"))) %>%
       {
+        print(paste("Media URL:", .$media_url))
+        print(paste("Image Name:", .$image_name))
         purrr::map2_chr(.$media_url, .$image_name, download_file)
       }
   } else {
@@ -401,8 +407,8 @@ wt_download_media <- function(input, output, type = c("recording","image", "tag_
 #' @description Download Data Discover results from projects across WildTrax
 #'
 #' @param sensor  The sensor you wish to query from either 'ARU', 'CAM' or 'PC'
-#' @param species The species you want to search for (e.g. 'WTSP'). Multiple species can be included.
-#' @param boundary The custom boundary you want to use. Defined as at least a four vertex polygon. Definition can also be a bbox
+#' @param species The species you want to search for (e.g. 'White-throated Sparrow'). Multiple species can be included.
+#' @param boundary The custom boundary you want to use. Must be a list of at least four latitude and longitude points where the last point is a duplicate of the first, or an object of class "bbox" (as produced by sf::st_bbox)
 #'
 #' @import dplyr tibble httr2
 #' @export
@@ -414,7 +420,7 @@ wt_download_media <- function(input, output, type = c("recording","image", "tag_
 #' c(-110.85438, 57.13472),
 #' c(-114.14364, 54.74858),
 #' c(-110.69368, 52.34150),
-#' c(-110.854385, 57.13472)
+#' c(-110.85438, 57.13472)
 #' )
 #'
 #' dd <- wt_dd_summary(sensor = 'ARU', species = 'White-throated Sparrow', boundary = aoi)
@@ -465,24 +471,18 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
   })
 
   # Fetch species if provided
-  if (!is.null(species)) {
+  if (is.null(species)) {
+    spp <- species_tibble$species_id
+    if (length(spp) == 0) {
+      stop("No species data available for the selected sensor.")
+    }
+  } else {
     spp <- species_tibble |>
       filter(species_common_name %in% species) |>
       pull(species_id)
 
     if (length(spp) == 0) {
       stop("No species were found.")
-    }
-
-  } else {
-    if (.wt_auth_expired()) {
-      stop("Please authenticate with wt_auth().", call. = FALSE)
-    } else if (!is.null(species)) { # Ensure species is provided before fetching
-      spp <- wt_get_species() |>
-        filter(species_common_name %in% species) |>
-        pull(species_id)
-    } else {
-      stop("Species parameter is missing.")
     }
   }
 
@@ -556,11 +556,14 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
   # Iterate over each species
   for (sp in spp) {
 
-    # Construct payload for first request
-    payload <- list(
+    # Construct payload for second request (small)
+    payload_ll <- list(
+      polygonBoundary = boundary,
       sensorId = sensor,
-      speciesIds = list(sp)  # Wrap the integer value in a list to make it an array
+      speciesIds = list(sp)
     )
+
+    if(is.null(boundary)) {payload_ll$polygonBoundary <- NULL}
 
     rr <- request("https://www-api.wildtrax.ca") |>
       req_url_path_append("/bis/get-data-discoverer-long-lat-summary") |>
@@ -571,20 +574,18 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
         Referer = "https://discover.wildtrax.ca/"
       ) |>
       req_user_agent(u) |>
-      req_body_json(payload) |>
+      req_body_json(payload_ll) |>
       req_perform()
 
-    # Construct payload for second request
-    payload_small <- list(
+    # Construct payload for first request
+    payload_mp <- list(
       isSpeciesTab = FALSE,
-      zoomLevel = 20,
-      bounds = full_bounds,
       sensorId = sensor,
+      speciesIds = list(sp),
       polygonBoundary = boundary,
-      speciesIds = list(sp)
+      bounds = full_bounds,
+      zoomLevel = 20
     )
-
-    if(is.null(boundary)) {payload_small$polygonBoundary <- NULL}
 
     rr2 <- request("https://www-api.wildtrax.ca") |>
       req_url_path_append("/bis/get-data-discoverer-map-and-projects") |>
@@ -595,7 +596,7 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
         Referer = "https://discover.wildtrax.ca/"
       ) |>
       req_user_agent(u) |>
-      req_body_json(payload_small) |>
+      req_body_json(payload_mp) |>
       req_perform()
 
     # Extract content from the second request
@@ -663,9 +664,52 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
     stop("No results were found on any of the search layers. Broaden your search and try again.")
   }
 
-  # Return list containing combined project summaries and result tables
-  return(list(combined_rpps_tibble, combined_result_table))
+  return(list(
+    "lat-long-summary" = combined_rpps_tibble,
+    "map-projects" = combined_result_table
+  ))
 }
 
+#' Get locations from a WildTrax Organization
+#'
+#' @description Obtain a table listing locations emulating the Locations tab in a WildTrax Organization
+#'
+#' @param organization Either the short letter or numeric digit representing the Organization
+#'
+#' @import httr2
+#' @import dplyr
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' # Authenticate first:
+#' wt_auth()
+#' wt_get_locations(organization = 5)
+#' }
+#'
+#' @return A data frame listing the projects that the user can download data for, including: project name, id, year, number of tasks, a geographic bounding box and project status.
+#'
 
+wt_get_locations <- function(organization) {
 
+  if (is.numeric(organization)) {
+      org_numeric <- organization
+      # do other stuff for org codes
+  }
+
+  r <- .wt_api_gr(
+    path = "/bis/get-location-summary",
+    organizationId = org_numeric,
+    sort = "locationName",
+    order = "asc",
+    limit = 1000
+  )
+
+  if(is.null(r)) {stop('')}
+
+  x <- data.frame(do.call(rbind, httr2::resp_body_json(r)$results))
+
+  return(x)
+
+}

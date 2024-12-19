@@ -55,7 +55,7 @@ my_projects <- wt_get_download_summary(sensor_id = 'ARU')
 head(my_projects)
 ```
 
-Using the project_id number in the download summary you can then use `wt_download_report()` to access the species data. You can also find the project_id number in the url of a WildTrax project, e.g. https://www.wildtrax.ca/home/aru-tasks.html?projectId=605&sensorId=ARU.
+Using the project_id number in the download summary you can then use `wt_download_report()` to access the species data. You can also find the project_id number in the url of a WildTrax project, e.g. https://portal.wildtrax.ca/home/aru-tasks.html?projectId=605&sensorId=ARU.
 
 ```{r echo=TRUE, include=TRUE, eval=F, warning = FALSE, message = FALSE}
 # Download the project report

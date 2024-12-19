@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Environmental sensor data management and analytics to and from WildTrax • wildrtrax</title>
+<title>Environmental Sensor Data Management and Analytics to and from WildTrax • wildrtrax</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
 <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="apple-touch-icon.png">
@@ -16,9 +16,9 @@
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Environmental sensor data management and analytics to and from WildTrax">
-<meta name="description" content="wildrtrax is an R package that enables environmental sensor users to create comprehensive work flows for managing and analyzing data.">
-<meta property="og:description" content="wildrtrax is an R package that enables environmental sensor users to create comprehensive work flows for managing and analyzing data.">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Environmental Sensor Data Management and Analytics to and from WildTrax">
+<meta name="description" content="This is an R package that enables environmental sensor users to create comprehensive work flows for managing and analyzing data.">
+<meta property="og:description" content="This is an R package that enables environmental sensor users to create comprehensive work flows for managing and analyzing data.">
 <meta property="og:image" content="https://abbiodiversity.github.io/wildrtrax/logo.png">
 </head>
 <body>
@@ -29,7 +29,7 @@
 
     <a class="navbar-brand me-2" href="index.html">wildrtrax</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,6 +56,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-news" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">News</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-news">
 <li><h6 class="dropdown-header" data-toc-skip>Releases</h6></li>
+    <li><h6 class="dropdown-header" data-toc-skip>wildrtrax 1.3.2</h6></li>
     <li><h6 class="dropdown-header" data-toc-skip>wildrtrax 1.3.1</h6></li>
     <li><h6 class="dropdown-header" data-toc-skip>wildrtrax 1.3.0</h6></li>
     <li><h6 class="dropdown-header" data-toc-skip>wildrtrax 1.2.0</h6></li>
@@ -86,10 +87,11 @@
 </div>
 <!-- badges: start -->
 
+<!-- badges: end -->
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p><code>wildrtrax</code> (pronounced <em>wild-r-tracks</em>) is an R package containing functions to help manage and analyze environmental sensor data. It helps to simplify the entire data life cycle by offering tools for data pre-processing, wrangling, and analysis, facilitating seamless data transfer to and from <a href="https://www.wildtrax.ca/home.html" class="external-link">WildTrax</a>. With <code>wildrtrax</code>, users can effortlessly establish end-to-end workflows and ensure reproducibility in their analyses. By providing a consistent and organized framework, the package promotes transparency and integrity in research, making it effortless to share and replicate results.</p>
+<p><code>wildrtrax</code> (pronounced <em>wild-r-tracks</em>) is an R package containing functions to help manage and analyze environmental sensor data. It helps to simplify the entire data life cycle by offering tools for data pre-processing, wrangling, and analysis, facilitating seamless data transfer to and from <a href="https://wildtrax.ca/" class="external-link">WildTrax</a>. With <code>wildrtrax</code>, users can effortlessly establish end-to-end workflows and ensure reproducibility in their analyses. By providing a consistent and organized framework, the package promotes transparency and integrity in research, making it effortless to share and replicate results.</p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -107,111 +109,76 @@
 <h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
 </h2>
 <p>All functions begin with a <code>wt_*</code> prefix. Column names and metadata align with the WildTrax infrastructure. The goal is to follow the work flow of pre-processing, linking with WildTrax, download and analysis.</p>
-<p>ARUs <span class="emoji" data-emoji="sound">🔉</span> Cameras <span class="emoji" data-emoji="camera">📷</span> Point counts <span class="emoji" data-emoji="bird">🐦</span> Bats <span class="emoji" data-emoji="bat">🦇</span></p>
-<ul>
-<li>Pre-process acoustic data
-<ul>
-<li>
-<code><a href="reference/wt_audio_scanner.html">wt_audio_scanner()</a></code> <span class="emoji" data-emoji="sound">🔉</span> <span class="emoji" data-emoji="bat">🦇</span>
-</li>
-<li>
-<code><a href="reference/wt_run_ap.html">wt_run_ap()</a></code> <span class="emoji" data-emoji="sound">🔉</span>
-</li>
-<li>
-<code><a href="reference/wt_glean_ap.html">wt_glean_ap()</a></code> <span class="emoji" data-emoji="sound">🔉</span>
-</li>
-<li>
-<code><a href="reference/wt_signal_level.html">wt_signal_level()</a></code> <span class="emoji" data-emoji="sound">🔉</span>
-</li>
-<li>
-<code><a href="reference/wt_chop.html">wt_chop()</a></code> <span class="emoji" data-emoji="sound">🔉</span> <span class="emoji" data-emoji="bat">🦇</span>
-</li>
-<li>
-<code><a href="reference/wt_make_aru_tasks.html">wt_make_aru_tasks()</a></code> <span class="emoji" data-emoji="sound">🔉</span> <span class="emoji" data-emoji="bat">🦇</span>
-</li>
-<li>
-<code><a href="reference/wt_songscope_tags.html">wt_songscope_tags()</a></code> <span class="emoji" data-emoji="sound">🔉</span>
-</li>
-<li>
-<code><a href="reference/wt_kaleidoscope_tags.html">wt_kaleidoscope_tags()</a></code> <span class="emoji" data-emoji="sound">🔉</span> <span class="emoji" data-emoji="bat">🦇</span>
-</li>
-</ul>
-</li>
-<li>Download data from WildTrax
-<ul>
-<li>
-<code><a href="reference/wt_auth.html">wt_auth()</a></code> <span class="emoji" data-emoji="camera">📷</span> <span class="emoji" data-emoji="sound">🔉</span> <span class="emoji" data-emoji="bird">🐦</span> <span class="emoji" data-emoji="bat">🦇</span>
-</li>
-<li>
-<code><a href="reference/wt_get_download_summary.html">wt_get_download_summary()</a></code> <span class="emoji" data-emoji="camera">📷</span> <span class="emoji" data-emoji="sound">🔉</span> <span class="emoji" data-emoji="bird">🐦</span> <span class="emoji" data-emoji="bat">🦇</span>
-</li>
-<li>
-<code><a href="reference/wt_download_report.html">wt_download_report()</a></code> <span class="emoji" data-emoji="camera">📷</span> <span class="emoji" data-emoji="sound">🔉</span> <span class="emoji" data-emoji="bird">🐦</span> <span class="emoji" data-emoji="bat">🦇</span>
-<ul>
-<li>Available reports: <code>main, project, location, recording, image_set, image, tag, point_count, megadetector, megaclassifer, birdnet, daylight</code>
-</li>
-</ul>
-</li>
-<li>
-<code><a href="reference/wt_dd_summary.html">wt_dd_summary()</a></code> <span class="emoji" data-emoji="camera">📷</span> <span class="emoji" data-emoji="sound">🔉</span> <span class="emoji" data-emoji="bird">🐦</span> <span class="emoji" data-emoji="bat">🦇</span>
-</li>
-<li>
-<code><a href="reference/wt_get_species.html">wt_get_species()</a></code> <span class="emoji" data-emoji="camera">📷</span> <span class="emoji" data-emoji="sound">🔉</span> <span class="emoji" data-emoji="bird">🐦</span> <span class="emoji" data-emoji="bat">🦇</span>
-</li>
-<li>
-<code><a href="reference/wt_download_media.html">wt_download_media()</a></code> <span class="emoji" data-emoji="sound">🔉</span> <span class="emoji" data-emoji="bat">🦇</span> <span class="emoji" data-emoji="camera">📷</span>
-</li>
-</ul>
-</li>
-<li>Analyze data
-<ul>
-<li>
-<code><a href="reference/wt_summarise_cam.html">wt_summarise_cam()</a></code> <span class="emoji" data-emoji="camera">📷</span>
-</li>
-<li>
-<code><a href="reference/wt_ind_detect.html">wt_ind_detect()</a></code> <span class="emoji" data-emoji="camera">📷</span>
-</li>
-</ul>
-</li>
-<li>Convenience functions
-<ul>
-<li>
-<code><a href="reference/wt_location_distances.html">wt_location_distances()</a></code> <span class="emoji" data-emoji="sound">🔉</span> <span class="emoji" data-emoji="camera">📷</span> <span class="emoji" data-emoji="bird">🐦</span> <span class="emoji" data-emoji="bat">🦇</span>
-</li>
-<li>
-<code><a href="reference/wt_tidy_species.html">wt_tidy_species()</a></code> <span class="emoji" data-emoji="sound">🔉</span> <span class="emoji" data-emoji="camera">📷</span> <span class="emoji" data-emoji="bird">🐦</span> <span class="emoji" data-emoji="bat">🦇</span>
-</li>
-<li>
-<code><a href="reference/wt_replace_tmtt.html">wt_replace_tmtt()</a></code> <span class="emoji" data-emoji="sound">🔉</span>
-</li>
-<li>
-<code><a href="reference/wt_make_wide.html">wt_make_wide()</a></code> <span class="emoji" data-emoji="sound">🔉</span> <span class="emoji" data-emoji="bird">🐦</span> <span class="emoji" data-emoji="bat">🦇</span>
-</li>
-<li>
-<code><a href="reference/wt_format_occupancy.html">wt_format_occupancy()</a></code> <span class="emoji" data-emoji="sound">🔉</span> <span class="emoji" data-emoji="bird">🐦</span>
-</li>
-<li>
-<code><a href="reference/wt_qpad_offsets.html">wt_qpad_offsets()</a></code> <span class="emoji" data-emoji="sound">🔉</span> <span class="emoji" data-emoji="bird">🐦</span>
-</li>
-<li>
-<code><a href="reference/wt_add_grts.html">wt_add_grts()</a></code> <span class="emoji" data-emoji="bat">🦇</span>
-</li>
-</ul>
-</li>
-<li>Acoustic classification <span class="emoji" data-emoji="sound">🔉</span>
-<ul>
-<li>
-<code><a href="reference/wt_evaluate_classifier.html">wt_evaluate_classifier()</a></code><span class="emoji" data-emoji="sound">🔉</span>
-</li>
-<li>
-<code><a href="reference/wt_get_threshold.html">wt_get_threshold()</a></code> <span class="emoji" data-emoji="sound">🔉</span>
-</li>
-<li>
-<code><a href="reference/wt_additional_species.html">wt_additional_species()</a></code> <span class="emoji" data-emoji="sound">🔉</span>
-</li>
-</ul>
-</li>
-</ul>
+<div class="section level3">
+<h3 id="acoustic-work-flow">Acoustic work flow<a class="anchor" aria-label="anchor" href="#acoustic-work-flow"></a>
+</h3>
+<p>Download data and run and a single-season single-species occupancy analysis. Consult <a href="https://abbiodiversity.github.io/wildrtrax/articles/apis.html">APIs</a> and <a href="https://abbiodiversity.github.io/wildrtrax/articles/acoustic-data-wrangling.html">Acoustic data wrangling</a> for more information.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">library</span>(wildrtrax)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co"># OAuth tokens only. Google OAuth2 will be supported soon</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="fu">Sys.setenv</span>(<span class="at">WT_USERNAME =</span> <span class="st">"*****"</span>, <span class="at">WT_PASSWORD =</span> <span class="st">"*****"</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>       </span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="fu">wt_auth</span>()</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>projects <span class="ot">&lt;-</span> <span class="fu">wt_get_download_summary</span>(<span class="st">"ARU"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>  <span class="fu">filter</span>(project <span class="sc">==</span> <span class="st">"ABMI Ecosystem Health 2023"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>  <span class="fu">select</span>(project_id) <span class="sc">|&gt;</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>  <span class="fu">pull</span>()</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">map_dfr</span>(<span class="at">.x =</span> projects, <span class="at">.f =</span> <span class="sc">~</span><span class="fu">wt_download_report</span>(.x, <span class="st">"ARU"</span>, <span class="at">weather_cols =</span> F, <span class="at">reports =</span> <span class="st">"main"</span>)</span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>dat.occu <span class="ot">&lt;-</span> <span class="fu">wt_format_occupancy</span>(my_report, <span class="at">species=</span><span class="st">"OVEN"</span>, <span class="at">siteCovs=</span><span class="cn">NULL</span>)</span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>mod <span class="ot">&lt;-</span> unmarked<span class="sc">::</span><span class="fu">occu</span>(<span class="sc">~</span> <span class="dv">1</span> <span class="sc">~</span> <span class="dv">1</span>, dat.occu)</span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a>mod</span></code></pre></div>
+<p>Conduct some pre-processing on various types of acoustic data. See more in <a href="https://abbiodiversity.github.io/wildrtrax/articles/acoustic-pre-processing.html">Acousitc pre-processing</a>.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://abbiodiversity.github.io/wildrtrax/">wildrtrax</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Scan files and filter results</span></span>
+<span><span class="va">files</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_audio_scanner.html">wt_audio_scanner</a></span><span class="op">(</span>path <span class="op">=</span> <span class="st">"."</span>, file_type <span class="op">=</span> <span class="st">"wav"</span>, extra_cols <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>              <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>hour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">recording_date_time</span>, <span class="st">"%H"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>              <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">julian</span> <span class="op">==</span> <span class="fl">176</span>, <span class="va">hour</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span><span class="op">:</span><span class="fl">8</span><span class="op">)</span><span class="op">)</span></span>
+<span>              </span>
+<span><span class="co"># Run acoustic indices and LDFCs</span></span>
+<span><span class="fu"><a href="reference/wt_run_ap.html">wt_run_ap</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">my_files</span>, output_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">root</span>, <span class="st">'ap_outputs'</span><span class="op">)</span>, path_to_ap <span class="op">=</span> <span class="st">'/where/you/store/AP'</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/wt_glean_ap.html">wt_glean_ap</a></span><span class="op">(</span><span class="va">my_files</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>hour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">recording_date_time</span>, <span class="st">"%H"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/between.html" class="external-link">between</a></span><span class="op">(</span><span class="va">julian</span>,<span class="fl">110</span>,<span class="fl">220</span><span class="op">)</span>, <span class="va">hour</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">3</span>,<span class="fl">22</span><span class="op">:</span><span class="fl">23</span><span class="op">)</span><span class="op">)</span>, input_dir <span class="op">=</span> <span class="st">".../ap_outputs"</span>, purpose <span class="op">=</span> <span class="st">"biotic"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="camera-work-flow">Camera work flow<a class="anchor" aria-label="anchor" href="#camera-work-flow"></a>
+</h3>
+<p>The ultimate pipeline for your camera data work flows. See <a href="https://abbiodiversity.github.io/wildrtrax/articles/camera-data-wrangling.html">Camera data wrangling</a> for more information.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">library</span>(wildrtrax)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="fu">Sys.setenv</span>(<span class="at">WT_USERNAME =</span> <span class="st">"*****"</span>, <span class="at">WT_PASSWORD =</span> <span class="st">"*****"</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="fu">wt_auth</span>()</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>projects <span class="ot">&lt;-</span> <span class="fu">wt_get_download_summary</span>(<span class="st">"CAM"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>  <span class="fu">filter</span>(project <span class="sc">==</span> <span class="st">"ABMI Ecosystem Health 2014"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>  <span class="fu">select</span>(project_id) <span class="sc">|&gt;</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>  <span class="fu">pull</span>()</span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>raw_data <span class="ot">&lt;-</span> <span class="fu">map_dfr</span>(<span class="at">.x =</span> projects, <span class="at">.f =</span> <span class="sc">~</span><span class="fu">wt_download_report</span>(.x, <span class="st">"CAM"</span>, <span class="at">weather_cols =</span> F, <span class="at">reports =</span> <span class="st">"main"</span>)</span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a>summarised <span class="ot">&lt;-</span> <span class="fu">wt_ind_detect</span>(raw_data, <span class="dv">30</span>, <span class="st">"minutes"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>              <span class="fu">wt_summarise_cam</span>(raw_data, <span class="st">"day"</span>, <span class="st">"detections"</span>, <span class="st">"long"</span>)</span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="ultrasonic-work-flow">Ultrasonic work flow<a class="anchor" aria-label="anchor" href="#ultrasonic-work-flow"></a>
+</h3>
+<p>Coming soon!</p>
+</div>
+<div class="section level3">
+<h3 id="point-count-work-flow">Point count work flow<a class="anchor" aria-label="anchor" href="#point-count-work-flow"></a>
+</h3>
+<p>Coming soon!</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="issues">Issues<a class="anchor" aria-label="anchor" href="#issues"></a>
@@ -231,7 +198,7 @@
 <div class="section level2">
 <h2 id="code-of-conduct">Code of Conduct<a class="anchor" aria-label="anchor" href="#code-of-conduct"></a>
 </h2>
-<p>Please note that <code>wildrtrax</code> is released with a <a href="CODE_OF_CONDUCT.html">Contributor Code of Conduct</a>. By contributing to this project, you agree to abide by its terms.</p>
+<p>Please note that <code>wildrtrax</code> is released with a <a href="https://github.com/ABbiodiversity/wildRtrax?tab=coc-ov-file" class="external-link">Contributor Code of Conduct</a>. By contributing to this project, you agree to abide by its terms.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="license">
