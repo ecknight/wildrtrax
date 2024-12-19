@@ -708,7 +708,7 @@ wt_add_grts <- function(data, group_locations_in_cell = FALSE) {
 #' @description This function takes the WildTrax reports and converts them to the desired format
 #' `r lifecycle::badge("experimental")`
 #'
-#' @param input A report containing locations from `wt_download_report()`
+#' @param input A report from `wt_download_report()`
 #' @param format A format i.e. 'FWMIS' or 'NABAT'
 #'
 #' @import dplyr httr2
@@ -725,13 +725,7 @@ wt_add_grts <- function(data, group_locations_in_cell = FALSE) {
 wt_format_data <- function(input, format = c('FWMIS','NABAT')){
 
   ## User agent
-  u <- getOption("HTTPUserAgent")
-  u <- sprintf("R/%s; R (%s)",
-               getRversion(),
-               paste(getRversion(), R.version$platform, R.version$arch, R.version$os))
-
-  # Add wildrtrax version information:
-  u <- paste0("wildrtrax ", as.character(packageVersion("wildrtrax")), "; ", u)
+  u <- .gen_ua()
 
   # Enabled functionalized api
   #spp <- .wt_api_pr(
@@ -749,7 +743,6 @@ wt_format_data <- function(input, format = c('FWMIS','NABAT')){
     req_user_agent(u) |>
     req_perform() |>
     resp_body_json()
-
 
   # spps <- httr::content(spp_fwmis)
   spps_tibble <- map_dfr(spp_fwmis, ~ tibble(species_id = .x$sfw_species_id, sfw_name = .x$sfw_name, sfw_name_cam = .x$sfw_name_cam)) |>

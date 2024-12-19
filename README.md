@@ -39,19 +39,25 @@ Download data and run and a single-season single-species occupancy analysis. Con
 library(wildrtrax)
 library(tidyverse)
 
-# OAuth tokens only. Google OAuth2 will be supported soon
+# OAuth logins only. Google OAuth2 will be supported soon.
 Sys.setenv(WT_USERNAME = "*****", WT_PASSWORD = "*****")
-       
+
+# Authenticate to WildTrax
 wt_auth()
 
+# Get a project id
 projects <- wt_get_download_summary("ARU") |>
   filter(project == "ABMI Ecosystem Health 2023") |>
   select(project_id) |>
   pull()
 
+# Download the main report
 data <- map_dfr(.x = projects, .f = ~wt_download_report(.x, "ARU", weather_cols = F, reports = "main")
 
+# Format to occupancy for OVEN
 dat.occu <- wt_format_occupancy(my_report, species="OVEN", siteCovs=NULL)
+
+# Run the model
 mod <- unmarked::occu(~ 1 ~ 1, dat.occu)
 mod
 ```
@@ -84,28 +90,47 @@ The ultimate pipeline for your camera data work flows. See [Camera data wranglin
 library(wildrtrax)
 library(tidyverse)
 
+# OAuth logins only. Google OAuth2 will be supported soon.
 Sys.setenv(WT_USERNAME = "*****", WT_PASSWORD = "*****")
 
+# Authenticate to WildTrax
 wt_auth()
 
+# Get a project id
 projects <- wt_get_download_summary("CAM") |>
   filter(project == "ABMI Ecosystem Health 2014") |>
   select(project_id) |>
   pull()
 
+# Download the data
 raw_data <- map_dfr(.x = projects, .f = ~wt_download_report(.x, "CAM", weather_cols = F, reports = "main")
 
+# Summarise individual detections and calculate detections per day in long format
 summarised <- wt_ind_detect(raw_data, 30, "minutes") |>
               wt_summarise_cam(raw_data, "day", "detections", "long")
 ```
 
 ### Ultrasonic work flow
 
-Coming soon!
+Format tags from [Kaleidoscope]() for a WildTrax project. Download data from a project into an [NABAT]() acceptable format.
+
+```R         
+library(wildrtrax)
+library(tidyverse)
+
+
+```
 
 ### Point count work flow
 
-Coming soon!
+Download combined and formatted acoustic and point count datasets together
+
+```R         
+library(wildrtrax)
+library(tidyverse)
+
+
+```
 
 ## Issues
 
