@@ -56,7 +56,7 @@ mod <- unmarked::occu(~ 1 ~ 1, dat.occu)
 mod
 ```
 
-Conduct some pre-processing on various types of acoustic data. See more in [Acousitc pre-processing](https://abbiodiversity.github.io/wildrtrax/articles/acoustic-pre-processing.html). 
+Conduct some pre-processing on various types of acoustic data. See more in [Acoustic pre-processing](https://abbiodiversity.github.io/wildrtrax/articles/acoustic-pre-processing.html). 
 
 ```R         
 library(wildrtrax)
