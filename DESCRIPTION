@@ -28,6 +28,7 @@ Imports:
     QPAD,
     readr,
     rlang,
+    rmarkdown,
     seewave,
     sf,
     suntools,

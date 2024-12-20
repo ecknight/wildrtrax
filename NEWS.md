@@ -1,5 +1,16 @@
 # wildrtrax 1.3.2
 
+## Major changes
+
+* Support for GET requests; new function `wt_get_locations()` to get Organization locations
+* Removed `stringr` as dependency
+
+## Minor changes
+
+* Generate R user agent functionally
+* Tweaks to LDFCs, including addition of borders for each recording
+* 
+* Added README work flows
 
 # wildrtrax 1.3.1
 
