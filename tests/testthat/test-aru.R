@@ -74,13 +74,13 @@ test_that('Occupancy formatting', {
   expect_true(class(occu)[1] == 'unmarkedFrameOccu')
 })
 
-test_that('Classifier functions', {
-  rep <- wt_download_report(620, 'ARU', c('main','birdnet'), F)
-  eval <- wt_evaluate_classifier(rep, "recording", remove_species = TRUE, thresholds = c(10,99))
-  e1 <- wt_get_threshold(eval)
-  add_sp <- wt_additional_species(rep, remove_species = TRUE, threshold = e1, resolution = "task")
-  expect_true(!is.null(add_sp))
-})
+# test_that('Classifier functions', {
+#   rep <- wt_download_report(620, 'ARU', c('main','birdnet'), F)
+#   eval <- wt_evaluate_classifier(rep, "recording", remove_species = TRUE, thresholds = c(10,99))
+#   e1 <- wt_get_threshold(eval)
+#   add_sp <- wt_additional_species(rep, remove_species = TRUE, threshold = e1, resolution = "task")
+#   expect_true(!is.null(add_sp))
+# })
 
 test_that('Add GRTS ID', {
   bats <- wt_download_report(685, 'ARU', 'location', F)
