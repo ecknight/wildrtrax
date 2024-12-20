@@ -54,10 +54,10 @@ projects <- wt_get_download_summary("ARU") |>
   pull()
 
 # Download the main report
-data <- map_dfr(.x = projects, .f = ~wt_download_report(.x, "ARU", weather_cols = F, reports = "main")
+raw_data <- map_dfr(.x = projects, .f = ~wt_download_report(.x, "ARU", weather_cols = F, reports = "main")
 
 # Format to occupancy for OVEN
-dat.occu <- wt_format_occupancy(my_report, species="OVEN", siteCovs=NULL)
+dat.occu <- wt_format_occupancy(raw_data, species="OVEN", siteCovs=NULL)
 
 # Run the model
 mod <- unmarked::occu(~ 1 ~ 1, dat.occu)
@@ -71,7 +71,7 @@ library(wildrtrax)
 library(tidyverse)
 
 # Scan files and filter results
-files <- wt_audio_scanner(path = ".", file_type = "wav", extra_cols = T) |>
+my_files <- wt_audio_scanner(path = ".", file_type = "wav", extra_cols = T) |>
               mutate(hour = as.numeric(format(recording_date_time, "%H"))) |>
               filter(julian == 176, hour %in% c(4:8))
               
@@ -114,23 +114,44 @@ summarised <- wt_ind_detect(raw_data, 30, "minutes") |>
 
 ### Ultrasonic work flow
 
-Format tags from [Kaleidoscope]() for a WildTrax project. Download data from a project into an [NABAT]() acceptable format.
+Format tags from [Kaleidoscope](https://www.wildlifeacoustics.com/products/kaleidoscope-pro?token=Sz_0cuFdrlAp3tVX2sJzcZanTHahEguB) for a WildTrax project. Download data from a project into an [NABAT]() acceptable format.
 
 ```R         
 library(wildrtrax)
 library(tidyverse)
 
+wt_kaleidoscope_tags(input, output, tz, freq_bump = T) # Add a frequency buffer to the tag, e.g. 20000 kHz
 
+## Upload the tags to a WildTrax project, then authenticate to WildTrax
+wt_auth()
+
+# Get a project id
+projects <- wt_get_download_summary("ARU") |>
+  filter(project == "BATS & LATS") |>
+  select(project_id) |>
+  pull()
+
+# Download the data
+raw_data <- map_dfr(.x = projects, .f = ~wt_download_report(.x, "ARU", weather_cols = F, reports = "main")
+
+# Experimental
+raw_data |>
+    wt_format_data(format = 'NABAT')
 ```
 
 ### Point count work flow
 
-Download combined and formatted acoustic and point count datasets together
+Download combined and formatted acoustic and point count data sets together.
 
 ```R         
 library(wildrtrax)
 library(tidyverse)
 
+# An ARU project
+an_aru_project <- wt_download_report(project_id = 620, sensor_id = 'ARU', reports = "main", weather_cols = F)
+
+# An ARU project as point count format
+aru_as_pc <- wt_download_report(project_id = 620, sensor_id = 'PC', reports = "main", weather_cols = F)
 
 ```
 

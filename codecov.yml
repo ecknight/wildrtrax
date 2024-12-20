@@ -21,11 +21,13 @@ jobs:
         run: |
           R -e 'install.packages("remotes")'
           R -e 'remotes::install_deps(dependencies = TRUE)'
+          R -e 'install.packages(c("rmarkdown", "covr"))'
 
-      - name: Run tests and coverage
+      - name: Run tests and generate coverage
         run: |
-          R -e 'install.packages("covr")'
-          R -e 'covr::codecov()'
+          R CMD build .
+          R CMD check --as-cran *.tar.gz
+          R -e 'covr::package_coverage(type = "all", path = ".", quiet = FALSE) %>% covr::to_cobertura(file = "coverage.xml")'
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2

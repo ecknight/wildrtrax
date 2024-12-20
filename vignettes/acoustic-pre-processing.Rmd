@@ -148,8 +148,6 @@ wt_kaleidoscope_tags(
   tz, 
   freq_bump = T) # Add a frequency buffer to the tag, e.g. 20000 kHz
 
-songscope_tags
-
 ```
 
 If you've already uploaded recordings to WildTrax, scan your media using `wt_audio_scanner()` and a relative folder path.

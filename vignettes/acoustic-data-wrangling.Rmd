@@ -1,5 +1,5 @@
 ---
-title: "Acoustic data wrangling"
+title: 'Acoustic pre-processing'
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Acoustic data wrangling}
