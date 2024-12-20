@@ -87,6 +87,7 @@
 </div>
 <!-- badges: start -->
 
+<!-- badges: end -->
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
@@ -109,35 +110,64 @@
 </h2>
 <p>All functions begin with a <code>wt_*</code> prefix. Column names and metadata align with the WildTrax infrastructure. The goal is to follow the work flow of pre-processing, linking with WildTrax, download and analysis.</p>
 <div class="section level3">
-<h3 id="acoustic-work-flow">Acoustic work flow<a class="anchor" aria-label="anchor" href="#acoustic-work-flow"></a>
+<h3 id="discover-data">Discover Data<a class="anchor" aria-label="anchor" href="#discover-data"></a>
+</h3>
+<p>Explore data through <a href="https://discover.wildtrax.ca/" class="external-link">Data Discover</a>. No login required to access public data! Use <code><a href="reference/wt_auth.html">wt_auth()</a></code> to login to see data you have privileges and membership to.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://abbiodiversity.github.io/wildrtrax/">wildrtrax</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-spatial.github.io/sf/" class="external-link">sf</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Search for public data without a boundary</span></span>
+<span><span class="fu"><a href="reference/wt_dd_summary.html">wt_dd_summary</a></span><span class="op">(</span>sensor <span class="op">=</span> <span class="st">'ARU'</span>, species <span class="op">=</span> <span class="st">'White-throated Sparrow'</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Apply an area of interest. Define a polygon or use a bbox from sf::st_bbox</span></span>
+<span><span class="va">my_aoi</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">113.96068</span>, <span class="fl">56.23817</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">117.06285</span>, <span class="fl">54.87577</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">112.88035</span>, <span class="fl">54.90431</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">113.96068</span>, <span class="fl">56.23817</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/wt_dd_summary.html">wt_dd_summary</a></span><span class="op">(</span>sensor <span class="op">=</span> <span class="st">'ARU'</span>, species <span class="op">=</span> <span class="st">'White-throated Sparrow'</span>, boundary <span class="op">=</span> <span class="va">my_aoi</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Alberta bounding box</span></span>
+<span><span class="va">abbox</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html" class="external-link">read_sf</a></span><span class="op">(</span><span class="st">"...shp"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># Shapefile of Alberta</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">Province</span> <span class="op">==</span> <span class="st">"Alberta"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html" class="external-link">st_transform</a></span><span class="op">(</span>crs <span class="op">=</span> <span class="fl">4326</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_bbox.html" class="external-link">st_bbox</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/wt_dd_summary.html">wt_dd_summary</a></span><span class="op">(</span>sensor <span class="op">=</span> <span class="st">"ARU"</span>, species <span class="op">=</span> <span class="st">"White-throated Sparrow"</span>, boundary <span class="op">=</span> <span class="va">abbox</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="acoustic-work-flows">Acoustic work flows<a class="anchor" aria-label="anchor" href="#acoustic-work-flows"></a>
 </h3>
 <p>Download data and run and a single-season single-species occupancy analysis. Consult <a href="https://abbiodiversity.github.io/wildrtrax/articles/apis.html">APIs</a> and <a href="https://abbiodiversity.github.io/wildrtrax/articles/acoustic-data-wrangling.html">Acoustic data wrangling</a> for more information.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">library</span>(wildrtrax)</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co"># OAuth logins only. Google OAuth2 will be supported soon.</span></span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="fu">Sys.setenv</span>(<span class="at">WT_USERNAME =</span> <span class="st">"*****"</span>, <span class="at">WT_PASSWORD =</span> <span class="st">"*****"</span>)</span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co"># Authenticate to WildTrax</span></span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="fu">wt_auth</span>()</span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a></span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co"># Get a project id</span></span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>projects <span class="ot">&lt;-</span> <span class="fu">wt_get_download_summary</span>(<span class="st">"ARU"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>  <span class="fu">filter</span>(project <span class="sc">==</span> <span class="st">"ABMI Ecosystem Health 2023"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>  <span class="fu">select</span>(project_id) <span class="sc">|&gt;</span></span>
-<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>  <span class="fu">pull</span>()</span>
-<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a></span>
-<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co"># Download the main report</span></span>
-<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>raw_data <span class="ot">&lt;-</span> <span class="fu">map_dfr</span>(<span class="at">.x =</span> projects, <span class="at">.f =</span> <span class="sc">~</span><span class="fu">wt_download_report</span>(.x, <span class="st">"ARU"</span>, <span class="at">weather_cols =</span> F, <span class="at">reports =</span> <span class="st">"main"</span>)</span>
-<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a></span>
-<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co"># Format to occupancy for OVEN</span></span>
-<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>dat.occu <span class="ot">&lt;-</span> <span class="fu">wt_format_occupancy</span>(raw_data, <span class="at">species=</span><span class="st">"OVEN"</span>, <span class="at">siteCovs=</span><span class="cn">NULL</span>)</span>
-<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a></span>
-<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co"># Run the model</span></span>
-<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a>mod <span class="ot">&lt;-</span> unmarked<span class="sc">::</span><span class="fu">occu</span>(<span class="sc">~</span> <span class="dv">1</span> <span class="sc">~</span> <span class="dv">1</span>, dat.occu)</span>
-<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a>mod</span></code></pre></div>
-<p>Conduct some pre-processing on various types of acoustic data. See more in <a href="https://abbiodiversity.github.io/wildrtrax/articles/acoustic-pre-processing.html">Acoustic pre-processing</a>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://abbiodiversity.github.io/wildrtrax/">wildrtrax</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># OAuth logins only. Google OAuth2 will be supported soon.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span>WT_USERNAME <span class="op">=</span> <span class="st">"*****"</span>, WT_PASSWORD <span class="op">=</span> <span class="st">"*****"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Authenticate to WildTrax</span></span>
+<span><span class="fu"><a href="reference/wt_auth.html">wt_auth</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Get a project id</span></span>
+<span><span class="va">projects</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_get_download_summary.html">wt_get_download_summary</a></span><span class="op">(</span><span class="st">"ARU"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">project</span> <span class="op">==</span> <span class="st">"ABMI Ecosystem Health 2023"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">project_id</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Download the main report</span></span>
+<span><span class="va">raw_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map_dfr.html" class="external-link">map_dfr</a></span><span class="op">(</span>.x <span class="op">=</span> <span class="va">projects</span>, .f <span class="op">=</span> <span class="op">~</span><span class="fu"><a href="reference/wt_download_report.html">wt_download_report</a></span><span class="op">(</span><span class="va">.x</span>, <span class="st">"ARU"</span>, weather_cols <span class="op">=</span> <span class="cn">F</span>, reports <span class="op">=</span> <span class="st">"main"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Format to occupancy for OVEN</span></span>
+<span><span class="va">dat.occu</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_format_occupancy.html">wt_format_occupancy</a></span><span class="op">(</span><span class="va">raw_data</span>, species<span class="op">=</span><span class="st">"OVEN"</span>, siteCovs<span class="op">=</span><span class="cn">NULL</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Run the model</span></span>
+<span><span class="fu">unmarked</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/unmarked/man/occu.html" class="external-link">occu</a></span><span class="op">(</span><span class="op">~</span> <span class="fl">1</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">dat.occu</span><span class="op">)</span></span></code></pre></div>
+<p>Conduct some pre-processing on various types of acoustic data. See more in <a href="https://abbiodiversity.github.io/wildrtrax/articles/acoustic-pre-processing.html">Acoustic pre-processing</a>.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://abbiodiversity.github.io/wildrtrax/">wildrtrax</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
 <span></span>
@@ -149,66 +179,84 @@
 <span><span class="co"># Run acoustic indices and LDFCs</span></span>
 <span><span class="fu"><a href="reference/wt_run_ap.html">wt_run_ap</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">my_files</span>, output_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">root</span>, <span class="st">'ap_outputs'</span><span class="op">)</span>, path_to_ap <span class="op">=</span> <span class="st">'/where/you/store/AP'</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="reference/wt_glean_ap.html">wt_glean_ap</a></span><span class="op">(</span><span class="va">my_files</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>hour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">recording_date_time</span>, <span class="st">"%H"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/between.html" class="external-link">between</a></span><span class="op">(</span><span class="va">julian</span>,<span class="fl">110</span>,<span class="fl">220</span><span class="op">)</span>, <span class="va">hour</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">3</span>,<span class="fl">22</span><span class="op">:</span><span class="fl">23</span><span class="op">)</span><span class="op">)</span>, input_dir <span class="op">=</span> <span class="st">".../ap_outputs"</span>, purpose <span class="op">=</span> <span class="st">"biotic"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="reference/wt_glean_ap.html">wt_glean_ap</a></span><span class="op">(</span><span class="va">my_files</span>, input_dir <span class="op">=</span> <span class="st">".../ap_outputs"</span>, purpose <span class="op">=</span> <span class="st">"biotic"</span><span class="op">)</span></span></code></pre></div>
+<p>Evaluate the performance of BirdNET on a project, and search for false negatives missed by human taggers. See <a href="https://abbiodiversity.github.io/wildrtrax/articles/classifiers-tutorial.html">Classifiers Tutorial</a> for more information.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://abbiodiversity.github.io/wildrtrax/">wildrtrax</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># OAuth logins only. Google OAuth2 will be supported soon.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span>WT_USERNAME <span class="op">=</span> <span class="st">"*****"</span>, WT_PASSWORD <span class="op">=</span> <span class="st">"*****"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Authenticate to WildTrax</span></span>
+<span><span class="fu"><a href="reference/wt_auth.html">wt_auth</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_download_report.html">wt_download_report</a></span><span class="op">(</span>project_id <span class="op">=</span> <span class="fl">1144</span>, sensor_id <span class="op">=</span> <span class="st">"ARU"</span>, reports <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"main"</span>, <span class="st">"birdnet"</span><span class="op">)</span>,  weather_cols <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span>                           </span>
+<span><span class="va">eval</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_evaluate_classifier.html">wt_evaluate_classifier</a></span><span class="op">(</span><span class="va">data</span>, resolution <span class="op">=</span> <span class="st">"task"</span>, remove_species <span class="op">=</span> <span class="cn">TRUE</span>, thresholds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">99</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">threshold_use</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_get_threshold.html">wt_get_threshold</a></span><span class="op">(</span><span class="va">eval</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Find additional species</span></span>
+<span><span class="fu"><a href="reference/wt_additional_species.html">wt_additional_species</a></span><span class="op">(</span><span class="va">data</span>, remove_species <span class="op">=</span> <span class="cn">TRUE</span>, threshold <span class="op">=</span> <span class="va">threshold_use</span>, resolution<span class="op">=</span><span class="st">"task"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="camera-work-flow">Camera work flow<a class="anchor" aria-label="anchor" href="#camera-work-flow"></a>
+<h3 id="camera-work-flows">Camera work flows<a class="anchor" aria-label="anchor" href="#camera-work-flows"></a>
 </h3>
 <p>The ultimate pipeline for your camera data work flows. See <a href="https://abbiodiversity.github.io/wildrtrax/articles/camera-data-wrangling.html">Camera data wrangling</a> for more information.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">library</span>(wildrtrax)</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a></span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co"># OAuth logins only. Google OAuth2 will be supported soon.</span></span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="fu">Sys.setenv</span>(<span class="at">WT_USERNAME =</span> <span class="st">"*****"</span>, <span class="at">WT_PASSWORD =</span> <span class="st">"*****"</span>)</span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a></span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co"># Authenticate to WildTrax</span></span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="fu">wt_auth</span>()</span>
-<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a></span>
-<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co"># Get a project id</span></span>
-<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>projects <span class="ot">&lt;-</span> <span class="fu">wt_get_download_summary</span>(<span class="st">"CAM"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>  <span class="fu">filter</span>(project <span class="sc">==</span> <span class="st">"ABMI Ecosystem Health 2014"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>  <span class="fu">select</span>(project_id) <span class="sc">|&gt;</span></span>
-<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>  <span class="fu">pull</span>()</span>
-<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a></span>
-<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co"># Download the data</span></span>
-<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>raw_data <span class="ot">&lt;-</span> <span class="fu">map_dfr</span>(<span class="at">.x =</span> projects, <span class="at">.f =</span> <span class="sc">~</span><span class="fu">wt_download_report</span>(.x, <span class="st">"CAM"</span>, <span class="at">weather_cols =</span> F, <span class="at">reports =</span> <span class="st">"main"</span>)</span>
-<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a></span>
-<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="co"># Summarise individual detections and calculate detections per day in long format</span></span>
-<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a>summarised <span class="ot">&lt;-</span> <span class="fu">wt_ind_detect</span>(raw_data, <span class="dv">30</span>, <span class="st">"minutes"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a>              <span class="fu">wt_summarise_cam</span>(raw_data, <span class="st">"day"</span>, <span class="st">"detections"</span>, <span class="st">"long"</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://abbiodiversity.github.io/wildrtrax/">wildrtrax</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># OAuth logins only. Google OAuth2 will be supported soon.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span>WT_USERNAME <span class="op">=</span> <span class="st">"*****"</span>, WT_PASSWORD <span class="op">=</span> <span class="st">"*****"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Authenticate to WildTrax</span></span>
+<span><span class="fu"><a href="reference/wt_auth.html">wt_auth</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Get a project id</span></span>
+<span><span class="va">projects</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_get_download_summary.html">wt_get_download_summary</a></span><span class="op">(</span><span class="st">"CAM"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">project</span> <span class="op">==</span> <span class="st">"ABMI Ecosystem Health 2014"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">project_id</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Download data</span></span>
+<span><span class="va">raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map_dfr.html" class="external-link">map_dfr</a></span><span class="op">(</span>.x <span class="op">=</span> <span class="va">projects</span>, .f <span class="op">=</span> <span class="op">~</span><span class="fu"><a href="reference/wt_download_report.html">wt_download_report</a></span><span class="op">(</span><span class="va">.x</span>, <span class="st">"CAM"</span>, weather_cols <span class="op">=</span> <span class="cn">F</span>, reports <span class="op">=</span> <span class="st">"main"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Get individual detections</span></span>
+<span><span class="va">individual_detections</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_ind_detect.html">wt_ind_detect</a></span><span class="op">(</span><span class="va">raw</span>, <span class="fl">30</span>, <span class="st">"minutes"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="ultrasonic-work-flow">Ultrasonic work flow<a class="anchor" aria-label="anchor" href="#ultrasonic-work-flow"></a>
 </h3>
 <p>Format tags from <a href="https://www.wildlifeacoustics.com/products/kaleidoscope-pro?token=Sz_0cuFdrlAp3tVX2sJzcZanTHahEguB" class="external-link">Kaleidoscope</a> for a WildTrax project. Download data from a project into an <a href="">NABAT</a> acceptable format.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">library</span>(wildrtrax)</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a></span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="fu">wt_kaleidoscope_tags</span>(input, output, tz, <span class="at">freq_bump =</span> T) <span class="co"># Add a frequency buffer to the tag, e.g. 20000 kHz</span></span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a></span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="do">## Upload the tags to a WildTrax project, then authenticate to WildTrax</span></span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="fu">wt_auth</span>()</span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a></span>
-<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co"># Get a project id</span></span>
-<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>projects <span class="ot">&lt;-</span> <span class="fu">wt_get_download_summary</span>(<span class="st">"ARU"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>  <span class="fu">filter</span>(project <span class="sc">==</span> <span class="st">"BATS &amp; LATS"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>  <span class="fu">select</span>(project_id) <span class="sc">|&gt;</span></span>
-<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>  <span class="fu">pull</span>()</span>
-<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a></span>
-<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co"># Download the data</span></span>
-<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a>raw_data <span class="ot">&lt;-</span> <span class="fu">map_dfr</span>(<span class="at">.x =</span> projects, <span class="at">.f =</span> <span class="sc">~</span><span class="fu">wt_download_report</span>(.x, <span class="st">"ARU"</span>, <span class="at">weather_cols =</span> F, <span class="at">reports =</span> <span class="st">"main"</span>)</span>
-<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a></span>
-<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co"># Experimental</span></span>
-<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a>raw_data <span class="sc">|&gt;</span></span>
-<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a>    <span class="fu">wt_format_data</span>(<span class="at">format =</span> <span class="st">'NABAT'</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://abbiodiversity.github.io/wildrtrax/">wildrtrax</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/wt_kaleidoscope_tags.html">wt_kaleidoscope_tags</a></span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">tz</span>, freq_bump <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="co"># Add a frequency buffer to the tag, e.g. 20000 kHz</span></span>
+<span></span>
+<span><span class="co">## Upload the tags to a WildTrax project, then authenticate to WildTrax</span></span>
+<span><span class="fu"><a href="reference/wt_auth.html">wt_auth</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Get a project id</span></span>
+<span><span class="va">projects</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_get_download_summary.html">wt_get_download_summary</a></span><span class="op">(</span><span class="st">"ARU"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">project</span> <span class="op">==</span> <span class="st">"BATS &amp; LATS"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">project_id</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Download the data</span></span>
+<span><span class="va">raw_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map_dfr.html" class="external-link">map_dfr</a></span><span class="op">(</span>.x <span class="op">=</span> <span class="va">projects</span>, .f <span class="op">=</span> <span class="op">~</span><span class="fu"><a href="reference/wt_download_report.html">wt_download_report</a></span><span class="op">(</span><span class="va">.x</span>, <span class="st">"ARU"</span>, weather_cols <span class="op">=</span> <span class="cn">F</span>, reports <span class="op">=</span> <span class="st">"main"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Experimental</span></span>
+<span><span class="va">raw_data</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="reference/wt_format_data.html">wt_format_data</a></span><span class="op">(</span>format <span class="op">=</span> <span class="st">'NABAT'</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="point-count-work-flow">Point count work flow<a class="anchor" aria-label="anchor" href="#point-count-work-flow"></a>
 </h3>
 <p>Download combined and formatted acoustic and point count data sets together.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://abbiodiversity.github.io/wildrtrax/">wildrtrax</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
 <span></span>

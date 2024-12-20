@@ -20,7 +20,8 @@
 #' @param detection_id_col Defaults to `detection`. The column indicating the detection id
 #' @param start_col_det Defaults to `start_time`. The column indicating the start time of the independent detections
 #'
-#' @import dplyr tidyr
+#' @import dplyr
+#' @importFrom tidyr pivot_longer pivot_wider unnest crossing replace_na drop_na
 #' @importFrom rlang is_missing
 #' @export
 #'

@@ -112,7 +112,6 @@ library(wildrtrax)
 Sys.setenv(WT_USERNAME = 'guest', WT_PASSWORD = 'Apple123')
 wt_auth()
 
-#This line will take a minute to run while it downloads the data
 data <- wt_download_report(project_id = 1144,
                            sensor_id = "ARU",
                            reports = c("main", "birdnet"), 

@@ -9,7 +9,8 @@
 
 * Generate R user agent functionally
 * Tweaks to LDFCs, including addition of borders for each recording
-* Added README work flows
+* Deal with dependency changes for camera functions (#61, #63)
+* Added README work flows; vignette enhancements
 
 # wildrtrax 1.3.1
 

@@ -28,7 +28,7 @@ jobs:
           install.packages("remotes")
           remotes::install_deps(dependencies = TRUE)
 
-      # Step 4: Run tests and generate coverage
+      # Step 4: Run tests and generate coverage report
       - name: Run tests and generate coverage
         run: |
           install.packages("covr")

@@ -1,10 +1,9 @@
 # wildrtrax <img src="man/figures/logo.png" width="50%" align="right"/>
 
 <!-- badges: start -->
-[![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
-[![CRAN status](https://www.r-pkg.org/badges/version/wildrtrax)](https://CRAN.R-project.org/package=wildrtrax)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13916882.svg)](https://doi.org/10.5281/zenodo.13916882)
-[![Codecov test coverage](https://codecov.io/gh/ABbiodiversity/wildrtrax/graph/badge.svg)](https://app.codecov.io/gh/ABbiodiversity/wildrtrax)
+
+[![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable) [![CRAN status](https://www.r-pkg.org/badges/version/wildrtrax)](https://CRAN.R-project.org/package=wildrtrax) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13916882.svg)](https://doi.org/10.5281/zenodo.13916882) [![Codecov test coverage](https://codecov.io/gh/ABbiodiversity/wildrtrax/graph/badge.svg)](https://app.codecov.io/gh/ABbiodiversity/wildrtrax)
+
 <!-- badges: end -->
 
 ## Overview
@@ -32,11 +31,41 @@ The development version of the package will be periodically merged and will be r
 
 All functions begin with a `wt_*` prefix. Column names and metadata align with the WildTrax infrastructure. The goal is to follow the work flow of pre-processing, linking with WildTrax, download and analysis.
 
-### Acoustic work flow
+### Discover Data
+
+Explore data through [Data Discover](https://discover.wildtrax.ca/). No login required to access public data! Use `wt_auth()` to login to see data you have privileges and membership to.
+
+``` r
+library(wildrtrax)
+library(sf)
+
+# Search for public data without a boundary
+wt_dd_summary(sensor = 'ARU', species = 'White-throated Sparrow')
+
+# Apply an area of interest. Define a polygon or use a bbox from sf::st_bbox
+my_aoi <- list(
+  c(-113.96068, 56.23817),
+  c(-117.06285, 54.87577),
+  c(-112.88035, 54.90431),
+  c(-113.96068, 56.23817)
+)
+
+wt_dd_summary(sensor = 'ARU', species = 'White-throated Sparrow', boundary = my_aoi)
+
+# Alberta bounding box
+abbox <- read_sf("...shp") |> # Shapefile of Alberta
+  filter(Province == "Alberta") |>
+  st_transform(crs = 4326) |> 
+  st_bbox()
+
+wt_dd_summary(sensor = "ARU", species = "White-throated Sparrow", boundary = abbox)
+```
+
+### Acoustic work flows
 
 Download data and run and a single-season single-species occupancy analysis. Consult [APIs](https://abbiodiversity.github.io/wildrtrax/articles/apis.html) and [Acoustic data wrangling](https://abbiodiversity.github.io/wildrtrax/articles/acoustic-data-wrangling.html) for more information.
 
-```R         
+``` r
 library(wildrtrax)
 library(tidyverse)
 
@@ -53,19 +82,18 @@ projects <- wt_get_download_summary("ARU") |>
   pull()
 
 # Download the main report
-raw_data <- map_dfr(.x = projects, .f = ~wt_download_report(.x, "ARU", weather_cols = F, reports = "main")
+raw_data <- map_dfr(.x = projects, .f = ~wt_download_report(.x, "ARU", weather_cols = F, reports = "main"))
 
 # Format to occupancy for OVEN
 dat.occu <- wt_format_occupancy(raw_data, species="OVEN", siteCovs=NULL)
 
 # Run the model
-mod <- unmarked::occu(~ 1 ~ 1, dat.occu)
-mod
+unmarked::occu(~ 1 ~ 1, dat.occu)
 ```
 
-Conduct some pre-processing on various types of acoustic data. See more in [Acoustic pre-processing](https://abbiodiversity.github.io/wildrtrax/articles/acoustic-pre-processing.html). 
+Conduct some pre-processing on various types of acoustic data. See more in [Acoustic pre-processing](https://abbiodiversity.github.io/wildrtrax/articles/acoustic-pre-processing.html).
 
-```R         
+``` r
 library(wildrtrax)
 library(tidyverse)
 
@@ -78,14 +106,35 @@ my_files <- wt_audio_scanner(path = ".", file_type = "wav", extra_cols = T) |>
 wt_run_ap(x = my_files, output_dir = paste0(root, 'ap_outputs'), path_to_ap = '/where/you/store/AP')
 
 wt_glean_ap(my_files, input_dir = ".../ap_outputs", purpose = "biotic")
-
 ```
 
-### Camera work flow
+Evaluate the performance of BirdNET on a project, and search for false negatives missed by human taggers. See [Classifiers Tutorial](https://abbiodiversity.github.io/wildrtrax/articles/classifiers-tutorial.html) for more information.
+
+``` r
+library(wildrtrax)
+library(tidyverse)
+
+# OAuth logins only. Google OAuth2 will be supported soon.
+Sys.setenv(WT_USERNAME = "*****", WT_PASSWORD = "*****")
+
+# Authenticate to WildTrax
+wt_auth()
+
+data <- wt_download_report(project_id = 1144, sensor_id = "ARU", reports = c("main", "birdnet"),  weather_cols = FALSE)
+                           
+eval <- wt_evaluate_classifier(data, resolution = "task", remove_species = TRUE, thresholds = c(10, 99))
+
+threshold_use <- wt_get_threshold(eval)
+
+# Find additional species
+wt_additional_species(data, remove_species = TRUE, threshold = threshold_use, resolution="task")
+```
+
+### Camera work flows
 
 The ultimate pipeline for your camera data work flows. See [Camera data wrangling](https://abbiodiversity.github.io/wildrtrax/articles/camera-data-wrangling.html) for more information.
 
-```R         
+``` r
 library(wildrtrax)
 library(tidyverse)
 
@@ -112,7 +161,7 @@ individual_detections <- wt_ind_detect(raw, 30, "minutes")
 
 Format tags from [Kaleidoscope](https://www.wildlifeacoustics.com/products/kaleidoscope-pro?token=Sz_0cuFdrlAp3tVX2sJzcZanTHahEguB) for a WildTrax project. Download data from a project into an [NABAT]() acceptable format.
 
-```R         
+``` r
 library(wildrtrax)
 library(tidyverse)
 
@@ -128,7 +177,7 @@ projects <- wt_get_download_summary("ARU") |>
   pull()
 
 # Download the data
-raw_data <- map_dfr(.x = projects, .f = ~wt_download_report(.x, "ARU", weather_cols = F, reports = "main")
+raw_data <- map_dfr(.x = projects, .f = ~wt_download_report(.x, "ARU", weather_cols = F, reports = "main"))
 
 # Experimental
 raw_data |>
@@ -139,7 +188,7 @@ raw_data |>
 
 Download combined and formatted acoustic and point count data sets together.
 
-```R         
+``` r
 library(wildrtrax)
 library(tidyverse)
 
@@ -148,7 +197,6 @@ an_aru_project <- wt_download_report(project_id = 620, sensor_id = 'ARU', report
 
 # An ARU project as point count format
 aru_as_pc <- wt_download_report(project_id = 620, sensor_id = 'PC', reports = "main", weather_cols = F)
-
 ```
 
 ## Issues
