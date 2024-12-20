@@ -227,12 +227,15 @@
 <span><span class="va">individual_detections</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_ind_detect.html">wt_ind_detect</a></span><span class="op">(</span><span class="va">raw</span>, <span class="fl">30</span>, <span class="st">"minutes"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="ultrasonic-work-flow">Ultrasonic work flow<a class="anchor" aria-label="anchor" href="#ultrasonic-work-flow"></a>
+<h3 id="ultrasonic-work-flows">Ultrasonic work flows<a class="anchor" aria-label="anchor" href="#ultrasonic-work-flows"></a>
 </h3>
 <p>Format tags from <a href="https://www.wildlifeacoustics.com/products/kaleidoscope-pro?token=Sz_0cuFdrlAp3tVX2sJzcZanTHahEguB" class="external-link">Kaleidoscope</a> for a WildTrax project. Download data from a project into an <a href="">NABAT</a> acceptable format.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://abbiodiversity.github.io/wildrtrax/">wildrtrax</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">input</span> <span class="op">&lt;-</span> <span class="st">".../bat.txt"</span> <span class="co"># Kaleidoscope output</span></span>
+<span><span class="va">output</span> <span class="op">&lt;-</span> <span class="st">".../bats"</span> <span class="co"># A folder to store the tags</span></span>
 <span></span>
 <span><span class="fu"><a href="reference/wt_kaleidoscope_tags.html">wt_kaleidoscope_tags</a></span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">tz</span>, freq_bump <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="co"># Add a frequency buffer to the tag, e.g. 20000 kHz</span></span>
 <span></span>
@@ -253,7 +256,7 @@
 <span>    <span class="fu"><a href="reference/wt_format_data.html">wt_format_data</a></span><span class="op">(</span>format <span class="op">=</span> <span class="st">'NABAT'</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="point-count-work-flow">Point count work flow<a class="anchor" aria-label="anchor" href="#point-count-work-flow"></a>
+<h3 id="point-count-work-flows">Point count work flows<a class="anchor" aria-label="anchor" href="#point-count-work-flows"></a>
 </h3>
 <p>Download combined and formatted acoustic and point count data sets together.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
