@@ -77,7 +77,7 @@ wt_auth()
 
 # Get a project id
 projects <- wt_get_download_summary("ARU") |>
-  filter(project == "ABMI Ecosystem Health 2023") |>
+  filter(project == "Ecosystem Health 2023") |>
   select(project_id) |>
   pull()
 
