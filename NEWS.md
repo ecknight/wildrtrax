@@ -9,7 +9,6 @@
 
 * Generate R user agent functionally
 * Tweaks to LDFCs, including addition of borders for each recording
-* 
 * Added README work flows
 
 # wildrtrax 1.3.1

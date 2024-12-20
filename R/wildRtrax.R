@@ -48,6 +48,7 @@ utils::globalVariables(
     "fullNm",
     "geometry",
     "image_date_time",
+    "image_id",
     "index_value",
     "index_variable",
     "individual_count",

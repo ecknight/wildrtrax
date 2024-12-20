@@ -71,7 +71,7 @@ library(wildrtrax)
 library(tidyverse)
 
 # Scan files and filter results
-files <- wt_audio_scanner(path = ".", file_type = "wav", extra_cols = T) |>
+my_files <- wt_audio_scanner(path = ".", file_type = "wav", extra_cols = T) |>
               mutate(hour = as.numeric(format(recording_date_time, "%H"))) |>
               filter(julian == 176, hour %in% c(4:8))
               

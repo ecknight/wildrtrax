@@ -14,8 +14,8 @@
 <link rel="apple-touch-icon" type="image/png" sizes="60x60" href="apple-touch-icon-60x60.png">
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Environmental Sensor Data Management and Analytics to and from WildTrax">
 <meta name="description" content="This is an R package that enables environmental sensor users to create comprehensive work flows for managing and analyzing data.">
 <meta property="og:description" content="This is an R package that enables environmental sensor users to create comprehensive work flows for managing and analyzing data.">
@@ -46,7 +46,7 @@
     <li><a class="dropdown-item" href="articles/apis.html">APIs</a></li>
     <li><a class="dropdown-item" href="articles/audio-data-concepts.html">Audio data concepts</a></li>
     <li><a class="dropdown-item" href="articles/acoustic-pre-processing.html">Acoustic pre-processing</a></li>
-    <li><a class="dropdown-item" href="articles/acoustic-data-wrangling.html">Acoustic data wrangling</a></li>
+    <li><a class="dropdown-item" href="articles/acoustic-data-wrangling.html">Acoustic pre-processing</a></li>
     <li><a class="dropdown-item" href="articles/classifiers-tutorial.html">Acoustic classifiers</a></li>
     <li><a class="dropdown-item" href="articles/camera-data-wrangling.html">Camera data wrangling</a></li>
     <li><a class="dropdown-item" href="articles/tutorials.html">Tutorials</a></li>
@@ -142,7 +142,7 @@
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Scan files and filter results</span></span>
-<span><span class="va">files</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_audio_scanner.html">wt_audio_scanner</a></span><span class="op">(</span>path <span class="op">=</span> <span class="st">"."</span>, file_type <span class="op">=</span> <span class="st">"wav"</span>, extra_cols <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span><span class="va">my_files</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_audio_scanner.html">wt_audio_scanner</a></span><span class="op">(</span>path <span class="op">=</span> <span class="st">"."</span>, file_type <span class="op">=</span> <span class="st">"wav"</span>, extra_cols <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>              <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>hour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">recording_date_time</span>, <span class="st">"%H"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>              <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">julian</span> <span class="op">==</span> <span class="fl">176</span>, <span class="va">hour</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span><span class="op">:</span><span class="fl">8</span><span class="op">)</span><span class="op">)</span></span>
 <span>              </span>
@@ -188,24 +188,26 @@
 <span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a></span>
 <span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="fu">wt_kaleidoscope_tags</span>(input, output, tz, <span class="at">freq_bump =</span> T) <span class="co"># Add a frequency buffer to the tag, e.g. 20000 kHz</span></span>
 <span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a></span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="do">## Upload the tags to a WildTrax project, then</span></span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a></span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co"># Get a project id</span></span>
-<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>projects <span class="ot">&lt;-</span> <span class="fu">wt_get_download_summary</span>(<span class="st">"ARU"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>  <span class="fu">filter</span>(project <span class="sc">==</span> <span class="st">"BATS &amp; LATS"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>  <span class="fu">select</span>(project_id) <span class="sc">|&gt;</span></span>
-<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>  <span class="fu">pull</span>()</span>
-<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a></span>
-<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co"># Download the data</span></span>
-<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a>raw_data <span class="ot">&lt;-</span> <span class="fu">map_dfr</span>(<span class="at">.x =</span> projects, <span class="at">.f =</span> <span class="sc">~</span><span class="fu">wt_download_report</span>(.x, <span class="st">"ARU"</span>, <span class="at">weather_cols =</span> F, <span class="at">reports =</span> <span class="st">"main"</span>)</span>
-<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a></span>
-<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a>raw_data <span class="sc">|&gt;</span></span>
-<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a>    <span class="fu">wt_format_data</span>(<span class="at">format =</span> <span class="st">'NABAT'</span>)</span></code></pre></div>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="do">## Upload the tags to a WildTrax project, then authenticate to WildTrax</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="fu">wt_auth</span>()</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co"># Get a project id</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>projects <span class="ot">&lt;-</span> <span class="fu">wt_get_download_summary</span>(<span class="st">"ARU"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>  <span class="fu">filter</span>(project <span class="sc">==</span> <span class="st">"BATS &amp; LATS"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>  <span class="fu">select</span>(project_id) <span class="sc">|&gt;</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>  <span class="fu">pull</span>()</span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co"># Download the data</span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a>raw_data <span class="ot">&lt;-</span> <span class="fu">map_dfr</span>(<span class="at">.x =</span> projects, <span class="at">.f =</span> <span class="sc">~</span><span class="fu">wt_download_report</span>(.x, <span class="st">"ARU"</span>, <span class="at">weather_cols =</span> F, <span class="at">reports =</span> <span class="st">"main"</span>)</span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co"># Experimental</span></span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a>raw_data <span class="sc">|&gt;</span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a>    <span class="fu">wt_format_data</span>(<span class="at">format =</span> <span class="st">'NABAT'</span>)</span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="point-count-work-flow">Point count work flow<a class="anchor" aria-label="anchor" href="#point-count-work-flow"></a>
 </h3>
-<p>Download combined and formatted acoustic and point count datasets together</p>
+<p>Download combined and formatted acoustic and point count data sets together.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://abbiodiversity.github.io/wildrtrax/">wildrtrax</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
@@ -282,7 +284,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer>
