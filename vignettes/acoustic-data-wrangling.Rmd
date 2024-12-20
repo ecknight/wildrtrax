@@ -80,7 +80,7 @@ head(my_offset_data)
 You can also perform a single-season, single-species occupancy work flow using `wt_format_occupancy()` once the data is downloaded.
 
 ```{r, eval = T, echo = T, warning = F, message = F}
-dat.occu <- wt_format_occupancy(my_report, species="OVEN", siteCovs=NULL)
+dat.occu <- wt_format_occupancy(my_report, species="WCSP", siteCovs=NULL)
 mod <- unmarked::occu(~ 1 ~ 1, dat.occu)
 mod
 
