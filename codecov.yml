@@ -41,7 +41,8 @@ jobs:
           covr::codecov()
 
       # Step 5: Upload coverage to Codecov
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}  # Set this token in your repository secrets
+     - name: Upload coverage reports to Codecov
+       uses: codecov/codecov-action@v5
+       with:
+         token: ${{ secrets.CODECOV_TOKEN }}
+         slug: ABbiodiversity/wildrtrax
