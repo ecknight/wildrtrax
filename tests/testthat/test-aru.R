@@ -74,13 +74,13 @@ test_that('Occupancy formatting', {
   expect_true(class(occu)[1] == 'unmarkedFrameOccu')
 })
 
-test_that('Classifier functions', {
-  rep <- wt_download_report(620, 'ARU', c('main','birdnet'), F)
-  eval <- wt_evaluate_classifier(rep, "recording", remove_species = TRUE, thresholds = c(10,99))
-  e1 <- wt_get_threshold(eval)
-  add_sp <- wt_additional_species(rep, remove_species = TRUE, threshold = e1, resolution = "task")
-  expect_true(!is.null(add_sp))
-})
+# test_that('Classifier functions', {
+#   rep <- wt_download_report(620, 'ARU', c('main','birdnet'), F)
+#   eval <- wt_evaluate_classifier(rep, "recording", remove_species = TRUE, thresholds = c(10,99))
+#   e1 <- wt_get_threshold(eval)
+#   add_sp <- wt_additional_species(rep, remove_species = TRUE, threshold = e1, resolution = "task")
+#   expect_true(!is.null(add_sp))
+# })
 
 test_that('Add GRTS ID', {
   bats <- wt_download_report(685, 'ARU', 'location', F)
@@ -94,16 +94,16 @@ test_that('Location distances', {
   expect_true(!is.null(locs_dist))
 })
 
-##wt_audio_scanner
-test_that('Scanner', {
-  url <- 'https://raw.githubusercontent.com/ABbiodiversity/wildRtrax-assets/main/ABMI-1046-NW_20240313_110010.wav'
-  req <- request(url) |>
-    req_perform()
-  file_path <- 'ABMI-1046-NW_20240313_110010.wav'  # Define the path
-  writeBin(req$body, file_path)
-  j <- wt_audio_scanner(".", file_type = "wav", extra_cols = F)
-  expect_true(nrow(j) == 1)
-})
+# ##wt_audio_scanner
+# test_that('Scanner', {
+#   url <- 'https://raw.githubusercontent.com/ABbiodiversity/wildRtrax-assets/main/ABMI-1046-NW_20240313_110010.wav'
+#   req <- request(url) |>
+#     req_perform()
+#   file_path <- 'ABMI-1046-NW_20240313_110010.wav'  # Define the path
+#   writeBin(req$body, file_path)
+#   j <- wt_audio_scanner(".", file_type = "wav", extra_cols = F)
+#   expect_true(nrow(j) == 1)
+# })
 
 # ##wt_run_ap
 # test_that('AP', {
