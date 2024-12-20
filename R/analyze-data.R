@@ -103,9 +103,9 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
     if (exclude_out_of_range == TRUE) {
       x <- raw_data |>
         group_by({{project_col}}, {{station_col}}) |>
-        arrange(image_date_time) %>%
-        mutate(period = rep(seq_along(rle(image_fov)$lengths), rle(image_fov)$lengths)) %>%
-        filter(image_fov == "WITHIN") %>%
+        arrange(image_date_time) |>
+        mutate(period = rep(seq_along(rle(image_fov)$lengths), rle(image_fov)$lengths)) |>
+        filter(image_fov == "WITHIN") |>
         group_by({{project_col}}, {{station_col}}, period) |>
         summarise(
           start_date = as.Date(min(image_date_time)),

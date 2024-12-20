@@ -84,7 +84,6 @@ eh14_summarised <- wt_summarise_cam(
 ## The ultimate pipeline
 
 ```{r eval=FALSE, echo=TRUE, include=TRUE}
-
 library(wildrtrax)
 
 Sys.setenv(WT_USERNAME = "*****",
@@ -98,7 +97,7 @@ projects <- wt_get_download_summary("CAM") %>%
   pull()
 
 raw_data <- map_dfr(.x = projects, 
-                    .f = ~wt_download_report(.x, "CAM", weather_cols = F, reports = "main")
+                    .f = ~wt_download_report(.x, "CAM", weather_cols = F, reports = "main"))
 
 summarised <- wt_ind_detect(raw_data, 30, "minutes") %>%
   wt_summarise_cam(raw_data, "day", "detections", "long")

@@ -77,9 +77,7 @@ my_files <- wt_audio_scanner(path = ".", file_type = "wav", extra_cols = T) |>
 # Run acoustic indices and LDFCs
 wt_run_ap(x = my_files, output_dir = paste0(root, 'ap_outputs'), path_to_ap = '/where/you/store/AP')
 
-wt_glean_ap(my_files |>
-    mutate(hour = as.numeric(format(recording_date_time, "%H"))) |>
-    filter(between(julian,110,220), hour %in% c(0:3,22:23)), input_dir = ".../ap_outputs", purpose = "biotic")
+wt_glean_ap(my_files, input_dir = ".../ap_outputs", purpose = "biotic")
 
 ```
 
@@ -98,17 +96,16 @@ Sys.setenv(WT_USERNAME = "*****", WT_PASSWORD = "*****")
 wt_auth()
 
 # Get a project id
-projects <- wt_get_download_summary("CAM") |>
-  filter(project == "ABMI Ecosystem Health 2014") |>
-  select(project_id) |>
+projects <- wt_get_download_summary("CAM") %>%
+  filter(project == "ABMI Ecosystem Health 2014") %>%
+  select(project_id) %>%
   pull()
 
-# Download the data
-raw_data <- map_dfr(.x = projects, .f = ~wt_download_report(.x, "CAM", weather_cols = F, reports = "main")
+# Download data
+raw <- map_dfr(.x = projects, .f = ~wt_download_report(.x, "CAM", weather_cols = F, reports = "main"))
 
-# Summarise individual detections and calculate detections per day in long format
-summarised <- wt_ind_detect(raw_data, 30, "minutes") |>
-              wt_summarise_cam(raw_data, "day", "detections", "long")
+# Get individual detections
+individual_detections <- wt_ind_detect(raw, 30, "minutes")
 ```
 
 ### Ultrasonic work flow
