@@ -46,6 +46,7 @@
     <li><a class="dropdown-item" href="articles/apis.html">APIs</a></li>
     <li><a class="dropdown-item" href="articles/audio-data-concepts.html">Audio data concepts</a></li>
     <li><a class="dropdown-item" href="articles/acoustic-pre-processing.html">Acoustic pre-processing</a></li>
+    <li><a class="dropdown-item" href="articles/acoustic-data-wrangling.html">Acoustic data wrangling</a></li>
     <li><a class="dropdown-item" href="articles/classifiers-tutorial.html">Acoustic classifiers</a></li>
     <li><a class="dropdown-item" href="articles/camera-data-wrangling.html">Camera data wrangling</a></li>
     <li><a class="dropdown-item" href="articles/tutorials.html">Tutorials</a></li>
@@ -131,7 +132,7 @@
 <span></span>
 <span><span class="co"># Alberta bounding box</span></span>
 <span><span class="va">abbox</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html" class="external-link">read_sf</a></span><span class="op">(</span><span class="st">"...shp"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># Shapefile of Alberta</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">Province</span> <span class="op">==</span> <span class="st">"Alberta"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">Province</span> <span class="op">==</span> <span class="st">"Alberta"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html" class="external-link">st_transform</a></span><span class="op">(</span>crs <span class="op">=</span> <span class="fl">4326</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_bbox.html" class="external-link">st_bbox</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
