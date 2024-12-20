@@ -1,8 +1,0 @@
----
-title: "Acoustic data wrangling"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Acoustic data wrangling}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----

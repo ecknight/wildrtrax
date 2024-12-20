@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">wildrtrax</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -30,6 +30,7 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-news" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">News</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-news"><li><h6 class="dropdown-header" data-toc-skip>Releases</h6></li>
+    <li><h6 class="dropdown-header" data-toc-skip>wildrtrax 1.3.2</h6></li>
     <li><h6 class="dropdown-header" data-toc-skip>wildrtrax 1.3.1</h6></li>
     <li><h6 class="dropdown-header" data-toc-skip>wildrtrax 1.3.0</h6></li>
     <li><h6 class="dropdown-header" data-toc-skip>wildrtrax 1.2.0</h6></li>
@@ -54,6 +55,21 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.3.2" id="wildrtrax-132">wildrtrax 1.3.2<a class="anchor" aria-label="anchor" href="#wildrtrax-132"></a></h2>
+<div class="section level3">
+<h3 id="major-changes-1-3-2">Major changes<a class="anchor" aria-label="anchor" href="#major-changes-1-3-2"></a></h3>
+<ul><li>Support for GET requests; new function <code><a href="../reference/wt_get_locations.html">wt_get_locations()</a></code> to get Organization locations</li>
+<li>Removed <code>stringr</code> as dependency</li>
+</ul></div>
+<div class="section level3">
+<h3 id="minor-changes-1-3-2">Minor changes<a class="anchor" aria-label="anchor" href="#minor-changes-1-3-2"></a></h3>
+<ul><li>Generate R user agent functionally</li>
+<li>Tweaks to LDFCs, including addition of borders for each recording</li>
+<li>Deal with dependency changes for camera functions (#61, #63)</li>
+<li>Added README work flows; vignette enhancements</li>
+</ul></div>
+</div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.3.1" id="wildrtrax-131">wildrtrax 1.3.1<a class="anchor" aria-label="anchor" href="#wildrtrax-131"></a></h2>
 <div class="section level3">
 <h3 id="major-changes-1-3-1">Major changes<a class="anchor" aria-label="anchor" href="#major-changes-1-3-1"></a></h3>
@@ -77,7 +93,7 @@
 <ul><li>
 <code><a href="../reference/wt_dd_summary.html">wt_dd_summary()</a></code> for querying data from Data Discover. See <a href="https://abbiodiversity.github.io/wildrtrax/articles/apis.html#data-discover">APIs</a> for more information</li>
 <li>
-<code><a href="../reference/wt_evaluate_classifier.html">wt_evaluate_classifier()</a></code>, <code><a href="../reference/wt_get_threshold.html">wt_get_threshold()</a></code>, and <code><a href="../reference/wt_additional_species.html">wt_additional_species()</a></code> for wrangling acoustic automated classification results. See <a href="https://abbiodiversity.github.io/wildrtrax/articles/acoustic-classifiers.html">Acoustic classifiers</a> for more information.</li>
+<code><a href="../reference/wt_evaluate_classifier.html">wt_evaluate_classifier()</a></code>, <code><a href="../reference/wt_get_threshold.html">wt_get_threshold()</a></code>, and <code><a href="../reference/wt_additional_species.html">wt_additional_species()</a></code> for wrangling acoustic automated classification results. See <a href="https://abbiodiversity.github.io/wildrtrax/articles/classifiers-tutorial.html">Acoustic classifiers</a> for more information.</li>
 <li>
 <code><a href="../reference/wt_add_grts.html">wt_add_grts()</a></code> to intersect locations with GRTS IDs from <a href="https://www.nabatmonitoring.org/" class="external-link">NABat</a>
 </li>
@@ -161,7 +177,7 @@
 </ul></div>
 <div class="section level3">
 <h3 id="minor-improvements-and-bug-fixes-1-0-0">Minor improvements and bug fixes<a class="anchor" aria-label="anchor" href="#minor-improvements-and-bug-fixes-1-0-0"></a></h3>
-<ul><li>Moved <code><a href="../reference/wt_run_ap.html">wt_run_ap()</a></code> to <code>furrr::future_map</code> from <code>dopar</code> loop to lessen package dependencies</li>
+<ul><li>Moved <code><a href="../reference/wt_run_ap.html">wt_run_ap()</a></code> to <code><a href="https://furrr.futureverse.org/reference/future_map.html" class="external-link">furrr::future_map</a></code> from <code>dopar</code> loop to lessen package dependencies</li>
 <li>Quiet console output from <code><a href="../reference/wt_run_ap.html">wt_run_ap()</a></code> for Windows users</li>
 <li>Added a <code>NEWS.md</code> file to track changes to the package</li>
 <li>Renamed <code>wt_ind_det</code> to <code><a href="../reference/wt_ind_detect.html">wt_ind_detect()</a></code>

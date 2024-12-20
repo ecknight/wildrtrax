@@ -18,8 +18,10 @@
 <url><loc>https://abbiodiversity.github.io/wildrtrax/index.html</loc></url>
 <url><loc>https://abbiodiversity.github.io/wildrtrax/news/index.html</loc></url>
 <url><loc>https://abbiodiversity.github.io/wildrtrax/reference/dot-delete_wav_files.html</loc></url>
+<url><loc>https://abbiodiversity.github.io/wildrtrax/reference/dot-gen_ua.html</loc></url>
 <url><loc>https://abbiodiversity.github.io/wildrtrax/reference/dot-make_off.html</loc></url>
 <url><loc>https://abbiodiversity.github.io/wildrtrax/reference/dot-make_x.html</loc></url>
+<url><loc>https://abbiodiversity.github.io/wildrtrax/reference/dot-wt_api_gr.html</loc></url>
 <url><loc>https://abbiodiversity.github.io/wildrtrax/reference/dot-wt_api_pr.html</loc></url>
 <url><loc>https://abbiodiversity.github.io/wildrtrax/reference/dot-wt_auth.html</loc></url>
 <url><loc>https://abbiodiversity.github.io/wildrtrax/reference/dot-wt_auth_expired.html</loc></url>
@@ -40,6 +42,7 @@
 <url><loc>https://abbiodiversity.github.io/wildrtrax/reference/wt_format_data.html</loc></url>
 <url><loc>https://abbiodiversity.github.io/wildrtrax/reference/wt_format_occupancy.html</loc></url>
 <url><loc>https://abbiodiversity.github.io/wildrtrax/reference/wt_get_download_summary.html</loc></url>
+<url><loc>https://abbiodiversity.github.io/wildrtrax/reference/wt_get_locations.html</loc></url>
 <url><loc>https://abbiodiversity.github.io/wildrtrax/reference/wt_get_species.html</loc></url>
 <url><loc>https://abbiodiversity.github.io/wildrtrax/reference/wt_get_threshold.html</loc></url>
 <url><loc>https://abbiodiversity.github.io/wildrtrax/reference/wt_glean_ap.html</loc></url>
