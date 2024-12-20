@@ -20,8 +20,7 @@
 #' @param detection_id_col Defaults to `detection`. The column indicating the detection id
 #' @param start_col_det Defaults to `start_time`. The column indicating the start time of the independent detections
 #'
-#' @import dplyr
-#' @importFrom tidyr pivot_longer pivot_wider unnest crossing replace_na drop_na
+#' @import dplyr tidyr
 #' @importFrom rlang is_missing
 #' @export
 #'
@@ -79,16 +78,15 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
 
   # Because station_col is also a function and arguments are lazily evaluated,
   # we need to deparse/substitute to a string
-  station_col <- deparse(substitute(station_col))
+  #station_col <- deparse(substitute(station_col))
 
   # Parse the raw or effort data to get time ranges for each camera deployment.
   if (!rlang::is_missing(raw_data)) {
-    ## if exclude_outofrange == FALSE then include all operations days between deployment and check
     if (exclude_out_of_range == FALSE) {
       x <- raw_data |>
-        group_by({{project_col}}, {{station_col}}) |>
-        summarise(start_date = as.Date(min(image_date_time)),
-                  end_date = as.Date(max(image_date_time))) |>
+        group_by({{ project_col }}, {{ station_col }}) |>
+        summarise(start_date = as.Date(min({{date_time_col}})),
+                  end_date = as.Date(max({{date_time_col}}))) |>
         ungroup()
 
       # Expand the time ranges into individual days of operation (smallest unit)
@@ -97,19 +95,19 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
         mutate(day = list(seq.Date(start_date, end_date, by = "day"))) |>
         tidyr::unnest(day) |>
         mutate(year = as.integer(format(day, "%Y"))) |>
-        select({{project_col}}, {{station_col}}, year, day)
+        select({{project_col}}, {{station_col}}, year, day) |>
+        ungroup()
     }
-    ## if exclude_out_of_range == TRUE then include remove periods of non operation
     if (exclude_out_of_range == TRUE) {
       x <- raw_data |>
         group_by({{project_col}}, {{station_col}}) |>
-        arrange(image_date_time) |>
+        arrange({{date_time_col}}) |>
         mutate(period = rep(seq_along(rle(image_fov)$lengths), rle(image_fov)$lengths)) |>
         filter(image_fov == "WITHIN") |>
         group_by({{project_col}}, {{station_col}}, period) |>
         summarise(
-          start_date = as.Date(min(image_date_time)),
-          end_date = as.Date(max(image_date_time))
+          start_date = as.Date(min({{date_time_col}})),
+          end_date = as.Date(max({{date_time_col}}))
         ) |>
         ungroup()
 
@@ -126,8 +124,7 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
       message("Parsing of image date time produced NAs, these will be dropped")
       x <- drop_na(x)
     }
-    }
-
+  }
 
   # Based on the desired timeframe, assess when each detection occurred
   if (time_interval == "day" | time_interval == "full") {
@@ -175,7 +172,7 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
       mutate(across(all_vars, ~ tidyr::replace_na(.x, 0)))
   } else if (time_interval == "month") {
     x <- x |>
-      mutate(month = month(day, label = TRUE, abbr = FALSE)) |>
+      mutate(month = format(day, "%B")) |>
       group_by({{project_col}}, {{station_col}}, year, month) |>
       tally(name = "n_days_effort") |>
       ungroup()
@@ -195,22 +192,20 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
       ungroup()
   }
 
-  # Make wide if desired, using
+  # Make wide if desired
   if (output_format == "wide") {
     z <- z |>
       tidyr::pivot_wider(id_cols = c({{project_col}}, {{station_col}}, year,
-                              {{time_interval}}, n_days_effort),
-        names_from = {{species_col}}, values_from = {{variable}}, names_sep = ".")
+                                     {{time_interval}}, n_days_effort),
+                         names_from = {{species_col}}, values_from = {{variable}}, names_sep = ".")
   } else if (output_format == "long") {
     z <- z |> select({{project_col}}, {{station_col}}, year,
-                      {{time_interval}}, n_days_effort,
-                      {{species_col}}, {{variable}}) |>
+                     {{time_interval}}, n_days_effort,
+                     {{species_col}}, {{variable}}) |>
       tidyr::pivot_longer(cols = {{variable}}, names_to = "variable", values_to = "value")
   }
 
-  # If neither 'wide' or 'long' is specified, just return z without pivoting.
   return(z)
-
 }
 
 #' Evaluate independent camera detections
