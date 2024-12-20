@@ -157,13 +157,16 @@ raw <- map_dfr(.x = projects, .f = ~wt_download_report(.x, "CAM", weather_cols =
 individual_detections <- wt_ind_detect(raw, 30, "minutes")
 ```
 
-### Ultrasonic work flow
+### Ultrasonic work flows
 
 Format tags from [Kaleidoscope](https://www.wildlifeacoustics.com/products/kaleidoscope-pro?token=Sz_0cuFdrlAp3tVX2sJzcZanTHahEguB) for a WildTrax project. Download data from a project into an [NABAT]() acceptable format.
 
 ``` r
 library(wildrtrax)
 library(tidyverse)
+
+input <- ".../bat.txt" # Kaleidoscope output
+output <- ".../bats" # A folder to store the tags
 
 wt_kaleidoscope_tags(input, output, tz, freq_bump = T) # Add a frequency buffer to the tag, e.g. 20000 kHz
 
@@ -184,7 +187,7 @@ raw_data |>
     wt_format_data(format = 'NABAT')
 ```
 
-### Point count work flow
+### Point count work flows
 
 Download combined and formatted acoustic and point count data sets together.
 
