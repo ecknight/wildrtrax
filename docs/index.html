@@ -46,7 +46,6 @@
     <li><a class="dropdown-item" href="articles/apis.html">APIs</a></li>
     <li><a class="dropdown-item" href="articles/audio-data-concepts.html">Audio data concepts</a></li>
     <li><a class="dropdown-item" href="articles/acoustic-pre-processing.html">Acoustic pre-processing</a></li>
-    <li><a class="dropdown-item" href="articles/acoustic-data-wrangling.html">Acoustic data wrangling</a></li>
     <li><a class="dropdown-item" href="articles/classifiers-tutorial.html">Acoustic classifiers</a></li>
     <li><a class="dropdown-item" href="articles/camera-data-wrangling.html">Camera data wrangling</a></li>
     <li><a class="dropdown-item" href="articles/tutorials.html">Tutorials</a></li>
@@ -132,7 +131,7 @@
 <span></span>
 <span><span class="co"># Alberta bounding box</span></span>
 <span><span class="va">abbox</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html" class="external-link">read_sf</a></span><span class="op">(</span><span class="st">"...shp"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># Shapefile of Alberta</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">Province</span> <span class="op">==</span> <span class="st">"Alberta"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">Province</span> <span class="op">==</span> <span class="st">"Alberta"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html" class="external-link">st_transform</a></span><span class="op">(</span>crs <span class="op">=</span> <span class="fl">4326</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_bbox.html" class="external-link">st_bbox</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
@@ -141,7 +140,7 @@
 <div class="section level3">
 <h3 id="acoustic-work-flows">Acoustic work flows<a class="anchor" aria-label="anchor" href="#acoustic-work-flows"></a>
 </h3>
-<p>Download data and run and a single-season single-species occupancy analysis. Consult <a href="https://abbiodiversity.github.io/wildrtrax/articles/apis.html">APIs</a> and <a href="https://abbiodiversity.github.io/wildrtrax/articles/acoustic-data-wrangling.html">Acoustic data wrangling</a> for more information.</p>
+<p>Download data and run and a single-season single-species occupancy analysis. Consult <a href="https://abbiodiversity.github.io/wildrtrax/articles/apis.html">APIs</a> and Acoustic data wrangling for more information.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://abbiodiversity.github.io/wildrtrax/">wildrtrax</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>

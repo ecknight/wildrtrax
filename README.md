@@ -63,7 +63,7 @@ wt_dd_summary(sensor = "ARU", species = "White-throated Sparrow", boundary = abb
 
 ### Acoustic work flows
 
-Download data and run and a single-season single-species occupancy analysis. Consult [APIs](https://abbiodiversity.github.io/wildrtrax/articles/apis.html) and [Acoustic data wrangling](https://abbiodiversity.github.io/wildrtrax/articles/acoustic-data-wrangling.html) for more information.
+Download data and run and a single-season single-species occupancy analysis. Consult [APIs](https://abbiodiversity.github.io/wildrtrax/articles/apis.html) and Acoustic data wrangling for more information.
 
 ``` r
 library(wildrtrax)
