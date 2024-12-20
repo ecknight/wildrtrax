@@ -6,6 +6,12 @@ on:
       - main
   pull_request:
 
+- name: Cache R packages
+  uses: actions/cache@v3
+  with:
+    path: ${{ runner.tool_cache }}/R
+    key: ${{ runner.os }}-r-${{ hashFiles('**/DESCRIPTION') }}
+
 jobs:
   test:
     name: Run tests and upload coverage
