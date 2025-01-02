@@ -231,10 +231,7 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
   files.full <- list.files(td, pattern= "*.csv", full.names = TRUE)
   files.less <- basename(files.full)
   x <- purrr::map(.x = files.full, .f = ~ suppressWarnings(readr::read_csv(., show_col_types = F,
-                                                                           skip_empty_rows = T, col_types = list(abundance = readr::col_character(),
-                                                                                                                 individual_count = readr::col_character(),
-                                                                                                                 image_fire = readr::col_logical(),
-                                                                                                                 image_snow_depth_m = readr::col_number())))) %>%
+                                                                           skip_empty_rows = T, col_types = .wt_col_types()))) %>%
     purrr::set_names(files.less)
 
   # Remove weather columns, if desired

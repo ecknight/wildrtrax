@@ -465,8 +465,8 @@
 
 .wt_col_types <- function(data) {
 
-  # Corresponding column types
-    column_types <- list(
+  # Define the column types as functions
+  column_types <- list(
     abundance = as.character,
     age_class = as.character,
     behaviours = as.character,
@@ -564,52 +564,29 @@
     width = as.numeric,
     x_loc = as.numeric,
     y_loc = as.numeric,
-    height = as.numeric,
-    left_dc_offset = as.numeric,
-    left_full_freq_tag_dc_offset = as.numeric,
-    left_full_freq_tag_max_level = as.numeric,
-    left_full_freq_tag_min_level = as.numeric,
-    left_full_freq_tag_pk_count = as.integer,
-    left_full_freq_tag_peak_level_dbfs = as.numeric,
-    left_full_freq_tag_rms_peak_dbfs = as.numeric,
-    left_full_freq_tag_rms_trough_dbfs = as.numeric,
-    left_freq_filter_tag_dc_offset = as.numeric,
-    left_freq_filter_tag_max_level = as.numeric,
-    left_freq_filter_tag_min_level = as.numeric,
-    left_freq_filter_tag_pk_count = as.integer,
-    left_freq_filter_tag_peak_level_dbfs = as.numeric,
-    left_freq_filter_tag_rms_peak_dbfs = as.numeric,
-    left_freq_filter_tag_rms_trough_dbfs = as.numeric,
-    right_dc_offset = as.numeric,
-    right_full_freq_tag_dc_offset = as.numeric,
-    right_full_freq_tag_max_level = as.numeric,
-    right_full_freq_tag_min_level = as.numeric,
-    right_full_freq_tag_pk_count = as.integer,
-    right_full_freq_tag_peak_level_dbfs = as.numeric,
-    right_full_freq_tag_rms_peak_dbfs = as.numeric,
-    right_full_freq_tag_rms_trough_dbfs = as.numeric,
-    right_freq_filter_tag_dc_offset = as.numeric,
-    right_freq_filter_tag_max_level = as.numeric,
-    right_freq_filter_tag_min_level = as.numeric,
-    right_freq_filter_tag_pk_count = as.integer,
-    right_freq_filter_tag_peak_level_dbfs = as.numeric,
-    right_freq_filter_tag_rms_peak_dbfs = as.numeric,
-    right_freq_filter_tag_rms_trough_dbfs = as.numeric
+    height = as.numeric
   )
 
-  # Iterate over each column in the list
+  # Apply the transformations to columns if they exist
   for (col_name in names(column_types)) {
     if (col_name %in% colnames(data)) {
       tryCatch({
         data[[col_name]] <- column_types[[col_name]](data[[col_name]])
       }, warning = function(w) {
-        warning(sprintf("Failed to convert '%s' to %s: %s", col_name, deparse(substitute(column_types[[col_name]])), w$message))
+        warning(sprintf(
+          "Warning converting '%s': %s",
+          col_name,
+          w$message
+        ))
       }, error = function(e) {
-        warning(sprintf("Error occurred while converting '%s' to %s: %s", col_name, deparse(substitute(column_types[[col_name]])), e$message))
+        warning(sprintf(
+          "Error converting '%s': %s",
+          col_name,
+          e$message
+        ))
       })
     }
   }
-
   return(data)
 }
 
