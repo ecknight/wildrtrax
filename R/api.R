@@ -230,8 +230,7 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
 
   files.full <- list.files(td, pattern= "*.csv", full.names = TRUE)
   files.less <- basename(files.full)
-  x <- purrr::map(.x = files.full, .f = ~ suppressWarnings(readr::read_csv(., show_col_types = F,
-                                                                           skip_empty_rows = T, col_types = .wt_col_types()))) %>%
+  x <- purrr::map(.x = files.full, .f = ~ suppressWarnings(readr::read_csv(., show_col_types = FALSE, skip_empty_rows = TRUE, col_types = NULL))) %>%
     purrr::set_names(files.less)
 
   # Remove weather columns, if desired
@@ -257,7 +256,6 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
   file.remove(tmp)
 
   return(x)
-
 }
 
 #' Get the WildTrax species table
@@ -277,7 +275,7 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
 
 wt_get_species <- function(){
 
-  spp <- .wt_api_pr(
+  spp <- .wt_api_gr(
     path = "/bis/get-all-species"
   )
 
