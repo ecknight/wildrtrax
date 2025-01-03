@@ -265,15 +265,29 @@
     }
     invisible(NULL)
   }
-  #Coordinates
+
+  # Coordinates
   if (check_xy) {
+    # Check longitude
+    if (any(lon < -164 | lon > -52)) {
+      stop("Error: QPAD only works between longitude values of -164 and -52.")
+    }
+    # Check latitude
+    if (any(lat < 39 | lat > 69)) {
+      stop("Error: QPAD only works between latitude valus of 39 and 69.")
+    }
+    # Validate with checkfun
     checkfun(lon, "lon", c(-164, -52))
     checkfun(lat, "lat", c(39, 69))
   }
-  if (any(is.infinite(lon)))
+
+  # Check for infinite values
+  if (any(is.infinite(lon))) {
     stop("Parameter lon must be finite")
-  if (any(is.infinite(lat)))
+  }
+  if (any(is.infinite(lat))) {
     stop("Parameter lat must be finite")
+  }
 
   #handling missing values
   ok_xy <- !is.na(lon) & !is.na(lat)
@@ -567,26 +581,21 @@
     height = as.numeric
   )
 
-  # Apply the transformations to columns if they exist
+  # Dynamically apply transformations for columns that exist in the data
   for (col_name in names(column_types)) {
     if (col_name %in% colnames(data)) {
       tryCatch({
         data[[col_name]] <- column_types[[col_name]](data[[col_name]])
       }, warning = function(w) {
-        warning(sprintf(
-          "Warning converting '%s': %s",
-          col_name,
-          w$message
-        ))
+        warning(sprintf("Warning converting '%s': %s", col_name, w$message))
       }, error = function(e) {
-        warning(sprintf(
-          "Error converting '%s': %s",
-          col_name,
-          e$message
-        ))
+        warning(sprintf("Error converting '%s': %s", col_name, e$message))
       })
     }
   }
+
+  # Handle unexpected column types or provide default transformations if needed
+  data <- dplyr::mutate(across(where(is.character), ~ as.character(.))) # Default for any other character columns
   return(data)
 }
 
