@@ -680,17 +680,32 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
 #' \dontrun{
 #' # Authenticate first:
 #' wt_auth()
-#' wt_get_locations(organization = 5)
+#' wt_get_locations(organization = 'ABMI')
 #' }
 #'
-#' @return A data frame listing the projects that the user can download data for, including: project name, id, year, number of tasks, a geographic bounding box and project status.
+#' @return A data frame listing an Organizations' locations
 #'
 
 wt_get_locations <- function(organization) {
 
   if (is.numeric(organization)) {
-      org_numeric <- organization
-      # do other stuff for org codes
+    org_numeric <- organization
+  } else if (is.character(organization)) {
+    orgs <- .wt_api_gr(
+      path = "/bis/get-all-readable-organizations"
+    )
+
+    og <- resp_body_json(orgs)
+
+    og_table <- tibble(
+      org_id = map_dbl(og, ~ ifelse(!is.null(.x$id), .x$id, NA)),
+      org_code = map_chr(og, ~ ifelse(!is.null(.x$name), .x$name, NA))
+    )
+
+    org_numeric <- og_table |>
+      filter(org_code == organization) |>
+      select(org_id) |>
+      pull()
   }
 
   r <- .wt_api_gr(
@@ -698,12 +713,21 @@ wt_get_locations <- function(organization) {
     organizationId = org_numeric,
     sort = "locationName",
     order = "asc",
-    limit = 1000
+    limit = 1e9
   )
 
   if(is.null(r)) {stop('')}
 
   x <- data.frame(do.call(rbind, httr2::resp_body_json(r)$results))
+
+  # Make location visibility human readable
+  visibility_names <- c("1" = "Hidden - Location", "2" = "Visible", "3" = "Hidden - Location+Data")
+  x$visibilityId <- as.character(visibility_names[as.character(x$visibilityId)])
+
+  new_names <- c("location_id", "location", "longitude", "latitude", "location_buffer",
+                 "location_visibility", "location_recording_count", "location_image_count")
+
+  colnames(x) <- new_names
 
   return(x)
 
