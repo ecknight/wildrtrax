@@ -219,7 +219,7 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
   abstract <- list.files(td, pattern = "*_abstract.csv", full.names = TRUE, recursive = TRUE)
   file.remove(abstract)
 
-  # Remove special characters
+  # Remove special characters from project names
   list.files(td, pattern = "*.csv", full.names = TRUE) %>% map(~ {
     directory <- dirname(.x)
     old_filename <- basename(.x)
@@ -230,7 +230,7 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
 
   files.full <- list.files(td, pattern= "*.csv", full.names = TRUE)
   files.less <- basename(files.full)
-  x <- purrr::map(.x = files.full, .f = ~ suppressWarnings(readr::read_csv(., show_col_types = FALSE, skip_empty_rows = TRUE, col_types = NULL))) %>%
+  x <- purrr::map(.x = files.full, .f = ~ suppressWarnings(readr::read_csv(., show_col_types = FALSE, skip_empty_rows = TRUE, col_types = .wt_col_types, progress = FALSE))) %>%
     purrr::set_names(files.less)
 
   # Remove weather columns, if desired
@@ -243,7 +243,7 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
   # Return the requested report(s)
   report <- paste(paste0("_",reports), collapse = "|")
   x <- x[grepl(report, names(x))]
-  # Return a dataframe if only 1 element in the list (i.e., only 1 report requested)
+  # Return a data frame if only 1 element in the list (i.e., only 1 report requested)
   if (length(x) == 1) {
     x <- x[[1]]
   } else {
