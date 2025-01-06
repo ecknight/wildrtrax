@@ -275,6 +275,10 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
 
 wt_get_species <- function(){
 
+  # Check if authentication has expired:
+  if (.wt_auth_expired())
+    stop("Please authenticate with wt_auth().", call. = FALSE)
+
   spp <- .wt_api_gr(
     path = "/bis/get-all-species"
   )
@@ -315,6 +319,10 @@ wt_get_species <- function(){
 #' @return An organized folder of media. Assigning wt_download_tags to an object will return the table form of the data with the functions returning the after effects in the output directory
 
 wt_download_media <- function(input, output, type = c("recording","image", "tag_clip_audio","tag_clip_spectrogram")) {
+
+  # Check if authentication has expired:
+  if (.wt_auth_expired())
+    stop("Please authenticate with wt_auth().", call. = FALSE)
 
   input_data <- input
 
@@ -688,26 +696,30 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
 
 wt_get_locations <- function(organization) {
 
+  # Check if authentication has expired:
+  if (.wt_auth_expired())
+    stop("Please authenticate with wt_auth().", call. = FALSE)
+
+  # Check if organization is numeric or character, and handle accordingly
   if (is.numeric(organization)) {
     org_numeric <- organization
   } else if (is.character(organization)) {
-    orgs <- .wt_api_gr(
-      path = "/bis/get-all-readable-organizations"
-    )
+    orgs <- .wt_api_gr(path = "/bis/get-all-readable-organizations")
+    og <- httr2::resp_body_json(orgs)
 
-    og <- resp_body_json(orgs)
-
+    # Extract organization details
     og_table <- tibble(
-      org_id = map_dbl(og, ~ ifelse(!is.null(.x$id), .x$id, NA)),
-      org_code = map_chr(og, ~ ifelse(!is.null(.x$name), .x$name, NA))
+      org_id = purrr::map_dbl(og, ~ ifelse(!is.null(.x$id), .x$id, NA)),
+      org_code = purrr::map_chr(og, ~ ifelse(!is.null(.x$name), .x$name, NA))
     )
 
-    org_numeric <- og_table |>
-      filter(org_code == organization) |>
-      select(org_id) |>
-      pull()
+    # Retrieve the numeric org_id based on org_code
+    org_numeric <- og_table %>%
+      filter(org_code == organization) %>%
+      pull(org_id)
   }
 
+  # Request location data
   r <- .wt_api_gr(
     path = "/bis/get-location-summary",
     organizationId = org_numeric,
@@ -716,19 +728,102 @@ wt_get_locations <- function(organization) {
     limit = 1e9
   )
 
-  if(is.null(r)) {stop('')}
+  # Stop if response is NULL or empty
+  if (is.null(r) || length(httr2::resp_body_json(r)$results) == 0) {
+    stop("No location data returned.")
+  }
 
+  # Convert response into a data frame
   x <- data.frame(do.call(rbind, httr2::resp_body_json(r)$results))
 
-  # Make location visibility human readable
-  visibility_names <- c("1" = "Hidden - Location", "2" = "Visible", "3" = "Hidden - Location+Data")
-  x$visibilityId <- as.character(visibility_names[as.character(x$visibilityId)])
-
+  # Rename columns for clarity
   new_names <- c("location_id", "location", "longitude", "latitude", "location_buffer",
                  "location_visibility", "location_recording_count", "location_image_count")
+  colnames(x) <- new_names
 
+  # Convert location_visibility to integer for joining
+  x$location_visibility <- as.integer(x$location_visibility)
+
+  # Fetch visibility options for the locations
+  op <- .wt_api_gr(path = "/bis/get-location-options") |>
+    httr2::resp_body_json() |>
+    purrr::pluck("visibility") |>
+    purrr::map_df(~ data.frame(id = .x$id, type = .x$type))
+
+  # Replace visibilityId with human-readable type from the op data frame
+  x <- x %>%
+    left_join(op, by = c("location_visibility" = "id")) %>%
+    select(-location_visibility) %>%
+    rename(location_visibility = type)  # Renaming the 'type' to 'location_visibility'
+
+  return(x)
+
+}
+
+#' Get visits from a WildTrax Organization
+#'
+#' @description Obtain a table listing visits emulating the Visits tab in a WildTrax Organization
+#'
+#' @param organization Either the short letter or numeric digit representing the Organization
+#'
+#' @import httr2
+#' @import dplyr
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' # Authenticate first:
+#' wt_auth()
+#' wt_get_visits(organization = 'ABMI')
+#' }
+#'
+#' @return A data frame listing an Organizations' visits
+#'
+
+# Check if authentication has expired:
+
+wt_get_visits <- function(organization) {
+
+  if (.wt_auth_expired())
+    stop("Please authenticate with wt_auth().", call. = FALSE)
+
+  # Check if organization is numeric or character, and handle accordingly
+  if (is.numeric(organization)) {
+    org_numeric <- organization
+  } else if (is.character(organization)) {
+    orgs <- .wt_api_gr(path = "/bis/get-all-readable-organizations")
+    og <- httr2::resp_body_json(orgs)
+
+    # Extract organization details
+    og_table <- tibble(
+      org_id = purrr::map_dbl(og, ~ ifelse(!is.null(.x$id), .x$id, NA)),
+      org_code = purrr::map_chr(og, ~ ifelse(!is.null(.x$name), .x$name, NA))
+    )
+
+    # Retrieve the numeric org_id based on org_code
+    org_numeric <- og_table %>%
+      filter(org_code == organization) %>%
+      pull(org_id)
+  }
+
+  # Request location data
+  r <- .wt_api_gr(
+    path = "/bis/get-location-visit-summary",
+    organizationId = org_numeric,
+    sort = "locationName",
+    order = "asc",
+    limit = 1e9
+  ) |>
+    httr2::resp_body_json()
+
+  x <- data.frame(do.call(rbind, r$results))
+
+  # Rename columns for clarity
+  new_names <- c("location_id", "location", "organization_id", "has_location_photos", "first_visit_date", "last_visit_date")
   colnames(x) <- new_names
 
   return(x)
 
 }
+
