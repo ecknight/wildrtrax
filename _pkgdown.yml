@@ -33,6 +33,7 @@ reference:
     - wt_get_locations
     - wt_get_species
     - wt_get_threshold
+    - wt_get_visits
     - wt_glean_ap
     - wt_ind_detect
     - wt_kaleidoscope_tags
@@ -49,6 +50,7 @@ reference:
     - wt_wac_info
 news:
   releases:
+  - text: wildrtrax 1.3.3
   - text: wildrtrax 1.3.2
   - text: wildrtrax 1.3.1
   - text: wildrtrax 1.3.0

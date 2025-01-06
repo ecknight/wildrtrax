@@ -266,28 +266,16 @@
     invisible(NULL)
   }
 
-  # Coordinates
+  #Coordinates
   if (check_xy) {
-    # Check longitude
-    if (any(lon < -164 | lon > -52)) {
-      stop("Error: QPAD only works between longitude values of -164 and -52.")
-    }
-    # Check latitude
-    if (any(lat < 39 | lat > 69)) {
-      stop("Error: QPAD only works between latitude valus of 39 and 69.")
-    }
-    # Validate with checkfun
     checkfun(lon, "lon", c(-164, -52))
     checkfun(lat, "lat", c(39, 69))
   }
 
-  # Check for infinite values
-  if (any(is.infinite(lon))) {
+  if (any(is.infinite(lon)))
     stop("Parameter lon must be finite")
-  }
-  if (any(is.infinite(lat))) {
+  if (any(is.infinite(lat)))
     stop("Parameter lat must be finite")
-  }
 
   #handling missing values
   ok_xy <- !is.na(lon) & !is.na(lat)

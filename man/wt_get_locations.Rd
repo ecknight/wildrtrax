@@ -10,7 +10,7 @@ wt_get_locations(organization)
 \item{organization}{Either the short letter or numeric digit representing the Organization}
 }
 \value{
-A data frame listing the projects that the user can download data for, including: project name, id, year, number of tasks, a geographic bounding box and project status.
+A data frame listing an Organizations' locations
 }
 \description{
 Obtain a table listing locations emulating the Locations tab in a WildTrax Organization
@@ -19,7 +19,7 @@ Obtain a table listing locations emulating the Locations tab in a WildTrax Organ
 \dontrun{
 # Authenticate first:
 wt_auth()
-wt_get_locations(organization = 5)
+wt_get_locations(organization = 'ABMI')
 }
 
 }
