@@ -701,23 +701,7 @@ wt_get_locations <- function(organization) {
     stop("Please authenticate with wt_auth().", call. = FALSE)
 
   # Check if organization is numeric or character, and handle accordingly
-  if (is.numeric(organization)) {
-    org_numeric <- organization
-  } else if (is.character(organization)) {
-    orgs <- .wt_api_gr(path = "/bis/get-all-readable-organizations")
-    og <- httr2::resp_body_json(orgs)
-
-    # Extract organization details
-    og_table <- tibble(
-      org_id = purrr::map_dbl(og, ~ ifelse(!is.null(.x$id), .x$id, NA)),
-      org_code = purrr::map_chr(og, ~ ifelse(!is.null(.x$name), .x$name, NA))
-    )
-
-    # Retrieve the numeric org_id based on org_code
-    org_numeric <- og_table %>%
-      filter(org_code == organization) %>%
-      pull(org_id)
-  }
+  org_numeric <- .get_org_id(organization)
 
   # Request location data
   r <- .wt_api_gr(
@@ -788,24 +772,7 @@ wt_get_visits <- function(organization) {
   if (.wt_auth_expired())
     stop("Please authenticate with wt_auth().", call. = FALSE)
 
-  # Check if organization is numeric or character, and handle accordingly
-  if (is.numeric(organization)) {
-    org_numeric <- organization
-  } else if (is.character(organization)) {
-    orgs <- .wt_api_gr(path = "/bis/get-all-readable-organizations")
-    og <- httr2::resp_body_json(orgs)
-
-    # Extract organization details
-    og_table <- tibble(
-      org_id = purrr::map_dbl(og, ~ ifelse(!is.null(.x$id), .x$id, NA)),
-      org_code = purrr::map_chr(og, ~ ifelse(!is.null(.x$name), .x$name, NA))
-    )
-
-    # Retrieve the numeric org_id based on org_code
-    org_numeric <- og_table %>%
-      filter(org_code == organization) %>%
-      pull(org_id)
-  }
+  org_numeric <- .get_org_id(organization)
 
   # Request location data
   r <- .wt_api_gr(
@@ -821,6 +788,102 @@ wt_get_visits <- function(organization) {
 
   # Rename columns for clarity
   new_names <- c("location_id", "location", "organization_id", "has_location_photos", "first_visit_date", "last_visit_date")
+  colnames(x) <- new_names
+
+  return(x)
+
+}
+
+#' Get an Organizations' list of recordings
+#'
+#' @description Obtain a table listing all recordings belonging to an Organization emulating the Recordings tab
+#'
+#' @param organization Either the short letter or numeric digit representing the Organization
+#'
+#' @import httr2
+#' @import dplyr
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' # Authenticate first:
+#' wt_auth()
+#' wt_get_recordings(organization = 'ABMI')
+#' }
+#'
+#' @return A data frame listing an Organizations' recordings
+#'
+
+wt_get_recordings <- function(organization) {
+
+  if (.wt_auth_expired())
+    stop("Please authenticate with wt_auth().", call. = FALSE)
+
+  org_numeric <- .get_org_id(organization)
+
+  # Request location data
+  r <- .wt_api_gr(
+    path = "/bis/get-recording-summary",
+    organizationId = org_numeric,
+    sort = "locationName",
+    order = "asc",
+    limit = 1e9
+  ) |>
+    httr2::resp_body_json()
+
+  x <- data.frame(do.call(rbind, r$results))
+
+  # Rename columns for clarity
+  new_names <- c("location_id", "organization_id", "location", "recording_date_time", "recording_length", "task_count")
+  colnames(x) <- new_names
+
+  return(x)
+
+}
+
+#' Get an Organizations' list of image sets
+#'
+#' @description Obtain a table listing all image sets belonging to an Organization emulating the Image Sets tab
+#'
+#' @param organization Either the short letter or numeric digit representing the Organization
+#'
+#' @import httr2
+#' @import dplyr
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' # Authenticate first:
+#' wt_auth()
+#' wt_get_image_sets(organization = 'ABMI')
+#' }
+#'
+#' @return A data frame listing an Organizations' recordings
+#'
+
+wt_get_image_sets <- function(organization) {
+
+  if (.wt_auth_expired())
+    stop("Please authenticate with wt_auth().", call. = FALSE)
+
+  org_numeric <- .get_org_id(organization)
+
+  # Request location data
+  r <- .wt_api_gr(
+    path = "/bis/get-image-deployment-summary",
+    organizationId = org_numeric,
+    sort = "locationName",
+    order = "asc",
+    limit = 1e9
+  ) |>
+    httr2::resp_body_json()
+
+  x <- data.frame(do.call(rbind, r$results))
+
+  # Rename columns for clarity
+  new_names <- c("location_id", "organization_id", "location", "image_set_start_date", "image_set_end_date", "motion_image_count", "total_image_count", "task_count")
   colnames(x) <- new_names
 
   return(x)
