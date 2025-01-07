@@ -614,3 +614,36 @@
   wav_files <- list.files(path = dir, pattern = "\\.wav$", recursive = TRUE, full.names = TRUE)
   file.remove(wav_files)
 }
+
+#' Internal function to get Organizations
+#'
+#' @description Internal function to get Organizations
+#'
+#' @keywords internal
+#' @export
+
+.get_org_id <- function(organization) {
+
+  if (is.numeric(organization)) {
+    return(organization)
+  } else if (is.character(organization)) {
+    orgs <- .wt_api_gr(path = "/bis/get-all-readable-organizations")
+    og <- httr2::resp_body_json(orgs)
+
+    # Create a lookup table
+    og_table <- tibble(
+      org_id = purrr::map_dbl(og, ~ ifelse(!is.null(.x$id), .x$id, NA)),
+      org_code = purrr::map_chr(og, ~ ifelse(!is.null(.x$name), .x$name, NA))
+    )
+
+    # Retrieve and return the numeric org_id
+    return(og_table %>%
+             filter(org_code == organization) %>%
+             pull(org_id))
+  }
+  stop("Organization must be either numeric or character")
+}
+
+
+
+
