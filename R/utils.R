@@ -512,6 +512,7 @@
   image_set_status = readr::col_character(),
   image_set_url = readr::col_character(),
   image_url = readr::col_character(),
+  individual_count = readr::col_character(),
   is_enabled_project_species = readr::col_logical(),
   is_species_allowed_in_project = readr::col_logical(),
   latitude = readr::col_double(),
