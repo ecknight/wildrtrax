@@ -223,7 +223,7 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
   list.files(td, pattern = "*.csv", full.names = TRUE) %>% map(~ {
     directory <- dirname(.x)
     old_filename <- basename(.x)
-    new_filename <- gsub("[:()?!~;/]", "", old_filename)
+    new_filename <- gsub("[:()?!~;/,]", "", old_filename)
     new_path <- file.path(directory, new_filename)
     file.rename(.x, new_path)
   })
@@ -440,14 +440,7 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
     tok_used <- ._wt_auth_env_$access_token
   }
 
-  # Have to user agent here maybe something better for later
-  u <- getOption("HTTPUserAgent")
-  u <- sprintf("R/%s; R (%s)",
-               getRversion(),
-               paste(getRversion(), R.version$platform, R.version$arch, R.version$os))
-
-  # Add wildrtrax version information:
-  u <- paste0("wildrtrax ", as.character(packageVersion("wildrtrax")), "; ", u)
+  u <- .gen_ua()
 
   # Make POST request using httr2
   ddspp <- request("https://www-api.wildtrax.ca") |>
@@ -749,6 +742,7 @@ wt_get_locations <- function(organization) {
 #' @description Obtain a table listing visits emulating the Visits tab in a WildTrax Organization
 #'
 #' @param organization Either the short letter or numeric digit representing the Organization
+#' @param location Supply a location to get all visits from that location
 #'
 #' @import httr2
 #' @import dplyr
@@ -774,7 +768,7 @@ wt_get_visits <- function(organization) {
 
   org_numeric <- .get_org_id(organization)
 
-  # Request location data
+  # Request data
   r <- .wt_api_gr(
     path = "/bis/get-location-visit-summary",
     organizationId = org_numeric,
@@ -822,7 +816,7 @@ wt_get_recordings <- function(organization) {
 
   org_numeric <- .get_org_id(organization)
 
-  # Request location data
+  # Request data
   r <- .wt_api_gr(
     path = "/bis/get-recording-summary",
     organizationId = org_numeric,
@@ -870,7 +864,7 @@ wt_get_image_sets <- function(organization) {
 
   org_numeric <- .get_org_id(organization)
 
-  # Request location data
+  # Request data
   r <- .wt_api_gr(
     path = "/bis/get-image-deployment-summary",
     organizationId = org_numeric,
@@ -887,6 +881,70 @@ wt_get_image_sets <- function(organization) {
   colnames(x) <- new_names
 
   return(x)
+
+}
+
+#' Batch upload and download locations photos
+#'
+#' @description A two-way street to upload and download locations photos
+#' `r lifecycle::badge("experimental")`
+#'
+#' @param data When going up, provide the joining data for locations and visits
+#' @param direction Either "up" or "down"; if "up" need to supply the appropriate data to join to a location and / or visit
+#' @param dir Folder of images either going "up" or "down"
+#'
+#' @import httr2
+#' @import dplyr
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' # Authenticate first:
+#' wt_auth()
+#' # When going up provide the folder of images and data for joining
+#' wt_location_photos(organization = 'ABMI', data = "/my/join/table", direction = "up", dir = "/my/dir/of/images")
+#'
+#' # When going down the directory where you want the files only
+#' wt_location_photos(organization = 'ABMI', direction = "down", dir = "/my/dir/to/download/images")
+#'
+#' }
+#'
+#' @return When "down", a folder of images
+#'
+
+wt_location_photos <- function(data, direction, dir) {
+
+  if (.wt_auth_expired())
+    stop("Please authenticate with wt_auth().", call. = FALSE)
+
+  org_numeric <- .get_org_id(organization)
+
+  visits <- data
+
+  if(direction == "up") {
+    # if down make it a GET
+    # Request location data
+    r <- .wt_api_gr(
+      path = "/bis/get-location-visit-image-by-visit",
+      organizationId = org_numeric,
+      sort = "locationName",
+      order = "asc",
+      limit = 1e9
+    )
+  } else if (direction == "down") {
+    # if going up make it a POST
+    # Request location data
+    r <- .wt_api_pr(
+      path = "/bis/create-or-update-location-visit-image",
+      locationVisitId = visits,
+      sort = "locationName",
+      order = "asc",
+      limit = 1e9
+    )
+  } else {
+    stop("Need to provide either 'up' or 'down' as a parameter")
+  }
 
 }
 
