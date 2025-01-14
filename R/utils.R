@@ -20,6 +20,15 @@
   # Initialize request to Auth0
   req <-  httr2::request("https://abmi.auth0.com/")
 
+  if (Sys.getenv("WT_USERNAME") == "" || Sys.getenv("WT_PASSWORD") == "") {
+    stop(
+      "Environment variables are not set:\n",
+      " - WT_USERNAME: ", ifelse(Sys.getenv("WT_USERNAME") == "", "MISSING", "SET"), "\n",
+      " - WT_PASSWORD: ", ifelse(Sys.getenv("WT_PASSWORD") == "", "MISSING", "SET"), "\n",
+      "Please set these variables using Sys.setenv() or add them to your .Renviron file."
+    )
+  }
+
   r <-   req |>
     httr2::req_url_path("oauth/token") |>
     httr2::req_body_form(
