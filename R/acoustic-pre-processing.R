@@ -640,68 +640,81 @@ wt_signal_level <- function(path, fmin = 500, fmax = NA, threshold, channel = "l
 #' @return No return value, called for file-writing side effects.
 
 wt_chop <- function(input = NULL, segment_length = NULL, output_folder = NULL) {
-
-  outroot <- output_folder
-
-  if (!dir.exists(outroot)) {
-    stop('The output directory does not exist.')
+  # Check if output folder exists
+  if (!dir.exists(output_folder)) {
+    stop("The output directory does not exist.")
   }
 
-  inp <- typ %>%
-    dplyr::select(file_path,
-                  recording_date_time,
-                  location,
-                  file_type,
-                  length_seconds) %>%
-    tibble::add_column("length_sec" = segment_length) %>%
-    dplyr::mutate(longer = case_when((length_seconds < length_sec) ~ FALSE, TRUE ~ TRUE),
-                  length_seconds = round(length_seconds,0))
-
-  too_long <- inp %>%
-    dplyr::filter(longer == FALSE)
-
-  if (nrow(too_long) > 1) {
-    stop('Segment is longer than duration. Choose a shorter segment length.')
+  # Validate segment length
+  if (is.null(segment_length) || !is.numeric(segment_length) || segment_length <= 0) {
+    stop("Segment length must be a positive numeric value.")
   }
 
-  inp2 <- inp %>%
-    dplyr::mutate(start_times = map2(.x = length_seconds, .y = segment_length, .f = ~seq(0, .x - .y, by = .y))) %>%
-    tidyr::unnest(start_times) %>%
-    dplyr::mutate(val = max(start_times) + segment_length,
-           ry = case_when(val < length_sec ~ "Modulo", TRUE ~ "Fixed"),
-           new_file = paste0(outroot, location, "_", format(recording_date_time + as.difftime(start_times, units = "secs"), "%Y%m%d_%H%M%S"), ".", file_type)) %>%
-    dplyr::mutate(across(c(length_sec, start_times), as.numeric))
+  # Check for input and output folder overlap
+  if (any(grepl(normalizePath(output_folder), normalizePath(input$file_path)))) {
+    stop("The output folder cannot be the same as the input file directory to prevent overwriting.")
+  }
 
-  inp2 %>%
-    purrr::pmap(
-      .l = list(
-        .$file_path,
-        .$new_file,
-        .$length_sec,
-        .$start_times
-      ),
-      .f = ~ {
-        file_path <- ..1
-        new_file <- ..2
-        length_sec <- as.numeric(..3)
-        start_times <- as.numeric(..4)
-
-        # Debugging: print the values to ensure they're correct
-        print(paste("File Path:", file_path))
-        print(paste("New File:", new_file))
-        print(paste("Start Time:", start_times))
-        print(paste("Length:", length_sec))
-
-        # Perform wave file processing
-        tuneR::writeWave(
-          tuneR::readWave(file_path, from = start_times, to = start_times + length_sec, units = "seconds"),
-          filename = new_file,
-          extensible = TRUE
-        )
-      }
+  # Prepare input data
+  inp <- input %>%
+    dplyr::select(file_path, recording_date_time, location, file_type, length_seconds) %>%
+    tibble::add_column(length_sec = segment_length) %>%
+    dplyr::mutate(
+      longer = ifelse(length_seconds >= length_sec, TRUE, FALSE),
+      length_seconds = round(length_seconds, 0)
     )
 
+  # Check for too short recordings
+  if (any(inp$length_seconds < segment_length)) {
+    stop("Some recordings are shorter than the segment length.")
+  }
+
+  # Generate start times and new file paths
+  inp2 <- inp %>%
+    dplyr::mutate(
+      start_times = purrr::map2(length_seconds, length_sec, ~ seq(0, .x - .y, by = .y))
+    ) %>%
+    tidyr::unnest(start_times) %>%
+    dplyr::filter(start_times + length_sec <= length_seconds) %>%
+    dplyr::mutate(
+      new_file = paste0(
+        output_folder, "/", location, "_",
+        format(recording_date_time + as.difftime(start_times, units = "secs"), "%Y%m%d_%H%M%S"), ".", file_type
+      )
+    ) %>%
+    dplyr::mutate(across(c(length_sec, start_times), as.numeric))
+
+  # Process audio files with validation
+  inp2 %>%
+    purrr::pmap(.l = list(file_path = .$file_path, new_file = .$new_file,
+                          length_sec = .$length_sec, start_times = .$start_times),
+                .f = ~ {
+                  file_path <- ..1
+                  new_file <- ..2
+                  length_sec <- as.numeric(..3)
+                  start_times <- as.numeric(..4)
+
+                  cat("Processing:\n  File:", file_path, "\n  Start:", start_times,
+                      "\n  Length:", length_sec, "\n  New File:", new_file, "\n")
+
+                  if (!file.exists(file_path)) {
+                    message("File not found: ", file_path)
+                    return(NULL)
+                  }
+
+                  tryCatch({
+                    tuneR::writeWave(
+                      tuneR::readWave(file_path, from = start_times, to = start_times + length_sec, units = "seconds"),
+                      filename = new_file,
+                      extensible = TRUE
+                    )
+                  }, error = function(e) {
+                    message("Error processing file: ", file_path, " - ", e$message)
+                  })
+                }
+    )
 }
+
 
 #' Linking media to WildTrax
 #'
