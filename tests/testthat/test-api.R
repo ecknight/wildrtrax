@@ -58,3 +58,21 @@ test_that("Download with authentication, bad boundary; single-species", {
 test_that("Download with authentication, bad boundary; multiple species", {
   expect_error(wt_dd_summary(sensor = 'ARU', species = c('White-throated Sparrow','Hermit Thrush'), boundary = bad_aoi))
 })
+
+test_that("A big project to complete is under 300 seconds", {
+  start_time <- Sys.time()
+  result <- wt_download_report(
+    project_id = '1385',
+    sensor_id = 'PC',
+    reports = 'main',
+    weather_cols = FALSE
+  )
+  end_time <- Sys.time()
+  elapsed_time <- as.numeric(difftime(end_time, start_time, units = "secs"))
+  expect_true(elapsed_time < 300,
+              info = paste("Function took", elapsed_time, "seconds, exceeding the 300-second limit."))
+  # Optionally, verify the result is not NULL or is as expected
+  expect_true(!is.null(result))
+})
+
+
