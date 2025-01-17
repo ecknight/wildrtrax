@@ -64,6 +64,7 @@ wt_audio_scanner <- function(path, file_type, extra_cols = F) {
     dplyr::mutate(size_Mb = round(purrr::map_dbl(.x = file_path, .f = ~ fs::file_size(.x)) / 10e5, digits = 2), # Convert file sizes to megabytes
                   file_path = as.character(file_path)) |>
     dplyr::select(file_path, size_Mb) |>
+    dplyr::filter(!size_Mb < 1) |> # zero-length file protection
     dplyr::mutate(file_name = sub("\\..*", "", basename(file_path)),
                   file_type = sub('.*\\.(\\w+)$', '\\1', basename(file_path))) |>
     # Parse location, recording date time and other temporal columns
