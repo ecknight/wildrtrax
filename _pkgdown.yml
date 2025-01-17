@@ -12,6 +12,7 @@ articles:
   - acoustic-pre-processing
   - acoustic-data-wrangling
   - classifiers-tutorial
+  - camera-pre-processing
   - camera-data-wrangling
   - tutorials
 reference:
@@ -38,6 +39,7 @@ reference:
     - wt_ind_detect
     - wt_kaleidoscope_tags
     - wt_location_distances
+    - wt_location_photos
     - wt_make_aru_tasks
     - wt_make_wide
     - wt_qpad_offsets
