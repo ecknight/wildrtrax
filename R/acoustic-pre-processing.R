@@ -389,7 +389,7 @@ wt_glean_ap <- function(x = NULL, input_dir, purpose = c("quality","abiotic","bi
   if (dir.exists(input_dir)) {
     ind <-
       fs::dir_ls(input_dir, regexp = "*.Indices.csv", recurse = T) |>
-      purrr::map_dfr( ~ readr::read_csv(\(x), show_col_types = F)) |>
+      purrr::map_dfr( ~ readr::read_csv(.x, show_col_types = F)) |>
       dplyr::relocate(c(FileName, ResultMinute)) |>
       dplyr::select(-c(ResultStartSeconds, SegmentDurationSeconds,RankOrder,ZeroSignal)) |>
       tidyr::pivot_longer(!c(FileName, ResultMinute),
@@ -770,24 +770,24 @@ wt_make_aru_tasks <- function(input, output=NULL, task_method = c("1SPM","1SPT",
     stop("task_length must be a number and between 1 and 1800 seconds.")
   }
 
-  tasks <- task_prep %>%
-    dplyr::select(location, recording_date_time, length_seconds) %>%
-    dplyr::distinct() %>%
-    dplyr::mutate(taskLength = case_when(length_seconds < task_length ~ NA_real_, TRUE ~ task_length)) %>% #Make sure recording length is long enough
-    dplyr::select(-length_seconds) %>%
+  tasks <- task_prep |>
+    dplyr::select(location, recording_date_time, length_seconds) |>
+    dplyr::distinct() |>
+    dplyr::mutate(taskLength = case_when(length_seconds < task_length ~ NA_real_, TRUE ~ task_length)) |> #Make sure recording length is long enough
+    dplyr::select(-length_seconds) |>
     #Add the necessary task columns
-    tibble::add_column(method = task_method, .after = "recording_date_time") %>%
-    tibble::add_column(status = "New", .after = "taskLength") %>%
-    tibble::add_column(transcriber = "", .after = "status") %>%
-    tibble::add_column(rain = "", .after = "transcriber") %>%
-    tibble::add_column(wind = "", .after = "rain") %>%
-    tibble::add_column(industryNoise = "", .after = "wind") %>%
-    tibble::add_column(otherNoise = "", .after = "industryNoise") %>%
-    tibble::add_column(audioQuality = "", .after = "otherNoise") %>%
-    tibble::add_column(taskComments = "", .after = "audioQuality") %>%
+    tibble::add_column(method = task_method, .after = "recording_date_time") |>
+    tibble::add_column(status = "New", .after = "taskLength") |>
+    tibble::add_column(transcriber = "", .after = "status") |>
+    tibble::add_column(rain = "", .after = "transcriber") |>
+    tibble::add_column(wind = "", .after = "rain") |>
+    tibble::add_column(industryNoise = "", .after = "wind") |>
+    tibble::add_column(otherNoise = "", .after = "industryNoise") |>
+    tibble::add_column(audioQuality = "", .after = "otherNoise") |>
+    tibble::add_column(taskComments = "", .after = "audioQuality") |>
     tibble::add_column(internal_task_id = "", .after = "taskComments")
 
-  no_length <- tasks %>%
+  no_length <- tasks |>
     dplyr::filter(is.na(taskLength))
 
   if ((nrow(no_length)) > 0) {
