@@ -388,8 +388,8 @@ wt_glean_ap <- function(x = NULL, input_dir, purpose = c("quality","abiotic","bi
   # Check to see if the input exists and reading it in
   if (dir.exists(input_dir)) {
     ind <-
-      fs::dir_ls(input_dir, regexp = "*.Indices.csv", recurse = T) %>%
-      purrr::map_dfr( ~ readr::read_csv(.x, show_col_types = F)) |>
+      fs::dir_ls(input_dir, regexp = "*.Indices.csv", recurse = T) |>
+      purrr::map_dfr( ~ readr::read_csv(\(x), show_col_types = F)) |>
       dplyr::relocate(c(FileName, ResultMinute)) |>
       dplyr::select(-c(ResultStartSeconds, SegmentDurationSeconds,RankOrder,ZeroSignal)) |>
       tidyr::pivot_longer(!c(FileName, ResultMinute),
@@ -397,9 +397,9 @@ wt_glean_ap <- function(x = NULL, input_dir, purpose = c("quality","abiotic","bi
                    values_to = "index_value")
 
     ldfcs <-
-      fs::dir_info(input_dir, regexp = "*__2Maps.png", recurse = T) %>%
-      dplyr::select(path) %>%
-      dplyr::rename("image" = 1) %>%
+      fs::dir_info(input_dir, regexp = "*__2Maps.png", recurse = T) |>
+      dplyr::select(path) |>
+      dplyr::rename("image" = 1) |>
       dplyr::mutate(file_name = sub('__2Maps.png$', '', basename(image)))
 
   } else {
@@ -427,7 +427,7 @@ wt_glean_ap <- function(x = NULL, input_dir, purpose = c("quality","abiotic","bi
     print('Files joined!')
   }
 
-  joined_purpose <- joined %>%
+  joined_purpose <- joined |>
     dplyr::filter(index_variable %in% purpose_list)
 
   # Plot a summary of the indices
@@ -445,9 +445,9 @@ wt_glean_ap <- function(x = NULL, input_dir, purpose = c("quality","abiotic","bi
     ggplot2::ggtitle("Summary of indices")
 
   # Plot the LDFC
-  ldfc <- joined_purpose %>%
-    dplyr::select(image) %>%
-    dplyr::distinct() %>%
+  ldfc <- joined_purpose |>
+    dplyr::select(image) |>
+    dplyr::distinct() |>
     purrr::map(function(x) {
       # Define your condition
 
@@ -657,9 +657,9 @@ wt_chop <- function(input = NULL, segment_length = NULL, output_folder = NULL) {
   }
 
   # Prepare input data
-  inp <- input %>%
-    dplyr::select(file_path, recording_date_time, location, file_type, length_seconds) %>%
-    tibble::add_column(length_sec = segment_length) %>%
+  inp <- input |>
+    dplyr::select(file_path, recording_date_time, location, file_type, length_seconds) |>
+    tibble::add_column(length_sec = segment_length) |>
     dplyr::mutate(
       longer = ifelse(length_seconds >= length_sec, TRUE, FALSE),
       length_seconds = round(length_seconds, 0)
