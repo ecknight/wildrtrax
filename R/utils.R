@@ -190,7 +190,7 @@
     req_url_path_append(path) |>
     req_url_query(!!!query_params) |>  # Unpack the list of query parameters
     req_headers(Authorization = paste("Bearer", ._wt_auth_env_$access_token),
-                `Accept-Language` = 'fr') |>
+                `Accept-Language` = ._locale_language) |>
     req_user_agent(u) |>
     req_method("GET") |>
     req_perform()
