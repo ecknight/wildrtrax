@@ -1,6 +1,6 @@
-# Getting help with wildRtrax
+# Getting help with wildetrax
 
-Thanks for using wildRtrax!
+Thanks for using wildrtrax!
 Before filing an issue, there are a few places to explore and pieces to put together to make the process as smooth as possible.
 
 ## Make a reprex
@@ -16,19 +16,19 @@ Armed with your reprex, the next step is to figure out [where to ask](https://ww
 
 *   If it's a question: start with [community.rstudio.com](https://community.rstudio.com/), and/or StackOverflow. There are more people there to answer questions.  
 
-*   If it's a bug: you're in the right place, [file an issue](https://github.com/ABbiodiversity/wildRtrax/issues/new).  
+*   If it's a bug: you're in the right place, [file an issue](https://github.com/ABbiodiversity/wildrtrax/issues/new).  
   
 *   If you're not sure: let the community help you figure it out! 
     If your problem _is_ a bug or a feature request, you can easily return here and report it. 
 
-Before opening a new issue, be sure to [search issues and pull requests](https://github.com/ABbiodiversity/wildRtrax/issues) to make sure the bug hasn't been reported and/or already fixed in the development version. 
+Before opening a new issue, be sure to [search issues and pull requests](https://github.com/ABbiodiversity/wildrtrax/issues) to make sure the bug hasn't been reported and/or already fixed in the development version. 
 By default, the search will be pre-populated with `is:issue is:open`. 
 You can [edit the qualifiers](https://help.github.com/articles/searching-issues-and-pull-requests/)  (e.g. `is:pr`, `is:closed`) as needed. 
 For example, you'd simply remove `is:open` to search _all_ issues in the repo, open or closed.
 
 ## What happens next?
 
-To be as efficient as possible, development of tidyverse packages tends to be very bursty, so you shouldn't worry if you don't get an immediate response.
+Development of wildrtrax packages occurs on a rolling basis, so you shouldn't worry if you don't get an immediate response.
 Typically we don't look at a repo until a sufficient quantity of issues accumulates, then there’s a burst of intense activity as we focus our efforts. 
 That makes development more efficient because it avoids expensive context switching between problems, at the cost of taking longer to get back to you. 
 This process makes a good reprex particularly important because it might be multiple months between your initial report and when we start working on it. 
