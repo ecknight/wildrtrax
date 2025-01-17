@@ -142,6 +142,7 @@
     req_headers(Authorization = paste("Bearer", ._wt_auth_env_$access_token)) |>
     req_user_agent(u) |>
     req_method("POST") |>
+    req_timeout(300) |> # Add a 5 minute timeout
     req_perform()
 
   # Handle errors
