@@ -552,7 +552,7 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
   # Iterate over each species
   for (sp in spp) {
 
-    # Construct payload for second request (small)
+    # Construct payload for lat-long summary
     payload_ll <- list(
       polygonBoundary = boundary,
       sensorId = sensor,
@@ -573,7 +573,7 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
       req_body_json(payload_ll) |>
       req_perform()
 
-    # Construct payload for first request
+    # Construct payload for map-projects
     payload_mp <- list(
       isSpeciesTab = FALSE,
       sensorId = sensor,
@@ -625,7 +625,6 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
       latitude = latitude
     )
 
-    # Extract data from the first request
     rpps <- resp_body_json(rr)
 
     if(is.null(rpps)) {stop('Request was NULL.')}
@@ -877,7 +876,8 @@ wt_get_image_sets <- function(organization) {
   x <- data.frame(do.call(rbind, r$results))
 
   # Rename columns for clarity
-  new_names <- c("location_id", "organization_id", "location", "image_set_start_date", "image_set_end_date", "motion_image_count", "total_image_count", "task_count")
+  new_names <- c("location_id", "organization_id", "location", "image_set_start_date",
+                 "image_set_end_date", "motion_image_count", "total_image_count", "task_count")
   colnames(x) <- new_names
 
   return(x)
@@ -886,7 +886,7 @@ wt_get_image_sets <- function(organization) {
 
 #' Batch upload and download locations photos
 #'
-#' @description A two-way street to upload and download locations photos
+#' @description A two-way street to upload and download location photos
 #' `r lifecycle::badge("experimental")`
 #'
 #' @param data When going up, provide the joining data for locations and visits
