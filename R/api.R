@@ -922,8 +922,8 @@ wt_location_photos <- function(data, direction, dir) {
 
   visits <- data
 
-  if(direction == "up") {
-    # if down make it a GET
+  if(direction == "down") {
+    # if going down make it a GET
     # Request location data
     r <- .wt_api_gr(
       path = "/bis/get-location-visit-image-by-visit",
@@ -932,7 +932,7 @@ wt_location_photos <- function(data, direction, dir) {
       order = "asc",
       limit = 1e9
     )
-  } else if (direction == "down") {
+  } else if (direction == "up") {
     # if going up make it a POST
     # Request location data
     r <- .wt_api_pr(
