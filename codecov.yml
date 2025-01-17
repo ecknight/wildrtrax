@@ -1,48 +1,49 @@
-name: Run tests and upload coverage
-
 on:
   push:
-    branches:
-      - main
+    branches: [main, master]
   pull_request:
 
-- name: Cache R packages
-  uses: actions/cache@v3
-  with:
-    path: ${{ runner.tool_cache }}/R
-    key: ${{ runner.os }}-r-${{ hashFiles('**/DESCRIPTION') }}
+name: R-CMD-check.yaml
+
+permissions: read-all
 
 jobs:
-  test:
-    name: Run tests and upload coverage
-    runs-on: ubuntu-latest
+  R-CMD-check:
+    runs-on: ${{ matrix.config.os }}
+
+    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
+
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {os: macos-latest,   r: 'release'}
+          - {os: windows-latest, r: 'release'}
+          - {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release'}
+          - {os: ubuntu-latest,   r: 'release'}
+          - {os: ubuntu-latest,   r: 'oldrel-1'}
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
 
     steps:
-      # Step 1: Checkout repository
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
         with:
-          fetch-depth: 0
+          r-version: ${{ matrix.config.r }}
+          http-user-agent: ${{ matrix.config.http-user-agent }}
+          use-public-rspm: true
 
-      # Step 2: Set up R environment
-      - name: Set up R
-        uses: r-lib/actions/setup-r@v2
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck
+          needs: check
 
-      # Step 3: Install dependencies
-      - name: Install dependencies
-        run: |
-          install.packages("remotes")
-          remotes::install_deps(dependencies = TRUE)
-
-      # Step 4: Run tests and generate coverage report
-      - name: Run tests and generate coverage
-        run: |
-          install.packages("covr")
-          covr::codecov()
-
-      # Step 5: Upload coverage to Codecov
-     - name: Upload coverage reports to Codecov
-       uses: codecov/codecov-action@v5
-       with:
-         token: ${{ secrets.CODECOV_TOKEN }}
-         slug: ABbiodiversity/wildrtrax
+      - uses: r-lib/actions/check-r-package@v2
+        with:
+          upload-snapshots: true
+          build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
