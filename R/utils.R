@@ -104,9 +104,22 @@
       paste(getRversion(), R.version$platform, R.version$arch, R.version$os)
     )
   }
-  user_agent <- paste0("wildRtrax ", as.character(packageVersion("wildRtrax")), "; ", user_agent)
+  user_agent <- paste0("wildrtrax ", as.character(packageVersion("wildrtrax")), "; ", user_agent)
   return(user_agent)
 }
+
+#' Switch locale to another language
+#'
+#' @description Global function to allow a user to request data in another language. Currently English = en or French = fr.
+#'
+#' @keywords internal
+#'
+
+.language <- function(language = c("en", "fr")) {
+  language <- match.arg(language) # Ensure valid language selection
+  return(language)
+}
+
 
 #' An internal function to handle generic POST requests to WildTrax API
 #'
@@ -177,6 +190,9 @@
   ## User agent
   u <- .gen_ua()
 
+  # Validate language input
+  #accept_language <- .language(language)
+
   # Convert ... into a list
   query_params <- list(...)
 
@@ -189,8 +205,8 @@
   r <- request("https://www-api.wildtrax.ca") |>
     req_url_path_append(path) |>
     req_url_query(!!!query_params) |>  # Unpack the list of query parameters
-    req_headers(Authorization = paste("Bearer", ._wt_auth_env_$access_token),
-                `Accept-Language` = ._locale_language) |>
+    #req_url_path_append(`Accept-Language` = accept_language) |>
+    req_headers(Authorization = paste("Bearer", ._wt_auth_env_$access_token)) |>
     req_user_agent(u) |>
     req_method("GET") |>
     req_perform()
