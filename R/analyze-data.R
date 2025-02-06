@@ -86,39 +86,39 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
     if (exclude_out_of_range == FALSE) {
       x <- raw_data |>
         group_by({{ project_col }}, {{ station_col }}) |>
-        summarise(start_date = as.Date(min({{date_time_col}})),
-                  end_date = as.Date(max({{date_time_col}}))) |>
+        summarise(start_date = as.Date(min({{ date_time_col }})),
+                  end_date = as.Date(max({{ date_time_col }}))) |>
         ungroup()
 
       # Expand the time ranges into individual days of operation (smallest unit)
       x <- x |>
-        group_by({{project_col}}, {{station_col}}) |>
+        group_by({{ project_col }}, {{ station_col }}) |>
         mutate(day = list(seq.Date(start_date, end_date, by = "day"))) |>
         tidyr::unnest(day) |>
         mutate(year = as.integer(format(day, "%Y"))) |>
-        select({{project_col}}, {{station_col}}, year, day) |>
+        select({{ project_col }}, {{ station_col }}, year, day) |>
         ungroup()
     }
     if (exclude_out_of_range == TRUE) {
       x <- raw_data |>
-        group_by({{project_col}}, {{station_col}}) |>
-        arrange({{date_time_col}}) |>
+        group_by({{ project_col }}, {{ station_col }}) |>
+        arrange({{ date_time_col }}) |>
         mutate(period = rep(seq_along(rle(image_fov)$lengths), rle(image_fov)$lengths)) |>
         filter(image_fov == "WITHIN") |>
-        group_by({{project_col}}, {{station_col}}, period) |>
+        group_by({{ project_col }}, {{ station_col }}, period) |>
         summarise(
-          start_date = as.Date(min({{date_time_col}})),
-          end_date = as.Date(max({{date_time_col}}))
+          start_date = as.Date(min({{ date_time_col }})),
+          end_date = as.Date(max({{ date_time_col }}))
         ) |>
         ungroup()
 
       # Expand the time ranges into individual days of operation (smallest unit)
       x <- x |>
-        group_by({{project_col}}, {{station_col}}, period) |>
+        group_by({{ project_col }}, {{ station_col }}, period) |>
         mutate(day = list(seq.Date(start_date, end_date, by = "day"))) |>
         tidyr::unnest(day) |>
         mutate(year = as.integer(format(day, "%Y"))) |>
-        select({{project_col}}, {{station_col}}, year, day)
+        select({{ project_col }}, {{ station_col }}, year, day)
     }
 
     if (any(c(is.na(x$start_date), is.na(x$end_date)))) {
@@ -130,29 +130,29 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
   # Based on the desired timeframe, assess when each detection occurred
   if (time_interval == "day" | time_interval == "full") {
     y <- detect_data |>
-      mutate(year = as.integer(format({{start_col_det}}, "%Y")),
-             day = as.Date({{start_col_det}}))
+      mutate(year = as.integer(format({{ start_col_det }}, "%Y")),
+             day = as.Date({{ start_col_det }}))
     time_interval <- "day"
   } else if (time_interval == "week") {
     y <- detect_data |>
-      mutate(year = as.integer(format({{start_col_det}}, "%Y")),
-             week = as.integer(format({{start_col_det}}, "%V")))  # ISO week
+      mutate(year = as.integer(format({{ start_col_det }}, "%Y")),
+             week = as.integer(format({{ start_col_det }}, "%V")))  # ISO week
   } else if (time_interval == "month") {
     y <- detect_data |>
-      mutate(year = as.integer(format({{start_col_det}}, "%Y")),
-             month = format({{start_col_det}}, "%B"))  # Full month name
+      mutate(year = as.integer(format({{ start_col_det }}, "%Y")),
+             month = format({{ start_col_det }}, "%B"))  # Full month name
   }
 
   # Summarise variable of interest
   y <- y |>
-    group_by({{project_col}}, {{station_col}}, {{species_col}}, year, {{time_interval}}) |>
+    group_by({{ project_col }}, {{ station_col }}, {{ species_col }}, year, {{ time_interval }}) |>
     summarise(detections = n(),
               counts = sum(max_animals)) |>
     ungroup() |>
     mutate(presence = ifelse(detections > 0, 1, 0))
 
   # Species present in the data
-  sp <- y |> select({{species_col}}) |> distinct()
+  sp <- y |> select({{ species_col }}) |> distinct()
 
   # Create long df object of all species x location x timeframe combos
   if (time_interval == "day") {
@@ -164,7 +164,7 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
   } else if (time_interval == "week") {
     x <- x |>
       mutate(week = isoweek(day)) |>
-      group_by({{project_col}}, {{station_col}}, year, week) |>
+      group_by({{ project_col }}, {{ station_col }}, year, week) |>
       tally(name = "n_days_effort") |>
       ungroup()
     z <- x |>
@@ -174,7 +174,7 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
   } else if (time_interval == "month") {
     x <- x |>
       mutate(month = format(day, "%B")) |>
-      group_by({{project_col}}, {{station_col}}, year, month) |>
+      group_by({{ project_col }}, {{ station_col }}, year, month) |>
       tally(name = "n_days_effort") |>
       ungroup()
     z <- x |>
@@ -186,7 +186,7 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
       crossing(sp) |>
       left_join(y) |>
       mutate(across(all_vars, ~ tidyr::replace_na(.x, 0))) |>
-      group_by({{project_col}}, {{station_col}}, year, {{species_col}}) |>
+      group_by({{ project_col }}, {{ station_col }}, year, {{ species_col }}) |>
       summarise(detections = sum(detections),
                 counts = sum(counts),
                 presence = ifelse(any(presence == 1), 1, 0)) |>
@@ -196,14 +196,14 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
   # Make wide if desired
   if (output_format == "wide") {
     z <- z |>
-      tidyr::pivot_wider(id_cols = c({{project_col}}, {{station_col}}, year,
-                                     {{time_interval}}, n_days_effort),
-                         names_from = {{species_col}}, values_from = {{variable}}, names_sep = ".")
+      tidyr::pivot_wider(id_cols = c({{ project_col }}, {{ station_col }}, year,
+                                     {{ time_interval }}, n_days_effort),
+                         names_from = {{ species_col }}, values_from = {{ variable }}, names_sep = ".")
   } else if (output_format == "long") {
-    z <- z |> select({{project_col}}, {{station_col}}, year,
-                     {{time_interval}}, n_days_effort,
-                     {{species_col}}, {{variable}}) |>
-      tidyr::pivot_longer(cols = {{variable}}, names_to = "variable", values_to = "value")
+    z <- z |> select({{ project_col }}, {{ station_col }}, year,
+                     {{ time_interval }}, n_days_effort,
+                     {{ species_col }}, {{ variable }}) |>
+      tidyr::pivot_longer(cols = {{ variable }}, names_to = "variable", values_to = "value")
   }
 
   return(z)
