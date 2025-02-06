@@ -521,7 +521,7 @@
   image_exif_temperature = readr::col_double(),
   image_fire = readr::col_logical(),
   image_fov = readr::col_character(),
-  image_id = readr::col_character(),
+  image_id = readr::col_double(),
   image_in_wildtrax = readr::col_logical(),
   image_is_blurred = readr::col_logical(),
   image_malfunction = readr::col_logical(),

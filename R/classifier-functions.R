@@ -212,22 +212,26 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 50, r
       dplyr::filter(confidence >= threshold) |>
       dplyr::inner_join(data[[2]] |> dplyr::select(recording_id, task_id, task_duration), by = c("recording_id" = "recording_id")) |>
       dplyr::filter(!start_s > task_duration) |>
-      group_by(project_id, location_id, recording_id, task_id, species_code) |>
-      summarize(confidence = max(confidence),  .groups="keep") |>
-      ungroup()
+      dplyr::group_by(project_id, location_id, recording_id, task_id, species_code) |>
+      dplyr::summarize(confidence = max(confidence),  .groups="keep") |>
+      dplyr::ungroup()
 
     #Main report
     main <- wt_tidy_species(data[[2]], remove=c("mammal", "amphibian", "abiotic", "insect", "human", "unknown")) |>
       dplyr::select(project_id, location_id, recording_id, task_id, species_code) |>
-      unique()
+      dplyr::distinct()
 
     #Put together
-    new <- anti_join(detections, main, by=c("project_id", "location_id", "recording_id", "task_id", "species_code")) |>
-      left_join(classed, by=c("project_id", "location_id", "recording_id", "task_id", "species_code", "confidence"), multiple="all") |>
-      group_by(project_id, location_id, recording_id,task_id, species_code, confidence) |>
-      sample_n(1) |>
-      ungroup()
-
+    new <- dplyr::anti_join(detections, main, by=c("project_id", "location_id", "recording_id", "task_id", "species_code")) |>
+      dplyr::left_join(classed, by=c("project_id", "location_id", "recording_id", "task_id", "species_code", "confidence"), multiple="all")
+    if (nrow(new) == 0) {
+      stop("There were no additional species detected.")
+    } else {
+      new <- new |>
+        dplyr::group_by(project_id, location_id, recording_id,task_id, species_code, confidence) |>
+        dplyr::sample_n(1) |>
+        dplyr::ungroup()
+    }
   }
 
 
@@ -236,21 +240,21 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 50, r
     #Classifier report
     detections <- class |>
       dplyr::filter(confidence >= threshold) |>
-      group_by(project_id, location_id, recording_id, species_code) |>
-      summarize(confidence = max(confidence),  .groups="keep") |>
-      ungroup()
+      dplyr::group_by(project_id, location_id, recording_id, species_code) |>
+      dplyr::summarize(confidence = max(confidence),  .groups="keep") |>
+      dplyr::ungroup()
 
     #Main report
     main <- wt_tidy_species(data[[2]], remove=c("mammal", "amphibian", "abiotic", "insect", "human", "unknown")) |>
       dplyr::select(project_id, location_id, recording_id, species_code) |>
-      unique()
+      dplyr::distinct()
 
     #Put together
-    new <- anti_join(detections, main, by=c("project_id", "location_id", "recording_id", "species_code")) |>
-      left_join(class, by=c("project_id", "location_id", "recording_id", "species_code", "confidence"), multiple="all") |>
-      group_by(project_id, location_id, recording_id, species_code, confidence) |>
-      sample_n(1) |>
-      ungroup()
+    new <- dplyr::anti_join(detections, main, by=c("project_id", "location_id", "recording_id", "species_code")) |>
+      dplyr::left_join(class, by=c("project_id", "location_id", "recording_id", "species_code", "confidence"), multiple="all") |>
+      dplyr::group_by(project_id, location_id, recording_id, species_code, confidence) |>
+      dplyr::sample_n(1) |>
+      dplyr::ungroup()
 
   }
 
@@ -259,21 +263,21 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 50, r
     #Classifier report
     detections <- class |>
       dplyr::filter(confidence >= threshold) |>
-      group_by(project_id, location_id, species_code) |>
-      summarize(confidence = max(confidence),  .groups="keep") |>
-      ungroup()
+      dplyr::group_by(project_id, location_id, species_code) |>
+      dplyr::summarize(confidence = max(confidence),  .groups="keep") |>
+      dplyr::ungroup()
 
     #Main report
     main <- wt_tidy_species(data[[2]], remove=c("mammal", "amphibian", "abiotic", "insect", "human", "unknown")) |>
       dplyr::select(project_id, location_id, species_code) |>
-      unique()
+      dplyr::distinct()
 
     #Put together
     new <- anti_join(detections, main, by=c("project_id", "location_id", "species_code")) |>
-      left_join(class, by=c("project_id", "location_id", "species_code", "confidence"), multiple="all") |>
-      group_by(project_id, location_id, species_code, confidence) |>
-      sample_n(1) |>
-      ungroup()
+      dplyr::left_join(class, by=c("project_id", "location_id", "species_code", "confidence"), multiple="all") |>
+      dplyr::group_by(project_id, location_id, species_code, confidence) |>
+      dplyr::sample_n(1) |>
+      dplyr::ungroup()
 
   }
 
@@ -282,21 +286,21 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 50, r
     #Classifier report
     detections <- class |>
       dplyr::filter(confidence >= threshold) |>
-      group_by(project_id, species_code) |>
-      summarize(confidence = max(confidence),  .groups="keep") |>
-      ungroup()
+      dplyr::group_by(project_id, species_code) |>
+      dplyr::summarize(confidence = max(confidence),  .groups="keep") |>
+      dplyr::ungroup()
 
     #Main report
     main <- wt_tidy_species(data[[2]], remove=c("mammal", "amphibian", "abiotic", "insect", "human", "unknown")) |>
       dplyr::select(project_id, species_code) |>
-      unique()
+      dplyr::distinct()
 
     #Put together
     new <- anti_join(detections, main, by=c("project_id", "species_code")) |>
-      left_join(class, by=c("project_id", "species_code", "confidence"), multiple="all") |>
-      group_by(project_id, species_code, confidence) |>
-      sample_n(1) |>
-      ungroup()
+      dplyr::left_join(class, by=c("project_id", "species_code", "confidence"), multiple="all") |>
+      dplyr::group_by(project_id, species_code, confidence) |>
+      dplyr::sample_n(1) |>
+      dplyr::ungroup()
 
   }
 
@@ -311,38 +315,38 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 50, r
     ### Fields in WildTrax Sync will be updated in Vue3, or in Vue2 if there's high and urgent user demand. ###
 
     new_export <- new |>
-      relocate(location) |>
-      relocate(recording_date_time, .after = location) |>
-      rename("recordingDate" = 2) |>
-      inner_join(data[[2]] |> select(task_id, task_method) |> distinct(), by = "task_id") |>
-      relocate(task_method, .after = recordingDate) |>
-      rename("method" = 3) |>
-      relocate(task_duration, .after = method) |>
-      rename("taskLength" = 4) |>
-      mutate(transcriber = "birdnet") |>
-      relocate(transcriber, .after = taskLength) |>
-      relocate(species_code, .after = transcriber) |>
-      rename("species" = 6) |>
-      arrange(species, start_s) |>
-      group_by(location, recordingDate, species) |>
-      mutate(speciesIndividualNumber = row_number()) |>
-      ungroup() |>
-      relocate(speciesIndividualNumber, .after = species) |>
-      mutate(vocalization = "SONG") |>
-      relocate(vocalization, .after = speciesIndividualNumber) |>
-      mutate(abundance = 1) |>
-      relocate(abundance, .after = vocalization) |>
-      relocate(start_s, .after = abundance) |>
-      rename("startTime" = 10) |>
-      mutate(tagLength = "") |>
-      relocate(tagLength, .after = startTime) |>
-      mutate(minFreq = "") |>
-      mutate(maxFreq = "") |>
-      mutate(speciesIndividualComment = confidence) |>
-      mutate(internal_tag_id = "") |>
-      relocate(minFreq:internal_tag_id, .after = tagLength) |>
-      filter(!startTime > taskLength) |>
-      select(1:internal_tag_id) |>
-      write_csv(paste0(output,"/birdnet_tags.csv"))
+      dplyr::relocate(location) |>
+      dplyr::relocate(recording_date_time, .after = location) |>
+      dplyr::rename("recordingDate" = 2) |>
+      dplyr::inner_join(data[[2]] |> select(task_id, task_method) |> distinct(), by = "task_id") |>
+      dplyr::relocate(task_method, .after = recordingDate) |>
+      dplyr::rename("method" = 3) |>
+      dplyr::relocate(task_duration, .after = method) |>
+      dplyr::rename("taskLength" = 4) |>
+      dplyr::mutate(transcriber = "birdnet") |>
+      dplyr::relocate(transcriber, .after = taskLength) |>
+      dplyr::relocate(species_code, .after = transcriber) |>
+      dplyr::rename("species" = 6) |>
+      dplyr::arrange(species, start_s) |>
+      dplyr::group_by(location, recordingDate, species) |>
+      dplyr::mutate(speciesIndividualNumber = row_number()) |>
+      dplyr::ungroup() |>
+      dplyr::relocate(speciesIndividualNumber, .after = species) |>
+      dplyr::mutate(vocalization = "SONG") |>
+      dplyr::relocate(vocalization, .after = speciesIndividualNumber) |>
+      dplyr::mutate(abundance = 1) |>
+      dplyr::relocate(abundance, .after = vocalization) |>
+      dplyr::relocate(start_s, .after = abundance) |>
+      dplyr::rename("startTime" = 10) |>
+      dplyr::mutate(tagLength = "") |>
+      dplyr::relocate(tagLength, .after = startTime) |>
+      dplyr::mutate(minFreq = "") |>
+      dplyr::mutate(maxFreq = "") |>
+      dplyr::mutate(speciesIndividualComment = confidence) |>
+      dplyr::mutate(internal_tag_id = "") |>
+      dplyr::relocate(minFreq:internal_tag_id, .after = tagLength) |>
+      dplyr::filter(!startTime > taskLength) |>
+      dplyr::select(1:internal_tag_id) |>
+      readr::write_csv(paste0(output,"/birdnet_tags.csv"))
   }
 }
