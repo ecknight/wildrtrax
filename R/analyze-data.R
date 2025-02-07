@@ -82,47 +82,57 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
   #station_col <- deparse(substitute(station_col))
 
   # Parse the raw or effort data to get time ranges for each camera deployment.
-if (!rlang::is_missing(raw_data)) {
-  if (exclude_out_of_range) {
-    # Logic when exclude_out_of_range is TRUE
-    x <- raw_data |>
-      group_by({{ project_col }}, {{ station_col }}) |>
-      arrange({{ date_time_col }}) |>
-      mutate(period = rep(seq_along(rle(image_fov)$lengths), rle(image_fov)$lengths)) |>
-      filter(image_fov == "WITHIN") |>
-      group_by({{ project_col }}, {{ station_col }}, period) |>
-      summarise(
-        start_date = as.Date(min({{ date_time_col }})),
-        end_date = as.Date(max({{ date_time_col }})),
-        .groups = "drop"
-      ) |>
-      group_by({{ project_col }}, {{ station_col }}, period) |>
-      mutate(day = list(seq.Date(start_date, end_date, by = "day"))) |>
-      tidyr::unnest(day) |>
-      mutate(year = as.integer(format(day, "%Y"))) |>
-      select({{ project_col }}, {{ station_col }}, year, day)
-  } else {
-    # Logic when exclude_out_of_range is FALSE
-    x <- raw_data |>
-      group_by({{ project_col }}, {{ station_col }}) |>
-      summarise(
-        start_date = as.Date(min({{ date_time_col }})),
-        end_date = as.Date(max({{ date_time_col }})),
-        .groups = "drop"
-      ) |>
-      group_by({{ project_col }}, {{ station_col }}) |>
-      mutate(day = list(seq.Date(start_date, end_date, by = "day"))) |>
-      tidyr::unnest(day) |>
-      mutate(year = as.integer(format(day, "%Y"))) |>
-      select({{ project_col }}, {{ station_col }}, year, day)
-  }
+  if (!rlang::is_missing(raw_data)) {
 
-  # Handle NAs in start_date or end_date
-  if (any(is.na(x$start_date) | is.na(x$end_date))) {
-    message("Parsing of image date time produced NAs, these will be dropped")
-    x <- drop_na(x)
+    if (exclude_out_of_range == FALSE) {
+      x <- raw_data |>
+        group_by({{ project_col }}, {{ station_col }}) |>
+        summarise(start_date = as.Date(min({{ date_time_col }})),
+                  end_date = as.Date(max({{ date_time_col }}))) |>
+        ungroup()
+
+      if (any(c(is.na(x$start_date), is.na(x$end_date)))) {
+        message("Parsing of image date time produced NAs, these will be dropped")
+        x <- drop_na(x)
+      }
+
+      # Expand the time ranges into individual days of operation (smallest unit)
+      x <- x |>
+        group_by({{ project_col }}, {{ station_col }}) |>
+        mutate(day = list(seq.Date(start_date, end_date, by = "day"))) |>
+        tidyr::unnest(day) |>
+        mutate(year = as.integer(format(day, "%Y"))) |>
+        select({{ project_col }}, {{ station_col }}, year, day) |>
+        ungroup()
+
+    } else {
+      x <- raw_data |>
+        group_by({{ project_col }}, {{ station_col }}) |>
+        arrange({{ date_time_col }}) |>
+        mutate(period = rep(seq_along(rle(image_fov)$lengths), rle(image_fov)$lengths)) |>
+        filter(image_fov == "WITHIN") |>
+        group_by({{ project_col }}, {{ station_col }}, period) |>
+        summarise(
+          start_date = as.Date(min({{ date_time_col }})),
+          end_date = as.Date(max({{ date_time_col }}))
+        ) |>
+        ungroup()
+
+      if (any(c(is.na(x$start_date), is.na(x$end_date)))) {
+        message("Parsing of image date time produced NAs, these will be dropped")
+        x <- drop_na(x)
+      }
+
+      # Expand the time ranges into individual days of operation (smallest unit)
+      x <- x |>
+        group_by({{ project_col }}, {{ station_col }}, period) |>
+        mutate(day = list(seq.Date(start_date, end_date, by = "day"))) |>
+        tidyr::unnest(day) |>
+        mutate(year = as.integer(format(day, "%Y"))) |>
+        select({{ project_col }}, {{ station_col }}, year, day)
+    }
+
   }
-}
 
   # Based on the desired timeframe, assess when each detection occurred
   if (time_interval == "day" | time_interval == "full") {
@@ -158,7 +168,7 @@ if (!rlang::is_missing(raw_data)) {
     z <- x |>
       mutate(n_days_effort = 1) |>
       crossing(sp) |>
-      left_join(y) |>
+      suppressMessages(left_join(y)) |>
       mutate(across(all_vars, ~ tidyr::replace_na(.x, 0)))
   } else if (time_interval == "week") {
     x <- x |>
@@ -168,7 +178,7 @@ if (!rlang::is_missing(raw_data)) {
       ungroup()
     z <- x |>
       crossing(sp) |>
-      left_join(y) |>
+      suppressMessages(left_join(y)) |>
       mutate(across(all_vars, ~ tidyr::replace_na(.x, 0)))
   } else if (time_interval == "month") {
     x <- x |>
@@ -178,12 +188,12 @@ if (!rlang::is_missing(raw_data)) {
       ungroup()
     z <- x |>
       crossing(sp) |>
-      left_join(y) |>
+      suppressMessages(left_join(y)) |>
       mutate(across(all_vars, ~ tidyr::replace_na(.x, 0)))
   } else if (time_interval == "full") {
     z <- x |>
       crossing(sp) |>
-      left_join(y) |>
+      suppressMessages(left_join(y)) |>
       mutate(across(all_vars, ~ tidyr::replace_na(.x, 0))) |>
       group_by({{ project_col }}, {{ station_col }}, year, {{ species_col }}) |>
       summarise(detections = sum(detections),
