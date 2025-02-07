@@ -17,7 +17,7 @@ wt_location_photos(data, direction, dir)
 When "down", a folder of images
 }
 \description{
-A two-way street to upload and download locations photos
+A two-way street to upload and download location photos
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 }
 \examples{
