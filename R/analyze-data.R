@@ -132,20 +132,22 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
     y <- detect_data |>
       mutate(year = as.integer(format({{ start_col_det }}, "%Y")),
              day = as.Date({{ start_col_det }}))
-    time_interval <- "day"
+    grouping_cols <- c("year", "day")
   } else if (time_interval == "week") {
     y <- detect_data |>
       mutate(year = as.integer(format({{ start_col_det }}, "%Y")),
              week = as.integer(format({{ start_col_det }}, "%V")))  # ISO week
+    grouping_cols <- c("year", "week")
   } else if (time_interval == "month") {
     y <- detect_data |>
       mutate(year = as.integer(format({{ start_col_det }}, "%Y")),
              month = format({{ start_col_det }}, "%B"))  # Full month name
+    grouping_cols <- c("year", "month")
   }
 
   # Summarise variable of interest
   y <- y |>
-    group_by({{ project_col }}, {{ station_col }}, {{ species_col }}, year, {{ time_interval }}) |>
+    group_by(across(all_of(grouping_cols)), {{ project_col }}, {{ station_col }}, {{ species_col }}) |>
     summarise(detections = n(),
               counts = sum(max_animals)) |>
     ungroup() |>
@@ -197,13 +199,13 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
   if (output_format == "wide") {
     z <- z |>
       tidyr::pivot_wider(id_cols = c({{ project_col }}, {{ station_col }}, year,
-                                     {{ time_interval }}, n_days_effort),
-                         names_from = {{ species_col }}, values_from = {{ variable }}, names_sep = ".")
+                                     time_interval, n_days_effort),
+                         names_from = {{ species_col }}, values_from = variable, names_sep = ".")
   } else if (output_format == "long") {
     z <- z |> select({{ project_col }}, {{ station_col }}, year,
-                     {{ time_interval }}, n_days_effort,
-                     {{ species_col }}, {{ variable }}) |>
-      tidyr::pivot_longer(cols = {{ variable }}, names_to = "variable", values_to = "value")
+                     time_interval, n_days_effort,
+                     {{ species_col }}, variable) |>
+      tidyr::pivot_longer(cols = variable, names_to = "variable", values_to = "value")
   }
 
   return(z)
