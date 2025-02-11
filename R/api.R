@@ -433,53 +433,60 @@ wt_download_media <- function(input, output, type = c("recording","image", "tag_
 
 wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary = NULL) {
 
-  if (!exists("access_token", envir = ._wt_auth_env_)) {
+  if (!exists("._wt_auth_env_")) {
     message("Currently searching as a public user, access to data will be limited. Use wt_auth() to login.")
     tok_used <- NULL
   } else {
+    message("Currently searching as a logged in user.")
     tok_used <- ._wt_auth_env_$access_token
   }
 
   u <- .gen_ua()
 
-  # Make POST request using httr2
-  ddspp <- request("https://www-api.wildtrax.ca") |>
-    req_url_path_append("/bis/dd-get-species") |>
-    req_headers(
-      Authorization = tok_used,
-      Origin = "https://discover.wildtrax.ca",
-      Pragma = "no-cache",
-      Referer = "https://discover.wildtrax.ca/"
-    ) |>
-    req_user_agent(u) |>
-    req_body_json(list(sensorId = sensor)) |>
-    req_perform()
+  if(is.null(tok_used)) {
+    #Provide non-login user a way to search species - limited by dd-get-species however
+    ddspp <- request("https://www-api.wildtrax.ca") |>
+      req_url_path_append("/bis/dd-get-species") |>
+      req_headers(
+        Authorization = tok_used,
+        Origin = "https://discover.wildtrax.ca",
+        Pragma = "no-cache",
+        Referer = "https://discover.wildtrax.ca/"
+      ) |>
+      req_user_agent(u) |>
+      req_body_json(list(sensorId = sensor)) |>
+      req_perform()
 
-  # Extract JSON content from the response
-  spp_t <- resp_body_json(ddspp)
+    # Extract JSON content from the response
+    spp_t <- resp_body_json(ddspp)
 
-  species_tibble <- purrr::map_df(spp_t, ~{
-    # Check if each column exists in the list
-    commonName <- if ("commonName" %in% names(.x)) .x$commonName else NA
-    speciesId <- if ("speciesId" %in% names(.x)) .x$speciesId else NA
-    sciName <- if ("sciName" %in% names(.x)) .x$sciName else NA
-    tibble(species_common_name = commonName, species_id = speciesId, species_scientific_name = sciName)
-  })
+    species_tibble <- purrr::map_df(spp_t, ~{
+      # Check if each column exists in the list
+      commonName <- if ("commonName" %in% names(.x)) .x$commonName else NA
+      speciesId <- if ("speciesId" %in% names(.x)) .x$speciesId else NA
+      sciName <- if ("sciName" %in% names(.x)) .x$sciName else NA
+      tibble(species_common_name = commonName, species_id = speciesId, species_scientific_name = sciName)
+    })
 
-  # Fetch species if provided
-  if (is.null(species)) {
-    spp <- species_tibble$species_id
-    if (length(spp) == 0) {
-      stop("No species data available for the selected sensor.")
+    # Fetch species if provided
+    if (is.null(species)) {
+      spp <- species_tibble$species_id
+      if (length(spp) == 0) {
+        stop("No species data available for the selected sensor.")
+      }
+    } else {
+      spp <- species_tibble |>
+        filter(species_common_name %in% species) |>
+        pull(species_id)
+      if (length(spp) == 0) {
+        stop("No species were found.")
+      }
     }
   } else {
+    species_tibble <- wt_get_species()
     spp <- species_tibble |>
       filter(species_common_name %in% species) |>
       pull(species_id)
-
-    if (length(spp) == 0) {
-      stop("No species were found.")
-    }
   }
 
   # Test for coordinate system
