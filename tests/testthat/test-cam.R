@@ -33,6 +33,7 @@ test_that("Summarise cam", {
   abmi_amph_cam <- wt_download_report(391, 'CAM', 'main', FALSE)
   ind_detections <- wt_ind_detect(abmi_amph_cam, threshold = 10, units = "minutes", datetime_col = image_date_time, remove_human = TRUE, remove_domestic = TRUE)
   summary <- wt_summarise_cam(detect_data = ind_detections, raw_data = abmi_amph_cam, time_interval = "month", variable = "detections", output_format = "wide")
+  expect_true(!is.null(abmi_amph_cam))
 })
 
 test_that("Summarise cam", {
@@ -60,7 +61,7 @@ test_that("Summarise cam", {
     select(value)
 
   expected <- ind_detec.focal |>
-    mutate(month = month(start_time, label = F)) |>
+    mutate(month = as.numeric(format(as.Date(start_time),"%m"))) |>
     group_by(month) |>
     summarise(total_count=sum(max_animals)) |>
     select(total_count)
