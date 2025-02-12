@@ -25,10 +25,12 @@ A two-way street to upload and download location photos
 # Authenticate first:
 wt_auth()
 # When going up provide the folder of images and data for joining
-wt_location_photos(organization = 'ABMI', data = "/my/join/table", direction = "up", dir = "/my/dir/of/images")
+wt_location_photos(organization = 'ABMI', data = "/my/join/table",
+direction = "up", dir = "/my/dir/of/images")
 
 # When going down the directory where you want the files only
-wt_location_photos(organization = 'ABMI', direction = "down", dir = "/my/dir/to/download/images")
+wt_location_photos(organization = 'ABMI', direction = "down",
+dir = "/my/dir/to/download/images")
 
 }
 
