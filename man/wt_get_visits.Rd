@@ -8,8 +8,6 @@ wt_get_visits(organization)
 }
 \arguments{
 \item{organization}{Either the short letter or numeric digit representing the Organization}
-
-\item{location}{Supply a location to get all visits from that location}
 }
 \value{
 A data frame listing an Organizations' visits

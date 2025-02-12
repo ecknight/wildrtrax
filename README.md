@@ -145,9 +145,9 @@ Sys.setenv(WT_USERNAME = "*****", WT_PASSWORD = "*****")
 wt_auth()
 
 # Get a project id
-projects <- wt_get_download_summary("CAM") %>%
-  filter(project == "ABMI Ecosystem Health 2014") %>%
-  select(project_id) %>%
+projects <- wt_get_download_summary("CAM") |>
+  filter(project == "ABMI Ecosystem Health 2014") |>
+  select(project_id) |>
   pull()
 
 # Download data

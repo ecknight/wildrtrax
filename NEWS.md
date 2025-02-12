@@ -2,12 +2,7 @@
 
 ## Major changes
 
-* Continued GET request support; new function `wt_get_visits()` to get Organization visits
-
-## Minor changes
-
-*
-
+* Continued GET request support with new functions: `wt_get_visits()`, `wt_get_recordings()`, `wt_get_image_sets()`
 
 # wildrtrax 1.3.2
 

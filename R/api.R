@@ -748,7 +748,6 @@ wt_get_locations <- function(organization) {
 #' @description Obtain a table listing visits emulating the Visits tab in a WildTrax Organization
 #'
 #' @param organization Either the short letter or numeric digit representing the Organization
-#' @param location Supply a location to get all visits from that location
 #'
 #' @import httr2
 #' @import dplyr
