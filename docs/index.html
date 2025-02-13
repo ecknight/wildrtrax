@@ -196,7 +196,7 @@
 <span>                           </span>
 <span><span class="va">eval</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_evaluate_classifier.html">wt_evaluate_classifier</a></span><span class="op">(</span><span class="va">data</span>, resolution <span class="op">=</span> <span class="st">"task"</span>, remove_species <span class="op">=</span> <span class="cn">TRUE</span>, thresholds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">99</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">threshold_use</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_get_threshold.html">wt_get_threshold</a></span><span class="op">(</span><span class="va">eval</span><span class="op">)</span></span>
+<span><span class="va">threshold_use</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_classifier_threshold.html">wt_classifier_threshold</a></span><span class="op">(</span><span class="va">eval</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Find additional species</span></span>
 <span><span class="fu"><a href="reference/wt_additional_species.html">wt_additional_species</a></span><span class="op">(</span><span class="va">data</span>, remove_species <span class="op">=</span> <span class="cn">TRUE</span>, threshold <span class="op">=</span> <span class="va">threshold_use</span>, resolution<span class="op">=</span><span class="st">"task"</span><span class="op">)</span></span></code></pre></div>

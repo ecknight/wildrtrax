@@ -126,7 +126,7 @@ wt_evaluate_classifier <- function(data, resolution = "recording", remove_specie
 
 #' Identify optimal threshold
 #'
-#' @description Retrieves the score threshold that maximizes F-score, which is a tradeoff between precision and recall.
+#' @description Retrieves the score threshold that maximizes F-score, which is a trade-off between precision and recall.
 #'
 #' @param data Tibble output from the `wt_evaluate_classifier()` function.
 #'
@@ -141,12 +141,12 @@ wt_evaluate_classifier <- function(data, resolution = "recording", remove_specie
 #' eval <- wt_evaluate_classifier(data, resolution = "recording",
 #' remove_species = TRUE, thresholds = c(10, 99))
 #'
-#' threshold_use <- wt_get_threshold(eval) |> print()
+#' threshold_use <- wt_classifier_threshold(eval) |> print()
 #' }
 #'
 #' @return A single numeric value
 
-wt_get_threshold <- function(data){
+wt_classifier_threshold <- function(data){
 
   # Filter to highest F-score
   highest_fscore <- data |>

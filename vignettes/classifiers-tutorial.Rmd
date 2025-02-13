@@ -187,11 +187,11 @@ grid.arrange(plot.p.e, plot.r.e, plot.f.e, plot.pr.e, ncol=2)
 
 ## Selecting and filtering a threshold
 
-You can use the precision and recall values in the output of the `wt_evaluate_classifier()` function to select a score threshold manually, or you can use the `wt_get_threshold()` function to select the highest threshold that maximizes F-score.
+You can use the precision and recall values in the output of the `wt_evaluate_classifier()` function to select a score threshold manually, or you can use the `wt_classifier_threshold()` function to select the highest threshold that maximizes F-score.
 
 ```{r, message=F, warning=F}
 
-threshold_use <- wt_get_threshold(eval) |> 
+threshold_use <- wt_classifier_threshold(eval) |> 
   print()
 
 ```
@@ -259,7 +259,7 @@ eval_ccsp <- wt_evaluate_classifier(data,
                               thresholds = c(10, 99))
 
 #Filter the detections to the best threshold
-threshold_ccsp <- wt_get_threshold(eval_ccsp)
+threshold_ccsp <- wt_classifier_threshold(eval_ccsp)
 
 #Look at performance at that threshold
 eval_ccsp[eval_ccsp$threshold==threshold_ccsp,]

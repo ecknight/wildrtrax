@@ -124,7 +124,7 @@ data <- wt_download_report(project_id = 1144, sensor_id = "ARU", reports = c("ma
                            
 eval <- wt_evaluate_classifier(data, resolution = "task", remove_species = TRUE, thresholds = c(10, 99))
 
-threshold_use <- wt_get_threshold(eval)
+threshold_use <- wt_classifier_threshold(eval)
 
 # Find additional species
 wt_additional_species(data, remove_species = TRUE, threshold = threshold_use, resolution="task")
