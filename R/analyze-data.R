@@ -205,13 +205,10 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
   # Make wide if desired
   if (output_format == "wide") {
     z <- z |>
-      tidyr::pivot_wider(id_cols = c({{ project_col }}, {{ station_col }}, year,
-                                     time_interval, n_days_effort),
-                         names_from = {{ species_col }}, values_from = variable, names_sep = ".")
+      tidyr::pivot_wider(id_cols = c({{ project_col }}, {{ station_col }}, year, time_interval, n_days_effort),
+                         names_from = {{ species_col }}, values_from = all_of(variable), names_sep = ".")
   } else if (output_format == "long") {
-    z <- z |> select({{ project_col }}, {{ station_col }}, year,
-                     time_interval, n_days_effort,
-                     {{ species_col }}, variable) |>
+    z <- z |> dplyr::select({{ project_col }}, {{ station_col }}, year, time_interval, n_days_effort, {{ species_col }}, variable) |>
       tidyr::pivot_longer(cols = variable, names_to = "variable", values_to = "value")
   }
 
