@@ -382,7 +382,7 @@ wt_download_media <- function(input, output, type = c("recording","image", "tag_
           organization, "_", location, "_", format(recording_date_time, "%Y%m%d_%H%M%S"), "__",
           species_code, "__", individual_order, "__", detection_time, ".", audio_file_type
         ))
-      ) |>
+      ) %>%
       {
         purrr::map2_chr(.$spectrogram_url, .$clip_file_name_spec, download_file)
         purrr::map2_chr(.$clip_url, .$clip_file_name_audio, download_file)
@@ -391,7 +391,7 @@ wt_download_media <- function(input, output, type = c("recording","image", "tag_
   } else if ("media_url" %in% colnames(input_data)){
     output_data <- input_data |>
       mutate(image_name = file.path(output,
-                                    paste0(location, "_", format(image_date_time, "%Y%m%d_%H%M%S"), ".jpeg"))) |>
+                                    paste0(location, "_", format(image_date_time, "%Y%m%d_%H%M%S"), ".jpeg"))) %>%
       {
         print(paste("Media URL:", .$media_url))
         print(paste("Image Name:", .$image_name))
