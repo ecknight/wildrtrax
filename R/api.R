@@ -148,7 +148,7 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
     tibble::as_tibble() |>
     dplyr::select(project_id, sensor)
 
-  sensor_value <- i %>%
+  sensor_value <- i |>
     dplyr::rename('id' = 1) |>
     dplyr::filter(id %in% project_id) |>
     dplyr::pull(sensor)
@@ -351,7 +351,7 @@ wt_download_media <- function(input, output, type = c("recording","image", "tag_
   # Process based on type
   # Full recording
   if (type == "recording" & "recording_url" %in% colnames(input_data)) {
-    output_data <- input_data %>%
+    output_data <- input_data |>
       mutate(
         file_type = sub('.*\\.(\\w+)$', '\\1', basename(recording_url)),
         clip_file_name = paste0(output, "/", location, "_", format(recording_date_time, "%Y%m%d_%H%M%S"), ".", file_type)
@@ -359,7 +359,7 @@ wt_download_media <- function(input, output, type = c("recording","image", "tag_
       { purrr::map2_chr(.$recording_url, .$clip_file_name, download_file) }
     # Tag spectrograms
   } else if (type == "tag_clip_spectrogram" & "spectrogram_url" %in% colnames(input_data)) {
-    output_data <- input_data %>%
+    output_data <- input_data |>
       mutate(
         detection_time = gsub("\\.", "_", as.character(detection_time)),
         clip_file_name = file.path(output, paste0(
@@ -370,7 +370,7 @@ wt_download_media <- function(input, output, type = c("recording","image", "tag_
       { purrr::map2_chr(.$spectrogram_url, .$clip_file_name, download_file) }
     # Tag spectrogram and tag clip
   } else if (all(c("spectrogram_url", "clip_url") %in% colnames(input_data)) & any(type %in% c("tag_clip_spectrogram", "tag_clip_audio"))) {
-    output_data <- input_data %>%
+    output_data <- input_data |>
       mutate(
         detection_time = gsub("\\.", "_", as.character(detection_time)),
         audio_file_type = sub('.*\\.(\\w+)$', '\\1', clip_url),
@@ -382,16 +382,16 @@ wt_download_media <- function(input, output, type = c("recording","image", "tag_
           organization, "_", location, "_", format(recording_date_time, "%Y%m%d_%H%M%S"), "__",
           species_code, "__", individual_order, "__", detection_time, ".", audio_file_type
         ))
-      ) %>%
+      ) |>
       {
         purrr::map2_chr(.$spectrogram_url, .$clip_file_name_spec, download_file)
         purrr::map2_chr(.$clip_url, .$clip_file_name_audio, download_file)
       }
     # Images
   } else if ("media_url" %in% colnames(input_data)){
-    output_data <- input_data %>%
+    output_data <- input_data |>
       mutate(image_name = file.path(output,
-                                    paste0(location, "_", format(image_date_time, "%Y%m%d_%H%M%S"), ".jpeg"))) %>%
+                                    paste0(location, "_", format(image_date_time, "%Y%m%d_%H%M%S"), ".jpeg"))) |>
       {
         print(paste("Media URL:", .$media_url))
         print(paste("Image Name:", .$image_name))
@@ -433,7 +433,7 @@ wt_download_media <- function(input, output, type = c("recording","image", "tag_
 
 wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary = NULL) {
 
-  if (!exists("._wt_auth_env_")) {
+  if (!exists("._wt_auth_env_$access_token")) {
     message("Currently searching as a public user, access to data will be limited. Use wt_auth() to login.")
     tok_used <- NULL
   } else {
@@ -734,9 +734,9 @@ wt_get_locations <- function(organization) {
     purrr::map_df(~ data.frame(id = .x$id, type = .x$type))
 
   # Replace visibilityId with human-readable type from the op data frame
-  x <- x %>%
-    left_join(op, by = c("location_visibility" = "id")) %>%
-    select(-location_visibility) %>%
+  x <- x |>
+    left_join(op, by = c("location_visibility" = "id")) |>
+    select(-location_visibility) |>
     rename(location_visibility = type)  # Renaming the 'type' to 'location_visibility'
 
   return(x)
