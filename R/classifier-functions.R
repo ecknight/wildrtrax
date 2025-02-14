@@ -203,14 +203,14 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 50, r
 
   #Create a join between task and recording
   classed <- class |>
-    dplyr::inner_join(data[[2]] |> dplyr::select(recording_id, task_id, task_duration), by = c("recording_id" = "recording_id"))
+    dplyr::inner_join(data[[2]] |> dplyr::select(recording_id, task_id, task_duration), by = c("recording_id" = "recording_id"), relationship = "many-to-many")
 
   if(resolution=="task"){
 
     #Classifier report
     detections <- class |>
       dplyr::filter(confidence >= threshold) |>
-      dplyr::inner_join(data[[2]] |> dplyr::select(recording_id, task_id, task_duration), by = c("recording_id" = "recording_id")) |>
+      dplyr::inner_join(data[[2]] |> dplyr::select(recording_id, task_id, task_duration), by = c("recording_id" = "recording_id"), relationship = "many-to-many") |>
       dplyr::filter(!start_s > task_duration) |>
       dplyr::group_by(project_id, location_id, recording_id, task_id, species_code) |>
       dplyr::summarize(confidence = max(confidence),  .groups="keep") |>
