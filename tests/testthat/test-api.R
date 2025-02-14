@@ -16,12 +16,17 @@ bad_aoi <- list(
   c(-112.85438, 57.13472)
 )
 
-Sys.setenv(WT_USERNAME = "guest", WT_PASSWORD = "Apple123")
-wt_auth(force = TRUE)
-
 test_that("Download without authentication or boundary; single-species", {
   expect_true(!is.null(wt_dd_summary(sensor = 'ARU', species = 'White-throated Sparrow', boundary = NULL)))
 })
+
+test_that("Download without authentication or boundary; single-species", {
+  expect_true(!is.null(wt_dd_summary(sensor = 'ARU', species = 'White-throated Sparrow', boundary = aoi)))
+})
+
+
+Sys.setenv(WT_USERNAME = "guest", WT_PASSWORD = "Apple123")
+wt_auth(force = TRUE)
 
 test_that("Download without authentication with boundary; single-species", {
   expect_true(!is.null(wt_dd_summary(sensor = 'ARU', species = 'White-throated Sparrow', boundary = aoi)))
