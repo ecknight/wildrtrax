@@ -3,11 +3,12 @@
 ## Major changes
 
 * Continued GET request support with new functions: `wt_get_visits()`, `wt_get_recordings()`, `wt_get_image_sets()`. Experimenting with `wt_location_photos()`
-* Preparing package for WildTrax 2.0 overhaul; branching to dev-wildtrax-2.0
+* `wt_get_threshold` now becomes `wt_classifier_threshold()` to distinguish from aforementioned GET functions
 
 ## Minor changes
 
 * General maintenance; continue moving to base pipes and lambda functions
+* Preparing package for WildTrax 2.0 overhaul; branching to dev-wildtrax-2.0
 
 # wildrtrax 1.3.2
 

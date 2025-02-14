@@ -239,7 +239,6 @@
 #' @import QPAD dplyr httr2
 #' @importFrom terra extract rast vect project
 #'
-#' @export
 
 .make_x <- function(data, tz="local", check_xy=TRUE) {
 
@@ -606,7 +605,6 @@
 #' @keywords internal
 #'
 #' @import dplyr
-#' @export
 #'
 #' @return A vector of precision, recall, F-score, and threshold
 
@@ -638,7 +636,7 @@
 #' @param dir Directory containing files
 #'
 #' @keywords internal
-#' @export
+#'
 
 .delete_wav_files <- function(dir) {
   wav_files <- list.files(path = dir, pattern = "\\.wav$", recursive = TRUE, full.names = TRUE)
@@ -650,7 +648,6 @@
 #' @description Internal function to get Organizations
 #'
 #' @keywords internal
-#' @export
 
 .get_org_id <- function(organization) {
 
