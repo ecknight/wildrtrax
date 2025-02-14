@@ -29,7 +29,7 @@
     )
   }
 
-  r <-   req |>
+  r <- req |>
     httr2::req_url_path("oauth/token") |>
     httr2::req_body_form(
       audience = "http://www.wildtrax.ca",
@@ -248,7 +248,7 @@
 
   # Function to download and read a raster file using httr2
   download_and_read_raster <- function(url, filename) {
-    req <- request(url) %>%
+    req <- request(url) |>
       req_perform()  # Perform the request
 
     # Save the response content to a file
@@ -667,8 +667,8 @@
     )
 
     # Retrieve and return the numeric org_id
-    return(og_table %>%
-             filter(org_code == organization) %>%
+    return(og_table |>
+             filter(org_code == organization) |>
              pull(org_id))
   }
   stop("Organization must be either numeric or character")
