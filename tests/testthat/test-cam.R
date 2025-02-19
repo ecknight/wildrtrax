@@ -17,7 +17,7 @@ test_that("Downloading CAM report", {
 
 # Test other reports
 test_that("Downloading CAM report", {
-  abmi_amph_cam <- wt_download_report(391, 'CAM', c('project','location', 'image_set','image_report','megaclassifier','megadetector'), FALSE)
+  abmi_amph_cam <- wt_download_report(391, 'CAM', c('project','daylight_report','location', 'image_set_report','image_report','megaclassifier','megadetector','tag'), FALSE)
   expect_true(!is.null(abmi_amph_cam))
 })
 
