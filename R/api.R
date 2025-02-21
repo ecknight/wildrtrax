@@ -164,9 +164,9 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
   }
 
   # Allowable reports for each sensor
-  cam <- c("main", "project", "location", "image_set", "image_report", "tag", "megadetector", "megaclassifier", "daylight", "definitions")
+  cam <- c("main", "project", "location", "image_set_report", "image_report", "tag", "megadetector", "megaclassifier", "daylight_report", "definitions")
   aru <- c("main", "project", "location", "birdnet", "recording", "tag", "definitions")
-  pc <- c("main", "project", "location", "point_count", "definitions")
+  pc <- c("main", "project", "location", "point_count", "daylight_report", "definitions")
 
   # Check that the user supplied a valid report type depending on the sensor
   if(sensor_id == "CAM" & !all(reports %in% cam)) {
@@ -200,12 +200,12 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
     locationReport = if ("location" %in% reports) query_list$locationReport <- TRUE,
     tagReport = if ("tag" %in% reports) query_list$tagReport <- TRUE,
     imageReport = if ("image_report" %in% reports) query_list$imageReport <- TRUE,
-    imageSetReport = if ("image_set" %in% reports) query_list$imageSetReport <- TRUE,
+    imageSetReport = if ("image_set_report" %in% reports) query_list$imageSetReport <- TRUE,
     birdnetReport = if ("birdnet" %in% reports) query_list$birdnetReport <- TRUE,
     #hawkEarReport = if ("hawkears" %in% reports) query_list$hawkEarReport <- TRUE,
     megaDetectorReport = if ("megadetector" %in% reports) query_list$megaDetectorReport <- TRUE,
     megaClassifierReport = if ("megaclassifier" %in% reports) query_list$megaClassifierReport <- TRUE,
-    daylightReport = if ("daylight" %in% reports) query_list$daylightReport <- TRUE,
+    dayLightReport = if ("daylight_report" %in% reports) query_list$dayLightReport <- TRUE,
     includeMetaData = TRUE,
     splitLocation = TRUE
   )
@@ -433,7 +433,7 @@ wt_download_media <- function(input, output, type = c("recording","image", "tag_
 
 wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary = NULL) {
 
-  if (!exists("._wt_auth_env_$access_token")) {
+  if (!exists("access_token", env = ._wt_auth_env_)) {
     message("Currently searching as a public user, access to data will be limited. Use wt_auth() to login.")
     tok_used <- NULL
   } else {
