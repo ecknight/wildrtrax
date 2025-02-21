@@ -110,7 +110,7 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
         group_by({{ project_col }}, {{ station_col }}) |>
         arrange({{ date_time_col }}) |>
         mutate(period = rep(seq_along(rle(image_fov)$lengths), rle(image_fov)$lengths)) |>
-        filter(image_fov == "WITHIN") |>
+        filter(image_fov == TRUE) |>
         group_by({{ project_col }}, {{ station_col }}, period) |>
         summarise(
           start_date = as.Date(min({{ date_time_col }})),
