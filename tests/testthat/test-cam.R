@@ -11,7 +11,7 @@ test_that("Downloading CAM report", {
 })
 
 test_that("Downloading CAM report", {
-  suppressMessages(abmi_amph_cam <- wt_download_report(391, 'CAM', c('tag','image_set'), FALSE))
+  suppressMessages(abmi_amph_cam <- wt_download_report(391, 'CAM', c('tag','image_set_report'), FALSE))
   expect_true(length(abmi_amph_cam) == 2)
 })
 
