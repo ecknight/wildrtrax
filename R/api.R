@@ -433,7 +433,7 @@ wt_download_media <- function(input, output, type = c("recording","image", "tag_
 
 wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary = NULL) {
 
-  if (!exists("access_token", env = ._wt_auth_env_)) {
+  if (!exists("access_token", envir = ._wt_auth_env_)) {
     message("Currently searching as a public user, access to data will be limited. Use wt_auth() to login.")
     tok_used <- NULL
   } else {
@@ -483,6 +483,7 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
       }
     }
   } else {
+    # User is logged in - gets the whole species table
     species_tibble <- wt_get_species()
     spp <- species_tibble |>
       filter(species_common_name %in% species) |>
@@ -764,8 +765,6 @@ wt_get_locations <- function(organization) {
 #' @return A data frame listing an Organizations' visits
 #'
 
-# Check if authentication has expired:
-
 wt_get_visits <- function(organization) {
 
   if (.wt_auth_expired())
@@ -956,3 +955,65 @@ wt_location_photos <- function(data, direction, dir) {
 
 }
 
+#' Get project-species from WildTrax project
+#'
+#' @description Obtain a table listing species added to a specific project in WildTrax
+#'
+#' @param project_id Either the project_id or the project name of the WildTrax project
+#' @param sensor_id Sensor of the project, either 'ARU', 'CAM' or 'PC'
+#'
+#' @import httr2
+#' @import dplyr
+#'
+#' @export
+#'
+#' @example
+#' \dontrun{
+#' # Authenticate first:
+#' wt_auth()
+#' my_project <- wt_get_download_summary(sensor_id = 'ARU') |>
+#' filter(grepl('Ecosystem Health 2023',project)) |>
+#' pull(project_id)
+#' wt_get_project_species(project_id = my_project, sensor_id = 'ARU')
+#' }
+#'
+#' @return A data frame listing an Organizations' locations
+#'
+
+wt_get_project_species <- function(project_id, sensor_id) {
+
+  # Check if authentication has expired:
+  if (.wt_auth_expired())
+    stop("Please authenticate with wt_auth().", call. = FALSE)
+
+  sens <- c("PC", "ARU", "CAM")
+
+  # Stop call if sensor id value is not within range of possible values
+  if(!sensor_id %in% sens) {
+    stop("A valid value for sensor_id must be supplied. Either ARU, CAM or PC", call. = TRUE)
+  }
+
+  if (sensor_id == 'CAM') {
+  # Request location data
+  r <- .wt_api_gr(
+    path = "/bis/get-project-species-details",
+    projectId = 391,
+    limit = 1e9
+  )
+  }
+
+  x <- resp_body_json(r)
+
+  included_data <- x$Included
+  excluded_data <- x$Excluded
+
+  included <- map_dfr(included_data, ~ tibble(
+    species_id = .x$speciesId,
+    exists = .x$exists
+  ))
+
+  included_names <- inner_join(included, wt_get_species() |> select(species_id, species_common_name), by = "species_id")
+
+  return(included_names)
+
+}
