@@ -54,6 +54,9 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
     stop("Please only supply a value for one of `raw_data` or `effort_data`.")
   }
 
+  # Todo - check that supplied data contains all necessary columns
+
+
   # Check output variable(s)
   all_vars <- c("detections", "counts", "presence")
   if (length(variable) == 1 &&
@@ -172,7 +175,7 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
       mutate(across(all_vars, ~ tidyr::replace_na(.x, 0)))
   } else if (time_interval == "week") {
     x <- x |>
-      mutate(week = isoweek(day)) |>
+      mutate(week = as.numeric(format(day, "%V"))) |>
       group_by({{ project_col }}, {{ station_col }}, year, week) |>
       tally(name = "n_days_effort") |>
       ungroup()
