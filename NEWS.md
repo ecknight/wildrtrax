@@ -2,13 +2,14 @@
 
 ## Major changes
 
-* Continued GET request support with new functions: `wt_get_visits()`, `wt_get_recordings()`, `wt_get_image_sets()`. Experimenting with `wt_location_photos()`
-* `wt_get_threshold` now becomes `wt_classifier_threshold()` to distinguish from aforementioned GET functions
+* Continued GET request support with new functions: `wt_get_visits()`, `wt_get_recordings()`, `wt_get_image_sets()`, `wt_get_project_species()`
+* `wt_get_threshold` now becomes `wt_classifier_threshold()` to distinguish from other GET functions
 
 ## Minor changes
 
-* General maintenance; continue moving to base pipes and lambda functions
-* Preparing package for WildTrax 2.0 overhaul; branching to dev-wildtrax-2.0
+* Camera function maintenance for [#70](https://github.com/ABbiodiversity/wildrtrax/issues/70), ;
+* Continue moving to base pipes and lambda functions
+* Preparing package for WildTrax 2.0
 
 # wildrtrax 1.3.2
 
@@ -21,7 +22,7 @@
 
 * Generate R user agent functionally
 * Tweaks to LDFCs, including addition of borders for each recording
-* Deal with dependency changes for camera functions (#61, #63)
+* Deal with dependency changes for camera functions ([#61](https://github.com/ABbiodiversity/wildrtrax/issues/61), [#63](https://github.com/ABbiodiversity/wildrtrax/issues/63))
 * Added README work flows; vignette enhancements
 
 # wildrtrax 1.3.1
@@ -33,9 +34,9 @@
 
 ## Minor changes
 
-* Address camera functionalities from #60, #62
-* Add GRTS grid cells for Alaska and contiguous United States for `wt_add_grts()` (#64)
-* Use `.wt_col_types()` to dynamically adjust column reports to help address (#55)
+* Address camera functionalities from [#60](https://github.com/ABbiodiversity/wildrtrax/issues/60), [#62](https://github.com/ABbiodiversity/wildrtrax/issues/62)
+* Add GRTS grid cells for Alaska and contiguous United States for `wt_add_grts()` ([#64](https://github.com/ABbiodiversity/wildrtrax/issues/64))
+* Use `.wt_col_types()` to dynamically adjust column reports to help address ([#55](https://github.com/ABbiodiversity/wildrtrax/issues/55))
 * Moved `wt_calculate_prf()` to internal function
 
 # wildrtrax 1.3.0

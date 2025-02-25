@@ -75,26 +75,29 @@ test_that("output format 'long' works correctly", {
   expect_true(nrow(result) == 36108)
 })
 
-# Test 5: Test that valid time intervals are processed correctly
 test_that("valid time intervals are handled", {
+
   result_day <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, time_interval = "day", output_format = "long")
   result_week <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, time_interval = "week", output_format = "long")
   result_month <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, time_interval = "month", output_format = "long")
-
-  ## FIX THIS
   #result_full <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, time_interval = "full", output_format = "long")
+  result_day_w <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, time_interval = "day", output_format = "wide")
+  result_week_w <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, time_interval = "week", output_format = "wide")
+  result_month_w <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, time_interval = "month", output_format = "wide")
+  #result_full_w <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, time_interval = "full", output_format = "wide")
 
   expect_equal(nrow(result_day), 36108)  # Adjust this based on the actual expected number of rows for each case
   expect_equal(nrow(result_week), 5454)
   expect_equal(nrow(result_month), 1530)
+  expect_true(nrow(result_day_w) == 2006)
+  expect_true(nrow(result_week_w) == 303)
+  expect_true(nrow(result_month_w) == 85)
 })
 
-# Test 6: Check if all variables are processed correctly
 test_that("all specified variables are included in the summarised output", {
   result <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, variable = "all", time_interval = "day", output_format = "long")
 })
 
-# Test 9: Exclude out-of-range data functionality
 test_that("exclude_out_of_range removes data outside of the camera's field of view", {
   result <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, exclude_out_of_range = TRUE, time_interval = "day", output_format = "long")
   result_out <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, exclude_out_of_range = FALSE, time_interval = "day", output_format = "long")

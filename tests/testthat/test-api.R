@@ -25,7 +25,7 @@ test_that("Download without authentication or boundary; single-species", {
 })
 
 test_that("Download without authentication, bad boundary; single-species", {
-  expect_true(!is.null(wt_dd_summary(sensor = 'ARU', species = 'White-throated Sparrow', boundary = bad_aoi)))
+  expect_error(!is.null(wt_dd_summary(sensor = 'ARU', species = 'White-throated Sparrow', boundary = bad_aoi)))
 })
 
 test_that("Download without authentication, boundary; multiple single-species", {

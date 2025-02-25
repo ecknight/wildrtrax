@@ -959,59 +959,51 @@ wt_location_photos <- function(data, direction, dir) {
 #'
 #' @description Obtain a table listing species added to a specific project in WildTrax
 #'
-#' @param project_id Either the project_id or the project name of the WildTrax project
-#' @param sensor_id Sensor of the project, either 'ARU', 'CAM' or 'PC'
+#' @param project_id The project_id of the WildTrax project
 #'
 #' @import httr2
 #' @import dplyr
 #'
 #' @export
 #'
-#' @example
+#' @examples
 #' \dontrun{
 #' # Authenticate first:
 #' wt_auth()
 #' my_project <- wt_get_download_summary(sensor_id = 'ARU') |>
 #' filter(grepl('Ecosystem Health 2023',project)) |>
 #' pull(project_id)
-#' wt_get_project_species(project_id = my_project, sensor_id = 'ARU')
+#' wt_get_project_species(project_id = my_project)
 #' }
 #'
 #' @return A data frame listing an Organizations' locations
 #'
 
-wt_get_project_species <- function(project_id, sensor_id) {
+wt_get_project_species <- function(project_id) {
 
   # Check if authentication has expired:
   if (.wt_auth_expired())
     stop("Please authenticate with wt_auth().", call. = FALSE)
 
-  sens <- c("PC", "ARU", "CAM")
-
-  # Stop call if sensor id value is not within range of possible values
-  if(!sensor_id %in% sens) {
-    stop("A valid value for sensor_id must be supplied. Either ARU, CAM or PC", call. = TRUE)
-  }
-
-  if (sensor_id == 'CAM') {
   # Request location data
   r <- .wt_api_gr(
-    path = "/bis/get-project-species-details",
-    projectId = 391,
-    limit = 1e9
-  )
-  }
+      path = "/bis/get-aru-project-species",
+      projectId = project_id,
+      limit = 1e9
+    )
 
   x <- resp_body_json(r)
 
   included_data <- x$Included
   excluded_data <- x$Excluded
 
+  # Map the columns
   included <- map_dfr(included_data, ~ tibble(
     species_id = .x$speciesId,
     exists = .x$exists
   ))
 
+  # Join against common names
   included_names <- inner_join(included, wt_get_species() |> select(species_id, species_common_name), by = "species_id")
 
   return(included_names)
