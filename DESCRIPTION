@@ -15,7 +15,7 @@ Authors@R:
              role = "aut",
              email = "ecknight@ualberta.ca"))
 Maintainer: Alex MacPhail <agmacpha@ualberta.ca>
-Description: This is an R package that enables environmental sensor users to create comprehensive work flows for managing and analyzing data.
+Description: This R package enables users of environmental sensors to create comprehensive workflows for managing and analyzing data associated with WildTrax
 Depends: R (>= 4.4.0)
 License: MIT + file LICENSE
 Imports:

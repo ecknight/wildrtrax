@@ -3,13 +3,12 @@
 ## Major changes
 
 * Continued GET request support with new functions: `wt_get_visits()`, `wt_get_recordings()`, `wt_get_image_sets()`, `wt_get_project_species()`
-* `wt_get_threshold` now becomes `wt_classifier_threshold()` to distinguish from other GET functions
+* `wt_get_threshold` becomes `wt_classifier_threshold()` to distinguish from other GET functions
 
 ## Minor changes
 
-* Camera function maintenance for [#70](https://github.com/ABbiodiversity/wildrtrax/issues/70), ;
-* Continue moving to base pipes and lambda functions
-* Preparing package for WildTrax 2.0
+* Camera function maintenance for [#70](https://github.com/ABbiodiversity/wildrtrax/issues/70); increasing camera test suites for common permutations 
+* Branching development to prepare package for WildTrax 2.0
 
 # wildrtrax 1.3.2
 

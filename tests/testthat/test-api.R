@@ -48,4 +48,9 @@ test_that("Download with authentication with boundary; multiple species logged i
   expect_true(!is.null(wt_dd_summary(sensor = 'ARU', species = c('White-throated Sparrow','Townsend\'s Warbler'), boundary = aoi)))
 })
 
+# test_that("Test project-species", {
+#   expect_true(!is.null(wt_get_project_species(2460)))
+# })
+
+
 

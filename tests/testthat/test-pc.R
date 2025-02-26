@@ -64,3 +64,4 @@ test_that('Error for TMTT', {
   pc_tidy <- wt_tidy_species(pc_data, remove = c("unknown"), zerofill = T)
   expect_error(wt_replace_tmtt(pc_tidy, calc = 'round'))
 })
+

@@ -39,7 +39,7 @@ my_report <- wt_download_report(project_id = 620, sensor_id = 'ARU', reports = "
 
 ## Data wrangling
 
-Now let's start cleaning things up a bit. We don't need certain abiotic and mammal codes so let's remove those with `wt_tidy_species()`,
+Let's use some of the functins that are available to start cleaning up a dataset. For this question, we don't need certain abiotic and mammal codes so let's remove those with `wt_tidy_species()`,
 
 ```{r, tidy-chunk, eval = T, echo = T, warning = F, message = F}
 my_tidy_data <- wt_tidy_species(my_report, remove = c("mammal"), zerofill=F)

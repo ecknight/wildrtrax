@@ -962,6 +962,7 @@ wt_location_photos <- function(data, direction, dir) {
 #' @param project_id The project_id of the WildTrax project
 #'
 #' @import httr2
+#' @import purrr
 #' @import dplyr
 #'
 #' @export
@@ -987,12 +988,21 @@ wt_get_project_species <- function(project_id) {
 
   # Request location data
   r <- .wt_api_gr(
-      path = "/bis/get-aru-project-species",
+      path = "/bis/get-project-species-details",
       projectId = project_id,
       limit = 1e9
     )
 
+  if (r$status_code == 403) {
+    stop("Permission denied: You do not have access to request this data.", call. = FALSE)
+    return(NULL)
+  }
+
   x <- resp_body_json(r)
+
+  if (x$error == "Permission denied") {
+    stop("You do not have permission for this data")
+  }
 
   included_data <- x$Included
   excluded_data <- x$Excluded
