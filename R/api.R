@@ -86,6 +86,7 @@ wt_get_download_summary <- function(sensor_id) {
 #' @param sensor_id Character; Can either be "ARU", "CAM", or "PC".
 #' @param reports Character; The report type to be returned. Multiple values are accepted as a concatenated string.
 #' @param weather_cols Logical; Do you want to include weather information for your stations? Defaults to TRUE.
+#' @param maximum_time Numeric; Number of seconds to force to wait for downloads.
 #' @details Valid values for argument \code{report} when \code{sensor_id} = "CAM" currently are:
 #' \itemize{
 #'  \item main
@@ -137,7 +138,7 @@ wt_get_download_summary <- function(sensor_id) {
 #' @return If multiple report types are requested, a list object is returned; if only one, a dataframe.
 #'
 
-wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TRUE) {
+wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TRUE, max_seconds=300) {
 
   # Check if authentication has expired:
   if (.wt_auth_expired())
@@ -207,7 +208,8 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
     megaClassifierReport = if ("megaclassifier" %in% reports) query_list$megaClassifierReport <- TRUE,
     dayLightReport = if ("daylight_report" %in% reports) query_list$dayLightReport <- TRUE,
     includeMetaData = TRUE,
-    splitLocation = TRUE
+    splitLocation = TRUE,
+    max_time = max_seconds
   )
 
   writeBin(httr2::resp_body_raw(r), tmp)

@@ -127,7 +127,7 @@
 #'
 #' @param path The path to the API
 #' @param ... Argument to pass along into POST query
-#' @param maxt_time The maximum number of seconds an API request can take. By default 300.
+#' @param max_time The maximum number of seconds an API request can take. By default 300.
 #'
 #' @keywords internal
 #'
