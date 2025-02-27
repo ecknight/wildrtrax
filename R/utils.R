@@ -127,12 +127,13 @@
 #'
 #' @param path The path to the API
 #' @param ... Argument to pass along into POST query
+#' @param maxt_time The maximum number of seconds an API request can take. By default 300.
 #'
 #' @keywords internal
 #'
 #' @import httr2
 
-.wt_api_pr <- function(path, ...) {
+.wt_api_pr <- function(path, ..., max_time=300) {
 
   # Check if authentication has expired:
   if (.wt_auth_expired()) {stop("Please authenticate with wt_auth().", call. = FALSE)}
@@ -155,7 +156,7 @@
     req_headers(Authorization = paste("Bearer", ._wt_auth_env_$access_token)) |>
     req_user_agent(u) |>
     req_method("POST") |>
-    req_timeout(300) |> # Add a 5 minute timeout
+    req_timeout(max_time) |>
     req_perform()
 
   # Handle errors
