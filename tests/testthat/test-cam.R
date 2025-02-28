@@ -15,10 +15,14 @@ test_that("Downloading CAM report", {
 
 
 test_that("Individual detections", {
-  test_data_set
   ind_detections <- wt_ind_detect(test_data_set, threshold = 60, units = "minutes", datetime_col = image_date_time, remove_human = TRUE, remove_domestic = TRUE)
   expect_true(nrow(test_data_set) > nrow(ind_detections))
 
+})
+
+test_that("Individual detections", {
+  summary <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, time_interval = "day", variable = "detections", output_format = "wide")
+  expect_true(ncol(summary) > ncol(ind_detections))
 })
 
 # Test equality of summarized camera data
