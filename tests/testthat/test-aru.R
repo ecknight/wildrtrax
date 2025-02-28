@@ -2,7 +2,7 @@ library(testthat)
 
 Sys.setenv(WT_USERNAME = "guest", WT_PASSWORD = "Apple123")
 wt_auth(force = TRUE)
-cypress_hills <- wt_download_report(1097, 'CAM', 'main', FALSE)
+cypress_hills <- wt_download_report(620, 'ARU', 'main', FALSE)
 
 ################################### ARU Test suite
 
@@ -11,7 +11,7 @@ test_that("Authentication works correctly", {
   })
 
 test_that("Downloading ARU report", {
-  expect_true(!is.null(cypress_hills_aru))
+  expect_true(!is.null(cypress_hills))
 })
 
 test_that("Testing a Private Project", {
@@ -47,7 +47,7 @@ test_that("Replacing TMTT", {
 })
 
 test_that('Making wide', {
-  cypress_hills_tidy <- wt_tidy_species(cypress_hills_aru, remove = c("mammal", "abiotic", "amphibian", "unknown"), zerofill = T)
+  cypress_hills_tidy <- wt_tidy_species(cypress_hills, remove = c("mammal", "abiotic", "amphibian", "unknown"), zerofill = T)
   cypress_hills_tmtt <- wt_replace_tmtt(cypress_hills_tidy, calc = "round")
   cypress_hills_wide <- wt_make_wide(cypress_hills_tmtt, sound="all")
   expect_true(ncol(cypress_hills_wide) > ncol(cypress_hills_tmtt))

@@ -36,8 +36,6 @@ test_that("A specific summarized cam process", {
 
   df <- test_data_set
 
-  ind_detections
-
   summary <- wt_summarise_cam(
     detect_data = ind_detections,
     raw_data = df,
@@ -100,11 +98,12 @@ test_that("valid time intervals are handled", {
 
 test_that("all specified variables are included in the summarised output", {
   result <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, variable = "all", time_interval = "day", output_format = "long")
+  expect_true(!is.null(result))
 })
 
 test_that("exclude_out_of_range removes data outside of the camera's field of view", {
-  result <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, exclude_out_of_range = TRUE, time_interval = "day", output_format = "long")
-  result_out <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, exclude_out_of_range = FALSE, time_interval = "day", output_format = "long")
+  result <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, exclude_out_of_range = TRUE, time_interval = "day", output_format = "long", variable = "counts")
+  result_out <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, exclude_out_of_range = FALSE, time_interval = "day", output_format = "long", variable = "counts")
   expect_true(nrow(result_out) > nrow(result))
 })
 
