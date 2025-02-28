@@ -2,7 +2,7 @@ library(testthat)
 
 Sys.setenv(WT_USERNAME = "guest", WT_PASSWORD = "Apple123")
 wt_auth(force = TRUE)
-cypress_hills_aru <- wt_download_report(1097, 'CAM', 'main', FALSE)
+cypress_hills <- wt_download_report(1097, 'CAM', 'main', FALSE)
 
 ################################### ARU Test suite
 
