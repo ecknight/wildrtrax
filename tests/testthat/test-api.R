@@ -52,5 +52,12 @@ test_that("Download with authentication with boundary; multiple species logged i
 #   expect_true(!is.null(wt_get_project_species(2460)))
 # })
 
+test_that("Get functions", {
+  expect_true(!is.null(wt_get_locations('GUEST')))
+  expect_true(!is.null(wt_get_visits('GUEST')))
+  expect_true(!is.null(wt_get_recordings('GUEST')))
+  expect_true(!is.null(wt_get_project_species(3286)))
+})
+
 
 

@@ -988,36 +988,35 @@ wt_get_project_species <- function(project_id) {
   if (.wt_auth_expired())
     stop("Please authenticate with wt_auth().", call. = FALSE)
 
-  # Request location data
-  r <- .wt_api_gr(
+    r <- .wt_api_gr(
       path = "/bis/get-project-species-details",
       projectId = project_id,
       limit = 1e9
     )
 
-  if (r$status_code == 403) {
-    stop("Permission denied: You do not have access to request this data.", call. = FALSE)
-    return(NULL)
-  }
+    if (r$status_code == 403) {
+      stop("Permission denied: You do not have access to request this data.", call. = FALSE)
+      return(NULL)
+    }
 
-  x <- resp_body_json(r)
+    x <- resp_body_json(r)
 
-  if (x$error == "Permission denied") {
-    stop("You do not have permission for this data")
-  }
+    # Check if `x` contains the error field
+    if (!is.null(x$error) && x$error == "Permission denied") {
+      stop("You do not have permission for this data")
+    }
 
-  included_data <- x$Included
-  excluded_data <- x$Excluded
+    included_data <- x$Included %||% list()  # Use an empty list if not present
+    excluded_data <- x$Excluded %||% list()
 
-  # Map the columns
-  included <- map_dfr(included_data, ~ tibble(
-    species_id = .x$speciesId,
-    exists = .x$exists
-  ))
+    # Map the columns
+    included <- map_dfr(included_data, ~ tibble(
+      species_id = .x$speciesId,
+      exists = .x$exists
+    ))
 
-  # Join against common names
-  included_names <- inner_join(included, wt_get_species() |> select(species_id, species_common_name), by = "species_id")
+    # Join against common names
+    included_names <- inner_join(included, wt_get_species() |> select(species_id, species_common_name), by = "species_id")
 
-  return(included_names)
-
+    return(included_names)
 }
