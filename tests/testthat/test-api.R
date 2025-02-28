@@ -59,5 +59,9 @@ test_that("Get functions", {
   expect_true(!is.null(wt_get_project_species(3286)))
 })
 
+# Possible test but not necessary due to length it takes to run
+# test_that("Timeout test", {
+#   expect_true(!is.null(wt_download_report(197, 'CAM', 'main', F, max_seconds = 3000)))
+# })
 
 

@@ -2,6 +2,7 @@ library(testthat)
 
 Sys.setenv(WT_USERNAME = "guest", WT_PASSWORD = "Apple123")
 wt_auth(force = TRUE)
+cypress_hills_aru <- wt_download_report(1097, 'CAM', 'main', FALSE)
 
 ################################### ARU Test suite
 
@@ -10,7 +11,6 @@ test_that("Authentication works correctly", {
   })
 
 test_that("Downloading ARU report", {
-  cypress_hills_aru <- wt_download_report(1097, 'CAM', 'main', FALSE, max_seconds = 3000)
   expect_true(!is.null(cypress_hills_aru))
 })
 
@@ -28,19 +28,16 @@ test_that("Attempting PC as ARU report", {
 })
 
 test_that("Tidying species zero-filling true", {
-  cypress_hills <- wt_download_report(620, 'ARU', 'main', FALSE)
   cypress_hills_tidy <- wt_tidy_species(cypress_hills, remove = c("mammal", "abiotic", "amphibian","unknown"), zerofill = T)
   expect_true(nrow(cypress_hills_tidy) < nrow(cypress_hills))
 })
 
 test_that("Tidying species zero-filling false", {
-  cypress_hills <- wt_download_report(620, 'ARU', 'main', FALSE)
   cypress_hills_tidy_f <- wt_tidy_species(cypress_hills, remove = c("mammal", "abiotic", "amphibian","unknown"), zerofill = F)
   expect_true(nrow(cypress_hills_tidy_f) < nrow(cypress_hills))
 })
 
 test_that("Replacing TMTT", {
-  cypress_hills <- wt_download_report(620, 'ARU', 'main', FALSE)
   cypress_hills_tidy <- wt_tidy_species(cypress_hills, remove = c("mammal", "abiotic", "amphibian", "unknown"), zerofill = T)
   cypress_hills_tmtt <- wt_replace_tmtt(cypress_hills_tidy, calc = "round") |>
     select(individual_count) |>
@@ -50,7 +47,6 @@ test_that("Replacing TMTT", {
 })
 
 test_that('Making wide', {
-  cypress_hills_aru <- wt_download_report(620, 'ARU', 'main', FALSE)
   cypress_hills_tidy <- wt_tidy_species(cypress_hills_aru, remove = c("mammal", "abiotic", "amphibian", "unknown"), zerofill = T)
   cypress_hills_tmtt <- wt_replace_tmtt(cypress_hills_tidy, calc = "round")
   cypress_hills_wide <- wt_make_wide(cypress_hills_tmtt, sound="all")
@@ -58,7 +54,6 @@ test_that('Making wide', {
 })
 
 test_that('Getting QPAD offsets', {
-  cypress_hills <- wt_download_report(620, 'ARU', 'main', FALSE)
   cypress_hills_tidy <- wt_tidy_species(cypress_hills, remove = c("mammal", "abiotic", "amphibian", "unknown"), zerofill = T)
   cypress_hills_tmtt <- wt_replace_tmtt(cypress_hills_tidy, calc = "round")
   cypress_hills_wide <- wt_make_wide(cypress_hills_tmtt, sound = "all")
@@ -67,7 +62,6 @@ test_that('Getting QPAD offsets', {
 })
 
 test_that('Occupancy formatting', {
-  cypress_hills <- wt_download_report(620, 'ARU', 'main', FALSE)
   cypress_hills_tidy <- wt_tidy_species(cypress_hills, remove = c("mammal", "abiotic", "amphibian"), zerofill = T)
   cypress_hills_tmtt <- wt_replace_tmtt(cypress_hills_tidy, calc = "round")
   occu <- wt_format_occupancy(cypress_hills_tmtt, species = "OVEN")
