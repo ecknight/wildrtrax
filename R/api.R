@@ -86,7 +86,7 @@ wt_get_download_summary <- function(sensor_id) {
 #' @param sensor_id Character; Can either be "ARU", "CAM", or "PC".
 #' @param reports Character; The report type to be returned. Multiple values are accepted as a concatenated string.
 #' @param weather_cols Logical; Do you want to include weather information for your stations? Defaults to TRUE.
-#' @param maximum_time Numeric; Number of seconds to force to wait for downloads.
+#' @param max_seconds Numeric; Number of seconds to force to wait for downloads.
 #' @details Valid values for argument \code{report} when \code{sensor_id} = "CAM" currently are:
 #' \itemize{
 #'  \item main

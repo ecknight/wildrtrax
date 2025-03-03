@@ -21,7 +21,7 @@ wt_download_report(
 
 \item{weather_cols}{Logical; Do you want to include weather information for your stations? Defaults to TRUE.}
 
-\item{maximum_time}{Numeric; Number of seconds to force to wait for downloads.}
+\item{max_seconds}{Numeric; Number of seconds to force to wait for downloads.}
 }
 \value{
 If multiple report types are requested, a list object is returned; if only one, a dataframe.
