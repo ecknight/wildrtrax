@@ -1,3 +1,13 @@
+# wildrtrax 1.3.4
+
+## Major changes
+
+* Remove QPAD from Remotes. Users should be prompted to download QPAD separately.
+
+## Minor changes
+
+* Introduced the `max_seconds` argument in `wt_download_report()` to provide customizable timeout control for users with slower internet connections or larger project downloads
+
 # wildrtrax 1.3.3
 
 ## Major changes
