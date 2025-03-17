@@ -873,7 +873,7 @@ wt_kaleidoscope_tags <- function (input, output, freq_bump = T) {
                                              TRUE ~ species),
                   startTime = dplyr::case_when(startTime == 0 ~ 0.1, TRUE ~ startTime)) |> #Adjusting startTime parameter
     tibble::add_column(method = "None", .after = "recordingDate") |> #better to put none than 1SPT
-    tibble::add_column(transcriber = "Not Assigned", .after = "taskLength") |> #already added transcriber earlier on
+    tibble::add_column(transcriber = "Not Assigned", .after = "taskLength") |>
     dplyr::group_by(location, recordingDate, taskLength, species) |>
     dplyr::mutate(speciesIndividualNumber = dplyr::row_number()) |>
     dplyr::ungroup() |>
