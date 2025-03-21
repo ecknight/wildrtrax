@@ -93,7 +93,7 @@ wt_get_download_summary <- function(sensor_id) {
 #'  \item project
 #'  \item location
 #'  \item image_report
-#'  \item image_set
+#'  \item image_set_report
 #'  \item tag
 #'  \item megadetector
 #'  \item megaclassifier
@@ -127,7 +127,7 @@ wt_get_download_summary <- function(sensor_id) {
 #' # Authenticate first:
 #' wt_auth()
 #' a_camera_project <- wt_download_report(
-#' project_id = 397, sensor_id = "CAM", reports = c("tag", "image_set"),
+#' project_id = 397, sensor_id = "CAM", reports = c("tag", "image_set_report"),
 #' weather_cols = TRUE)
 #'
 #' an_aru_project <- wt_download_report(
@@ -1016,7 +1016,8 @@ wt_get_project_species <- function(project_id) {
     ))
 
     # Join against common names
-    included_names <- inner_join(included, wt_get_species() |> select(species_id, species_common_name), by = "species_id")
+    included_names <- inner_join(included, wt_get_species() |> select(species_id, species_common_name), by = "species_id") |>
+      as_tibble()
 
     return(included_names)
 }
