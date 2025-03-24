@@ -1,8 +1,8 @@
-# wildrtrax 1.3.4
+# wildrtrax 1.3.3.1
 
-## Major changes
+## Minor changes
 
-* Remove QPAD from Remotes. Users should be prompted to download QPAD separately.
+* Remove QPAD from Remotes. Users should be prompted to download QPAD separately if not already installed. Fix in timezone ([#78](https://github.com/ABbiodiversity/wildrtrax/pull/78)).
 
 ## Minor changes
 
