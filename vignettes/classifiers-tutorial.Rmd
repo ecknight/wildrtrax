@@ -62,31 +62,25 @@ dat <- curl::curl_download('https://raw.githubusercontent.com/ABbiodiversity/wil
 
 ```{r Plots, eval=T, include=T, echo=F, message=F, warning=F, fig.alt="Plots"}
 plot.p <- ggplot(dat) +
-  geom_line(aes(x=thresh, y=p), size=1.5) +
+  geom_line(aes(x=thresh, y=p), linewidth=1.5) +
   xlab("Score threshold") +
   ylab("Precision") +
-  xlim(c(0.1, 1)) +
-  ylim(c(0, 1)) +
   theme_bw()
 
 plot.r <- ggplot(dat) +
-  geom_line(aes(x=thresh, y=r), size=1.5) +
+  geom_line(aes(x=thresh, y=r), linewidth=1.5) +
   xlab("Score threshold") +
   ylab("Recall") +
-  xlim(c(0.1, 1)) +
-  ylim(c(0, 1)) +
   theme_bw()
 
 plot.f <- ggplot(dat) +
-  geom_line(aes(x=thresh, y=f), size=1.5) +
+  geom_line(aes(x=thresh, y=f), linewidth=1.5) +
   xlab("Score threshold") +
   ylab("F-score") +
-  xlim(c(0.1, 1)) +
-  ylim(c(0, 1)) +
   theme_bw()
 
 plot.pr <- ggplot(dat) +
-  geom_line(aes(x=r, y=p), size=1.5) +
+  geom_line(aes(x=r, y=p), linewidth=1.5) +
   xlab("Recall") +
   ylab("Precision") +
   xlim(c(0.1, 1)) +

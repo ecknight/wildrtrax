@@ -27,19 +27,20 @@ load("package.RData")
 # Attach package
 library(wildrtrax)
 library(dplyr)
+library(QPAD)
+
 ```
 
 ```{r, warning = F, message = F, eval = T, include = T, echo = T}
 # Start by getting everything you need
 Sys.setenv(WT_USERNAME = 'guest', WT_PASSWORD = 'Apple123')
 wt_auth()
-my_report <- wt_download_report(project_id = 620, sensor_id = 'ARU', reports = "main", weather_cols = F) |>
-  tibble::as_tibble()
+my_report <- wt_download_report(project_id = 620, sensor_id = 'ARU', reports = "main", weather_cols = F)
 ```
 
 ## Data wrangling
 
-Let's use some of the functins that are available to start cleaning up a dataset. For this question, we don't need certain abiotic and mammal codes so let's remove those with `wt_tidy_species()`,
+Let's use some of the functins that are available to start cleaning up a data set. For this question, we don't need certain abiotic and mammal codes so let's remove those with `wt_tidy_species()`,
 
 ```{r, tidy-chunk, eval = T, echo = T, warning = F, message = F}
 my_tidy_data <- wt_tidy_species(my_report, remove = c("mammal"), zerofill=F)
@@ -66,7 +67,7 @@ head(my_wide_data)
 
 ## Offsets
 
-Now you can calculate statistical offsets to account for imperfect detection following the [QPAD method](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.12106).
+Now you can calculate statistical offsets to account for imperfect detection following the [QPAD method](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.12106). Ensure you have QPAD [downloaded](https://github.com/borealbirds/QPAD) before proceeding and installed via `devtools::install_github("psolymos/QPAD")`.
 
 ```{r, eval = T, echo = T, warning = F, message = F}
 my_offset_data <- wt_qpad_offsets(data = my_wide_data, species = "all", version = 3, together = TRUE)

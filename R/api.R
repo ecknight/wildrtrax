@@ -86,13 +86,14 @@ wt_get_download_summary <- function(sensor_id) {
 #' @param sensor_id Character; Can either be "ARU", "CAM", or "PC".
 #' @param reports Character; The report type to be returned. Multiple values are accepted as a concatenated string.
 #' @param weather_cols Logical; Do you want to include weather information for your stations? Defaults to TRUE.
+#' @param max_seconds Numeric; Number of seconds to force to wait for downloads.
 #' @details Valid values for argument \code{report} when \code{sensor_id} = "CAM" currently are:
 #' \itemize{
 #'  \item main
 #'  \item project
 #'  \item location
 #'  \item image_report
-#'  \item image_set
+#'  \item image_set_report
 #'  \item tag
 #'  \item megadetector
 #'  \item megaclassifier
@@ -126,7 +127,7 @@ wt_get_download_summary <- function(sensor_id) {
 #' # Authenticate first:
 #' wt_auth()
 #' a_camera_project <- wt_download_report(
-#' project_id = 397, sensor_id = "CAM", reports = c("tag", "image_set"),
+#' project_id = 397, sensor_id = "CAM", reports = c("tag", "image_set_report"),
 #' weather_cols = TRUE)
 #'
 #' an_aru_project <- wt_download_report(
@@ -137,7 +138,7 @@ wt_get_download_summary <- function(sensor_id) {
 #' @return If multiple report types are requested, a list object is returned; if only one, a dataframe.
 #'
 
-wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TRUE) {
+wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TRUE, max_seconds=300) {
 
   # Check if authentication has expired:
   if (.wt_auth_expired())
@@ -207,7 +208,8 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
     megaClassifierReport = if ("megaclassifier" %in% reports) query_list$megaClassifierReport <- TRUE,
     dayLightReport = if ("daylight_report" %in% reports) query_list$dayLightReport <- TRUE,
     includeMetaData = TRUE,
-    splitLocation = TRUE
+    splitLocation = TRUE,
+    max_time = max_seconds
   )
 
   writeBin(httr2::resp_body_raw(r), tmp)
@@ -986,36 +988,36 @@ wt_get_project_species <- function(project_id) {
   if (.wt_auth_expired())
     stop("Please authenticate with wt_auth().", call. = FALSE)
 
-  # Request location data
-  r <- .wt_api_gr(
+    r <- .wt_api_gr(
       path = "/bis/get-project-species-details",
       projectId = project_id,
       limit = 1e9
     )
 
-  if (r$status_code == 403) {
-    stop("Permission denied: You do not have access to request this data.", call. = FALSE)
-    return(NULL)
-  }
+    if (r$status_code == 403) {
+      stop("Permission denied: You do not have access to request this data.", call. = FALSE)
+      return(NULL)
+    }
 
-  x <- resp_body_json(r)
+    x <- resp_body_json(r)
 
-  if (x$error == "Permission denied") {
-    stop("You do not have permission for this data")
-  }
+    # Check if `x` contains the error field
+    if (!is.null(x$error) && x$error == "Permission denied") {
+      stop("You do not have permission for this data")
+    }
 
-  included_data <- x$Included
-  excluded_data <- x$Excluded
+    included_data <- x$Included %||% list()  # Use an empty list if not present
+    excluded_data <- x$Excluded %||% list()
 
-  # Map the columns
-  included <- map_dfr(included_data, ~ tibble(
-    species_id = .x$speciesId,
-    exists = .x$exists
-  ))
+    # Map the columns
+    included <- map_dfr(included_data, ~ tibble(
+      species_id = .x$speciesId,
+      exists = .x$exists
+    ))
 
-  # Join against common names
-  included_names <- inner_join(included, wt_get_species() |> select(species_id, species_common_name), by = "species_id")
+    # Join against common names
+    included_names <- inner_join(included, wt_get_species() |> select(species_id, species_common_name), by = "species_id") |>
+      as_tibble()
 
-  return(included_names)
-
+    return(included_names)
 }

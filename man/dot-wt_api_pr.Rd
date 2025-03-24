@@ -4,12 +4,14 @@
 \alias{.wt_api_pr}
 \title{An internal function to handle generic POST requests to WildTrax API}
 \usage{
-.wt_api_pr(path, ...)
+.wt_api_pr(path, ..., max_time = 300)
 }
 \arguments{
 \item{path}{The path to the API}
 
 \item{...}{Argument to pass along into POST query}
+
+\item{max_time}{The maximum number of seconds an API request can take. By default 300.}
 }
 \description{
 Generic function to handle certain POST requests

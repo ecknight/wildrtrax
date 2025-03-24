@@ -480,7 +480,7 @@ wt_format_occupancy <- function(data,
 #'
 #' @references Solymos et al. 2013. Calibrating indices of avian density from non-standardized survey data: making the most of a messy situation. Methods in Ecology and Evolution, 4, 1047-1058.
 #'
-#' @import QPAD dplyr
+#' @import dplyr
 #' @export
 #'
 #' @examples
@@ -495,6 +495,10 @@ wt_format_occupancy <- function(data,
 #' @return A dataframe containing the QPAD values either by themselves or with the original wide data if `together = TRUE`
 
 wt_qpad_offsets <- function(data, species = c("all"), version = 3, together=FALSE) {
+
+  if(!requireNamespace("QPAD")) {
+    stop("The QPAD package is required for this function. Please install it using devtools::install_github('borealbirds/QPAD')")
+  }
 
   # Rename fields if PC
   if ("survey_url" %in% colnames(data)) {
@@ -522,10 +526,10 @@ wt_qpad_offsets <- function(data, species = c("all"), version = 3, together=FALS
 
   #Load QPAD estimates
   cat("\nLoading QPAD estimates... ")
-  load_BAM_QPAD(version)
+  QPAD::load_BAM_QPAD(version)
 
   #Make the species list
-  if("all" %in% species) spp <- sort(intersect(getBAMspecieslist(), colnames(data))) else spp <- species
+  if("all" %in% species) spp <- sort(intersect(QPAD::getBAMspecieslist(), colnames(data))) else spp <- species
 
   #Set up the offset loop
   cat("\nCalculating offsets...")
@@ -614,7 +618,6 @@ wt_add_grts <- function(data, group_locations_in_cell = FALSE) {
 
   # Check for intersection eventually
   if (nrow(data) > 0) {
-    message('Downloading NABAT data...')
     grts_list[[length(grts_list) + 1]] <- readr::read_csv('https://code.usgs.gov/fort/nabat/nabatr/-/raw/dffbf6afda4d390dbe4d2bf8c51e854b960a33dd/data/GRTS_coords_Canada.csv', show_col_types = FALSE)
   }
 

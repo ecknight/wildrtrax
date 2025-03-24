@@ -4,7 +4,13 @@
 \alias{wt_download_report}
 \title{Download formatted reports from WildTrax}
 \usage{
-wt_download_report(project_id, sensor_id, reports, weather_cols = TRUE)
+wt_download_report(
+  project_id,
+  sensor_id,
+  reports,
+  weather_cols = TRUE,
+  max_seconds = 300
+)
 }
 \arguments{
 \item{project_id}{Numeric; the project ID number that you would like to download data for. Use \code{wt_get_download_summary()} to retrieve these IDs.}
@@ -14,6 +20,8 @@ wt_download_report(project_id, sensor_id, reports, weather_cols = TRUE)
 \item{reports}{Character; The report type to be returned. Multiple values are accepted as a concatenated string.}
 
 \item{weather_cols}{Logical; Do you want to include weather information for your stations? Defaults to TRUE.}
+
+\item{max_seconds}{Numeric; Number of seconds to force to wait for downloads.}
 }
 \value{
 If multiple report types are requested, a list object is returned; if only one, a dataframe.
