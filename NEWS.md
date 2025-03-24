@@ -1,12 +1,4 @@
-# wildrtrax 1.3.3.1
-
-## Minor changes
-
-* Remove QPAD from Remotes. Users should be prompted to download QPAD separately if not already installed. Fix in timezone ([#78](https://github.com/ABbiodiversity/wildrtrax/pull/78)).
-
-## Minor changes
-
-* Introduced the `max_seconds` argument in `wt_download_report()` to provide customizable timeout control for users with slower internet connections or larger project downloads
+# wildrtrax 
 
 # wildrtrax 1.3.3
 
@@ -19,6 +11,8 @@
 
 * Camera function maintenance for [#70](https://github.com/ABbiodiversity/wildrtrax/issues/70); increasing camera test suites for common permutations 
 * Branching development to prepare package for WildTrax 2.0
+* Introduced the `max_seconds` argument in `wt_download_report()` to provide customizable timeout control for users with slower internet connections or larger project downloads
+* Remove QPAD from Remotes. Users should be prompted to download QPAD separately if not already installed. Fix in timezone ([#78](https://github.com/ABbiodiversity/wildrtrax/pull/78)).
 
 # wildrtrax 1.3.2
 
