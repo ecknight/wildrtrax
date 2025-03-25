@@ -164,15 +164,6 @@ references:
   year: '2025'
   doi: 10.32614/CRAN.package.purrr
 - type: software
-  title: QPAD
-  abstract: 'QPAD: QPAD estimates'
-  notes: Imports
-  url: https://github.com/psolymos/QPAD
-  authors:
-  - family-names: Solymos
-    given-names: Peter
-  year: '2025'
-- type: software
   title: readr
   abstract: 'readr: Read Rectangular Text Data'
   notes: Imports
