@@ -33,8 +33,9 @@ reference:
     - wt_get_download_summary
     - wt_get_image_sets
     - wt_get_locations
-    - wt_get_recordings
+    - wt_get_project_species
     - wt_get_species
+    - wt_get_recordings
     - wt_get_visits
     - wt_glean_ap
     - wt_ind_detect

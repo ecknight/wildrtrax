@@ -54,16 +54,11 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
     stop("Please only supply a value for one of `raw_data` or `effort_data`.")
   }
 
-  # Check output variable(s)
-  all_vars <- c("detections", "counts", "presence")
-  if (length(variable) == 1 &&
-      variable %in% c("detections", "counts", "presence", "all")) {
-    if (variable == "all") {
-      variable <- all_vars
-    }
-  } else {
-    stop("Variable must be one of 'detections', 'counts', 'presence', 'all'.")
+  if (variable == "all") {
+    variable <- c("detections", "counts", "presence")
   }
+
+  # Todo - check that supplied data contains all necessary columns
 
   # Check timeframe variable
   int <- c("day", "week", "month", "full")
@@ -169,17 +164,17 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
       mutate(n_days_effort = 1) |>
       crossing(sp) |>
       left_join(y) |>
-      mutate(across(all_vars, ~ tidyr::replace_na(.x, 0)))
+      mutate(across(6:8, ~ tidyr::replace_na(.x, 0)))
   } else if (time_interval == "week") {
     x <- x |>
-      mutate(week = isoweek(day)) |>
+      mutate(week = as.numeric(format(day, "%V"))) |>
       group_by({{ project_col }}, {{ station_col }}, year, week) |>
       tally(name = "n_days_effort") |>
       ungroup()
     z <- x |>
       crossing(sp) |>
       left_join(y) |>
-      mutate(across(all_vars, ~ tidyr::replace_na(.x, 0)))
+      mutate(across(7:9, ~ tidyr::replace_na(.x, 0)))
   } else if (time_interval == "month") {
     x <- x |>
       mutate(month = format(day, "%B")) |>
@@ -189,7 +184,7 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
     z <- x |>
       crossing(sp) |>
       left_join(y) |>
-      mutate(across(all_vars, ~ tidyr::replace_na(.x, 0)))
+      mutate(across(7:9, ~ tidyr::replace_na(.x, 0)))
   } else if (time_interval == "full") {
     z <- x |>
       crossing(sp) |>
@@ -205,11 +200,10 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
   # Make wide if desired
   if (output_format == "wide") {
     z <- z |>
-      tidyr::pivot_wider(id_cols = c({{ project_col }}, {{ station_col }}, year, time_interval, n_days_effort),
-                         names_from = {{ species_col }}, values_from = all_of(variable), names_sep = ".")
+      tidyr::pivot_wider(id_cols = 1:5, names_from = {{ species_col }}, values_from = {{ variable }}, names_sep = ".")
   } else if (output_format == "long") {
-    z <- z |> dplyr::select({{ project_col }}, {{ station_col }}, year, time_interval, n_days_effort, {{ species_col }}, variable) |>
-      tidyr::pivot_longer(cols = variable, names_to = "variable", values_to = "value")
+    z <- z |> dplyr::select(1:6, {{ variable }}) |>
+      tidyr::pivot_longer(cols = {{ variable }}, names_to = "variable", values_to = "value")
   }
 
   return(z)

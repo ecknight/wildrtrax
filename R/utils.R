@@ -127,12 +127,13 @@
 #'
 #' @param path The path to the API
 #' @param ... Argument to pass along into POST query
+#' @param max_time The maximum number of seconds an API request can take. By default 300.
 #'
 #' @keywords internal
 #'
 #' @import httr2
 
-.wt_api_pr <- function(path, ...) {
+.wt_api_pr <- function(path, ..., max_time=300) {
 
   # Check if authentication has expired:
   if (.wt_auth_expired()) {stop("Please authenticate with wt_auth().", call. = FALSE)}
@@ -155,7 +156,7 @@
     req_headers(Authorization = paste("Bearer", ._wt_auth_env_$access_token)) |>
     req_user_agent(u) |>
     req_method("POST") |>
-    req_timeout(300) |> # Add a 5 minute timeout
+    req_timeout(max_time) |>
     req_perform()
 
   # Handle errors
@@ -236,12 +237,15 @@
 #'
 #' @keywords internal
 #'
-#' @import QPAD dplyr httr2
+#' @import dplyr httr2
 #' @importFrom terra extract rast vect project
 #'
-#' @export
 
 .make_x <- function(data, tz="local", check_xy=TRUE) {
+
+  if(!requireNamespace("QPAD")) {
+    stop("The QPAD package is required for this function. Please install it using devtools::install_github('borealbirds/QPAD')")
+  }
 
   # Download message
   message("Downloading geospatial assets. This may take a moment.")
@@ -362,7 +366,7 @@
                              as.POSIXct(dtm, tz="GMT"),
                              direction="sunrise", POSIXct.out=FALSE) * 24
   }
-  TSSR <- round(unname((hour - sr + ltz) / 24), 4)
+  TSSR <- round(unname((hour - sr - ltz) / 24), 4)
 
   #days since local spring
   DSLS <- (day - d1) / 365
@@ -401,24 +405,29 @@
 #'
 #' @keywords internal
 #'
-#' @import QPAD dplyr
+#' @import dplyr
+#'
 
 .make_off <- function(spp, x){
+
+  if(!requireNamespace("QPAD")) {
+    stop("The QPAD package is required for this function. Please install it using devtools::install_github('borealbirds/QPAD')")
+  }
 
   if (length(spp) > 1L)
     stop("spp argument must be length 1. Use a loop or map for multiple species.")
   spp <- as.character(spp)
 
   #checks
-  if (!(spp %in% getBAMspecieslist()))
+  if (!(spp %in% QPAD:::getBAMspecieslist()))
     stop(sprintf("Species %s has no QPAD estimate available", spp))
 
   #constant for NA cases
-  cf0 <- exp(unlist(coefBAMspecies(spp, 0, 0)))
+  cf0 <- exp(unlist(QPAD:::coefBAMspecies(spp, 0, 0)))
 
   #best model
-  mi <- bestmodelBAMspecies(spp, type="BIC")
-  cfi <- coefBAMspecies(spp, mi$sra, mi$edr)
+  mi <- QPAD:::bestmodelBAMspecies(spp, type="BIC")
+  cfi <- QPAD:::coefBAMspecies(spp, mi$sra, mi$edr)
 
   TSSR <- x$TSSR
   DSLS <- x$DSLS
@@ -457,22 +466,22 @@
   OKq <- rowSums(is.na(Xq2)) == 0
 
   #calculate p, q, and A based on constant phi and tau for the respective NAs
-  p[!OKp] <- sra_fun(MAXDUR[!OKp], cf0[1])
+  p[!OKp] <- QPAD:::sra_fun(MAXDUR[!OKp], cf0[1])
   unlim <- ifelse(MAXDIS[!OKq] == Inf, TRUE, FALSE)
   A[!OKq] <- ifelse(unlim, pi * cf0[2]^2, pi * MAXDIS[!OKq]^2)
-  q[!OKq] <- ifelse(unlim, 1, edr_fun(MAXDIS[!OKq], cf0[2]))
+  q[!OKq] <- ifelse(unlim, 1, QPAD:::edr_fun(MAXDIS[!OKq], cf0[2]))
 
   #calculate time/lcc varying phi and tau for non-NA cases
   phi1 <- exp(drop(Xp2[OKp,,drop=FALSE] %*% cfi$sra))
   tau1 <- exp(drop(Xq2[OKq,,drop=FALSE] %*% cfi$edr))
-  p[OKp] <- sra_fun(MAXDUR[OKp], phi1)
+  p[OKp] <- QPAD:::sra_fun(MAXDUR[OKp], phi1)
   unlim <- ifelse(MAXDIS[OKq] == Inf, TRUE, FALSE)
   A[OKq] <- ifelse(unlim, pi * tau1^2, pi * MAXDIS[OKq]^2)
-  q[OKq] <- ifelse(unlim, 1, edr_fun(MAXDIS[OKq], tau1))
+  q[OKq] <- ifelse(unlim, 1, QPAD:::edr_fun(MAXDIS[OKq], tau1))
 
   #log(0) is not a good thing, apply constant instead
   ii <- which(p == 0)
-  p[ii] <- sra_fun(MAXDUR[ii], cf0[1])
+  p[ii] <- QPAD:::sra_fun(MAXDUR[ii], cf0[1])
 
   #package output
   data.frame(
@@ -496,15 +505,18 @@
   age_class = readr::col_character(),
   aru_task_status = readr::col_character(),
   behaviours = readr::col_character(),
-  bounding_box_number = readr::col_character(),
+  bounding_box_number = readr::col_double(),
   category = readr::col_character(),
   clip_channel_used = readr::col_character(),
   classifier_confidence = readr::col_double(),
   classifier_version = readr::col_character(),
   coat_attributes = readr::col_character(),
   coat_colours = readr::col_character(),
+  confidence = readr::col_double(),
   date_deployed = readr::col_date(),
   date_retrieved = readr::col_date(),
+  daylight_hours = readr::col_double(),
+  direction_travel = readr::col_character(),
   detection_time = readr::col_double(),
   disabled_for_autotag = readr::col_logical(),
   elevation = readr::col_double(),
@@ -515,6 +527,7 @@
   has_collar = readr::col_logical(),
   has_eartag = readr::col_logical(),
   health_diseases = readr::col_character(),
+  height = readr::col_double(),
   ihf = readr::col_character(),
   image_comments = readr::col_character(),
   image_date_time = readr::col_datetime(),
@@ -522,44 +535,43 @@
   image_exif_temperature = readr::col_double(),
   image_fire = readr::col_logical(),
   image_fov = readr::col_character(),
-  image_id = readr::col_double(),
+  image_id = readr::col_integer(),
   image_in_wildtrax = readr::col_logical(),
   image_is_blurred = readr::col_logical(),
   image_malfunction = readr::col_logical(),
   image_nice = readr::col_logical(),
-  image_snow = readr::col_logical(),
-  image_snow_depth_m = readr::col_double(),
-  image_water_depth_m = readr::col_double(),
-  image_trigger_mode = readr::col_character(),
   image_set_count_motion = readr::col_integer(),
   image_set_count_timelapse = readr::col_integer(),
   image_set_count_total = readr::col_integer(),
-  image_set_end_date_time = readr::col_datetime(),
-  image_set_id = readr::col_character(),
   image_set_start_date_time = readr::col_datetime(),
   image_set_status = readr::col_character(),
   image_set_url = readr::col_character(),
+  image_snow = readr::col_logical(),
+  image_snow_depth_m = readr::col_double(),
+  image_trigger_mode = readr::col_character(),
   image_url = readr::col_character(),
+  image_water_depth_m = readr::col_double(),
   individual_count = readr::col_character(),
-  individual_order = readr::col_double(),
+  individual_order = readr::col_integer(),
   is_enabled_project_species = readr::col_logical(),
   is_species_allowed_in_project = readr::col_logical(),
   latitude = readr::col_double(),
   location = readr::col_character(),
   location_buffer_m = readr::col_double(),
   location_comments = readr::col_character(),
-  location_id = readr::col_double(),
+  location_id = readr::col_integer(),
   location_visibility = readr::col_character(),
   longitude = readr::col_double(),
+  media_url = readr::col_character(),
   min_tag_freq = readr::col_double(),
   max_tag_freq = readr::col_double(),
   needs_review = readr::col_logical(),
   observer = readr::col_character(),
-  observer_id = readr::col_double(),
+  observer_id = readr::col_integer(),
   organization = readr::col_character(),
   project = readr::col_character(),
   project_description = readr::col_character(),
-  project_id = readr::col_double(),
+  project_id = readr::col_integer(),
   project_results = readr::col_character(),
   project_status = readr::col_character(),
   recording_date_time = readr::col_datetime(),
@@ -572,11 +584,13 @@
   species_common_name = readr::col_character(),
   species_individual_comments = readr::col_character(),
   species_scientific_name = readr::col_character(),
+  sunrise_utc = readr::col_datetime(),
+  sunset_utc = readr::col_datetime(),
   start_s = readr::col_double(),
   end_s = readr::col_double(),
   tag_comments = readr::col_character(),
   tag_duration = readr::col_double(),
-  tag_id = readr::col_double(),
+  tag_id = readr::col_integer(),
   tag_is_verified = readr::col_logical(),
   tag_needs_review = readr::col_logical(),
   tag_rating = readr::col_character(),
@@ -587,12 +601,12 @@
   task_method = readr::col_character(),
   task_url = readr::col_character(),
   task_status = readr::col_character(),
+  tine_attributes = readr::col_character(),
   version = readr::col_character(),
   vocalization = readr::col_character(),
   width = readr::col_double(),
   x_loc = readr::col_double(),
-  y_loc = readr::col_double(),
-  height = readr::col_double()
+  y_loc = readr::col_double()
 )
 
 #' Internal evaluation function for acoustic classifiers
@@ -606,7 +620,6 @@
 #' @keywords internal
 #'
 #' @import dplyr
-#' @export
 #'
 #' @return A vector of precision, recall, F-score, and threshold
 
@@ -638,7 +651,7 @@
 #' @param dir Directory containing files
 #'
 #' @keywords internal
-#' @export
+#'
 
 .delete_wav_files <- function(dir) {
   wav_files <- list.files(path = dir, pattern = "\\.wav$", recursive = TRUE, full.names = TRUE)
@@ -650,7 +663,6 @@
 #' @description Internal function to get Organizations
 #'
 #' @keywords internal
-#' @export
 
 .get_org_id <- function(organization) {
 

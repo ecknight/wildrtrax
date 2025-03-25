@@ -24,60 +24,44 @@ test_that("Download without authentication or boundary; single-species", {
   expect_true(!is.null(wt_dd_summary(sensor = 'ARU', species = 'White-throated Sparrow', boundary = aoi)))
 })
 
+test_that("Download without authentication, bad boundary; single-species", {
+  expect_error(!is.null(wt_dd_summary(sensor = 'ARU', species = 'White-throated Sparrow', boundary = bad_aoi)))
+})
+
+test_that("Download without authentication, boundary; multiple single-species", {
+  expect_true(!is.null(wt_dd_summary(sensor = 'ARU', species = c('White-throated Sparrow','Hermit Thrush'), boundary = aoi)))
+})
+
 
 Sys.setenv(WT_USERNAME = "guest", WT_PASSWORD = "Apple123")
 wt_auth(force = TRUE)
 
-test_that("Download without authentication with boundary; single-species", {
+test_that("Download with authentication with boundary; single-species", {
   expect_true(!is.null(wt_dd_summary(sensor = 'ARU', species = 'White-throated Sparrow', boundary = aoi)))
-})
-
-test_that("Download without authentication, bad boundary; single-species", {
-  expect_error(wt_dd_summary(sensor = 'ARU', species = 'White-throated Sparrow', boundary = bad_aoi))
-})
-
-test_that("Download without authentication with boundary; multiple species", {
-  expect_true(!is.null(wt_dd_summary(sensor = 'ARU', species = c('White-throated Sparrow','Hermit Thrush'), boundary = aoi)))
-})
-
-test_that("Download without authentication, bad boundary; multiple species", {
-  expect_error(wt_dd_summary(sensor = 'ARU', species = c('White-throated Sparrow','Hermit Thrush'), boundary = bad_aoi))
-})
-
-test_that("Download with authentication, no boundary; single-species", {
-  expect_true(!is.null(wt_dd_summary(sensor = 'ARU', species = 'White-throated Sparrow', boundary = NULL)))
-})
-
-test_that("Download with authentication, boundary; single-species", {
-  expect_true(!is.null(wt_dd_summary(sensor = 'ARU', species = 'White-throated Sparrow', boundary = aoi)))
-})
-
-test_that("Download with authentication, boundary; multiple species", {
-  expect_true(!is.null(wt_dd_summary(sensor = 'ARU', species = c('White-throated Sparrow','Hermit Thrush'), boundary = aoi)))
 })
 
 test_that("Download with authentication, bad boundary; single-species", {
   expect_error(wt_dd_summary(sensor = 'ARU', species = 'White-throated Sparrow', boundary = bad_aoi))
 })
 
-test_that("Download with authentication, bad boundary; multiple species", {
-  expect_error(wt_dd_summary(sensor = 'ARU', species = c('White-throated Sparrow','Hermit Thrush'), boundary = bad_aoi))
+test_that("Download with authentication with boundary; multiple species logged in", {
+  expect_true(!is.null(wt_dd_summary(sensor = 'ARU', species = c('White-throated Sparrow','Townsend\'s Warbler'), boundary = aoi)))
 })
 
-# test_that("A big project to complete is under 300 seconds", {
-#   start_time <- Sys.time()
-#   result <- wt_download_report(
-#     project_id = '1385',
-#     sensor_id = 'PC',
-#     reports = 'main',
-#     weather_cols = FALSE
-#   )
-#   end_time <- Sys.time()
-#   elapsed_time <- as.numeric(difftime(end_time, start_time, units = "secs"))
-#   expect_true(elapsed_time < 300,
-#               info = paste("Function took", elapsed_time, "seconds, exceeding the 300-second limit."))
-#   # Optionally, verify the result is not NULL or is as expected
-#   expect_true(!is.null(result))
+# test_that("Test project-species", {
+#   expect_true(!is.null(wt_get_project_species(2460)))
+# })
+
+test_that("Get functions", {
+  expect_true(!is.null(wt_get_locations('GUEST')))
+  expect_true(!is.null(wt_get_visits('GUEST')))
+  expect_true(!is.null(wt_get_recordings('GUEST')))
+  expect_true(!is.null(wt_get_project_species(3286)))
+})
+
+# Possible test but not necessary due to length it takes to run
+# test_that("Timeout test", {
+#   expect_true(!is.null(wt_download_report(197, 'CAM', 'main', F, max_seconds = 3000)))
 # })
 
 

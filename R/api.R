@@ -86,13 +86,14 @@ wt_get_download_summary <- function(sensor_id) {
 #' @param sensor_id Character; Can either be "ARU", "CAM", or "PC".
 #' @param reports Character; The report type to be returned. Multiple values are accepted as a concatenated string.
 #' @param weather_cols Logical; Do you want to include weather information for your stations? Defaults to TRUE.
+#' @param max_seconds Numeric; Number of seconds to force to wait for downloads.
 #' @details Valid values for argument \code{report} when \code{sensor_id} = "CAM" currently are:
 #' \itemize{
 #'  \item main
 #'  \item project
 #'  \item location
 #'  \item image_report
-#'  \item image_set
+#'  \item image_set_report
 #'  \item tag
 #'  \item megadetector
 #'  \item megaclassifier
@@ -126,7 +127,7 @@ wt_get_download_summary <- function(sensor_id) {
 #' # Authenticate first:
 #' wt_auth()
 #' a_camera_project <- wt_download_report(
-#' project_id = 397, sensor_id = "CAM", reports = c("tag", "image_set"),
+#' project_id = 397, sensor_id = "CAM", reports = c("tag", "image_set_report"),
 #' weather_cols = TRUE)
 #'
 #' an_aru_project <- wt_download_report(
@@ -137,7 +138,7 @@ wt_get_download_summary <- function(sensor_id) {
 #' @return If multiple report types are requested, a list object is returned; if only one, a dataframe.
 #'
 
-wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TRUE) {
+wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TRUE, max_seconds=300) {
 
   # Check if authentication has expired:
   if (.wt_auth_expired())
@@ -164,9 +165,9 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
   }
 
   # Allowable reports for each sensor
-  cam <- c("main", "project", "location", "image_set", "image_report", "tag", "megadetector", "megaclassifier", "daylight", "definitions")
+  cam <- c("main", "project", "location", "image_set_report", "image_report", "tag", "megadetector", "megaclassifier", "daylight_report", "definitions")
   aru <- c("main", "project", "location", "birdnet", "recording", "tag", "definitions")
-  pc <- c("main", "project", "location", "point_count", "definitions")
+  pc <- c("main", "project", "location", "point_count", "daylight_report", "definitions")
 
   # Check that the user supplied a valid report type depending on the sensor
   if(sensor_id == "CAM" & !all(reports %in% cam)) {
@@ -200,14 +201,15 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
     locationReport = if ("location" %in% reports) query_list$locationReport <- TRUE,
     tagReport = if ("tag" %in% reports) query_list$tagReport <- TRUE,
     imageReport = if ("image_report" %in% reports) query_list$imageReport <- TRUE,
-    imageSetReport = if ("image_set" %in% reports) query_list$imageSetReport <- TRUE,
+    imageSetReport = if ("image_set_report" %in% reports) query_list$imageSetReport <- TRUE,
     birdnetReport = if ("birdnet" %in% reports) query_list$birdnetReport <- TRUE,
     #hawkEarReport = if ("hawkears" %in% reports) query_list$hawkEarReport <- TRUE,
     megaDetectorReport = if ("megadetector" %in% reports) query_list$megaDetectorReport <- TRUE,
     megaClassifierReport = if ("megaclassifier" %in% reports) query_list$megaClassifierReport <- TRUE,
-    daylightReport = if ("daylight" %in% reports) query_list$daylightReport <- TRUE,
+    dayLightReport = if ("daylight_report" %in% reports) query_list$dayLightReport <- TRUE,
     includeMetaData = TRUE,
-    splitLocation = TRUE
+    splitLocation = TRUE,
+    max_time = max_seconds
   )
 
   writeBin(httr2::resp_body_raw(r), tmp)
@@ -433,7 +435,7 @@ wt_download_media <- function(input, output, type = c("recording","image", "tag_
 
 wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary = NULL) {
 
-  if (!exists("._wt_auth_env_$access_token")) {
+  if (!exists("access_token", envir = ._wt_auth_env_)) {
     message("Currently searching as a public user, access to data will be limited. Use wt_auth() to login.")
     tok_used <- NULL
   } else {
@@ -483,6 +485,7 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
       }
     }
   } else {
+    # User is logged in - gets the whole species table
     species_tibble <- wt_get_species()
     spp <- species_tibble |>
       filter(species_common_name %in% species) |>
@@ -764,8 +767,6 @@ wt_get_locations <- function(organization) {
 #' @return A data frame listing an Organizations' visits
 #'
 
-# Check if authentication has expired:
-
 wt_get_visits <- function(organization) {
 
   if (.wt_auth_expired())
@@ -956,3 +957,67 @@ wt_location_photos <- function(data, direction, dir) {
 
 }
 
+#' Get project-species from WildTrax project
+#'
+#' @description Obtain a table listing species added to a specific project in WildTrax
+#'
+#' @param project_id The project_id of the WildTrax project
+#'
+#' @import httr2
+#' @import purrr
+#' @import dplyr
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' # Authenticate first:
+#' wt_auth()
+#' my_project <- wt_get_download_summary(sensor_id = 'ARU') |>
+#' filter(grepl('Ecosystem Health 2023',project)) |>
+#' pull(project_id)
+#' wt_get_project_species(project_id = my_project)
+#' }
+#'
+#' @return A data frame listing an Organizations' locations
+#'
+
+wt_get_project_species <- function(project_id) {
+
+  # Check if authentication has expired:
+  if (.wt_auth_expired())
+    stop("Please authenticate with wt_auth().", call. = FALSE)
+
+    r <- .wt_api_gr(
+      path = "/bis/get-project-species-details",
+      projectId = project_id,
+      limit = 1e9
+    )
+
+    if (r$status_code == 403) {
+      stop("Permission denied: You do not have access to request this data.", call. = FALSE)
+      return(NULL)
+    }
+
+    x <- resp_body_json(r)
+
+    # Check if `x` contains the error field
+    if (!is.null(x$error) && x$error == "Permission denied") {
+      stop("You do not have permission for this data")
+    }
+
+    included_data <- x$Included %||% list()  # Use an empty list if not present
+    excluded_data <- x$Excluded %||% list()
+
+    # Map the columns
+    included <- map_dfr(included_data, ~ tibble(
+      species_id = .x$speciesId,
+      exists = .x$exists
+    ))
+
+    # Join against common names
+    included_names <- inner_join(included, wt_get_species() |> select(species_id, species_common_name), by = "species_id") |>
+      as_tibble()
+
+    return(included_names)
+}

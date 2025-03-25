@@ -20,6 +20,8 @@ utils::globalVariables(
     "IN FILE",
     "INDIR",
     "OFFSET",
+    "max_seconds",
+    "max_time",
     "Quality",
     "RankOrder",
     "ResultMinute",
