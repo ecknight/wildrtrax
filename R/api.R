@@ -1021,3 +1021,63 @@ wt_get_project_species <- function(project_id) {
 
     return(included_names)
 }
+
+#' Get tags from WildTrax project sync
+#'
+#' @description Obtain a table listing tags added to a specific project in WildTrax
+#'
+#' @param project_id The project_id of the WildTrax project
+#'
+#' @import httr2
+#' @import purrr
+#' @import dplyr
+#' @import readr
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' # Authenticate first:
+#' wt_auth()
+#' my_project <- wt_get_download_summary(sensor_id = 'ARU') |>
+#' filter(grepl('Ecosystem Health 2023',project)) |>
+#' pull(project_id)
+#' wt_get_project_tags(project_id = my_project)
+#' }
+#'
+#' @return A data frame listing an Organizations' locations
+#'
+
+wt_get_project_tags <- function(project_id) {
+
+  # Check if authentication has expired:
+  if (.wt_auth_expired())
+    stop("Please authenticate with wt_auth().", call. = FALSE)
+
+    r <- .wt_api_gr(
+      path = "/bis/download-tags-by-project-id",
+      projectId = project_id,
+      limit = 1e9
+    )
+
+    if (r$status_code == 403) {
+      stop("Permission denied: You do not have access to request this data.", call. = FALSE)
+      return(NULL)
+    }
+
+    x <- read_csv(
+      rawToChar(httr2::resp_body_raw(r)),
+      col_types = readr::cols(
+        recordingDate = readr::col_datetime(format = "%Y-%m-%d %H:%M:%S")
+      )
+    ) |> as_tibble()
+
+    # Check if `x` contains the error field
+    if (!is.null(x$error) && x$error == "Permission denied") {
+      stop("You do not have permission for this data")
+    }
+
+    tags <- x |> as_tibble()
+
+    return(tags)
+}
