@@ -96,7 +96,6 @@ wt_get_download_summary <- function(sensor_id) {
 #'  \item image_set_report
 #'  \item tag
 #'  \item megadetector
-#'  \item megaclassifier
 #'  \item definitions
 #' }
 #' @details Valid values for argument \code{report} when \code{sensor_id} = "ARU" currently are:
@@ -106,7 +105,7 @@ wt_get_download_summary <- function(sensor_id) {
 #'  \item location
 #'  \item recording
 #'  \item tag
-#'  \item birdnet
+#'  \item ai
 #'  \item definitions
 #' }
 #' @details Valid values for argument \code{report} when \code{sensor_id} = "PC" currently are:
@@ -131,7 +130,7 @@ wt_get_download_summary <- function(sensor_id) {
 #' weather_cols = TRUE)
 #'
 #' an_aru_project <- wt_download_report(
-#' project_id = 47, sensor_id = "ARU", reports = c("main", "birdnet"),
+#' project_id = 47, sensor_id = "ARU", reports = c("main", "ai"),
 #' weather_cols = TRUE)
 #' }
 #'
@@ -165,8 +164,8 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
   }
 
   # Allowable reports for each sensor
-  cam <- c("main", "project", "location", "image_set_report", "image_report", "tag", "megadetector", "megaclassifier", "daylight_report", "definitions")
-  aru <- c("main", "project", "location", "birdnet", "recording", "tag", "definitions")
+  cam <- c("main", "project", "location", "image_set_report", "image_report", "tag", "megadetector", "daylight_report", "definitions")
+  aru <- c("main", "project", "location", "ai", "recording", "tag", "definitions")
   pc <- c("main", "project", "location", "point_count", "daylight_report", "definitions")
 
   # Check that the user supplied a valid report type depending on the sensor
@@ -202,10 +201,8 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
     tagReport = if ("tag" %in% reports) query_list$tagReport <- TRUE,
     imageReport = if ("image_report" %in% reports) query_list$imageReport <- TRUE,
     imageSetReport = if ("image_set_report" %in% reports) query_list$imageSetReport <- TRUE,
-    birdnetReport = if ("birdnet" %in% reports) query_list$birdnetReport <- TRUE,
-    #hawkEarReport = if ("hawkears" %in% reports) query_list$hawkEarReport <- TRUE,
+    aiReport = if ("ai" %in% reports) query_list$aiReport <- TRUE,
     megaDetectorReport = if ("megadetector" %in% reports) query_list$megaDetectorReport <- TRUE,
-    megaClassifierReport = if ("megaclassifier" %in% reports) query_list$megaClassifierReport <- TRUE,
     dayLightReport = if ("daylight_report" %in% reports) query_list$dayLightReport <- TRUE,
     includeMetaData = TRUE,
     splitLocation = TRUE,
