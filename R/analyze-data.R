@@ -54,6 +54,23 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
     stop("Please only supply a value for one of `raw_data` or `effort_data`.")
   }
 
+  # Parse the raw or effort data to get time ranges for each camera deployment.
+  if (!is_missing(raw_data)) {
+    x <- raw_data |>
+      mutate(date_detected = as.POSIXct(date_detected, format = "%Y-%m-%d %H:%M:%S")) |>
+      group_by(project, location) |>
+      summarise(start_date = as.Date(min(date_detected)),
+                end_date = as.Date(max(date_detected))) |>
+      ungroup()
+  } else {
+    x <- effort_data |>
+      select(project = {{project_col}},
+             location = {{station_col}},
+             start_date = {{start_col}},
+             end_date = {{end_col}}) |>
+      ungroup()
+  }
+
   if (variable == "all") {
     variable <- c("detections", "counts", "presence")
   }
