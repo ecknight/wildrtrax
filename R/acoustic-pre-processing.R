@@ -838,35 +838,44 @@ wt_kaleidoscope_tags <- function (input, output, freq_bump = T) {
 
   #Cleaning things up for the tag template
   in_tbl_wtd <- in_tbl |>
-    dplyr::select(INDIR, `IN FILE`, DURATION, OFFSET, Dur, DATE, TIME, `AUTO ID*`, Fmin, Fmax) |>
+    dplyr::select(INDIR, `IN FILE`, DURATION, OFFSET, Dur, `AUTO ID*`, `MANUAL ID`, Fmin, Fmax) |>
     tidyr::separate(`IN FILE`, into = c("location", "recordingDate"), sep = "(?:_0\\+1_|_|__0__|__1__)", extra = "merge", remove = F) |>
-    dplyr::select(-(DATE:TIME)) |>
+    tidyr::separate_rows(`MANUAL ID`, sep = ",\\s*") |>
     dplyr::relocate(location) |>
     dplyr::relocate(recordingDate, .after = location) |>
-    dplyr::mutate(recordingDate = sub('.+?(?:__)', '', recordingDate))
-    # Create date/time fields
-    dplyr::mutate(recording_date_time = as.POSIXct(strptime(recording_date_time, format = "%Y-%m-%d %H:%M:%S"))) |> #Apply a time zone if necessary
+    dplyr::mutate(recordingDate = sub('.*?(?:__)?(\\d{4})(\\d{2})(\\d{2})_(\\d{2})(\\d{2})(\\d{2})\\..*$', '\\1-\\2-\\3 \\4:\\5:\\6', recordingDate)) |>
     dplyr::rename("taskLength" = 5,
                   "startTime" = 6,
                   "tagLength" = 7,
-                  "species" = 8,
-                  "minFreq" = 9,
-                  "maxFreq" = 10) |>
+                  "minFreq" = 10,
+                  "maxFreq" = 11) |>
+    dplyr::mutate(species = dplyr::if_else(!is.na(`MANUAL ID`), `MANUAL ID`, `AUTO ID*`))|>
+    dplyr::mutate(speciesIndividualComment = dplyr::if_else(!is.na(`MANUAL ID`), "Manual ID", "AUTO ID"))|>
+    dplyr::select(-(`AUTO ID*`:`MANUAL ID`))|>
     dplyr::select(-(INDIR:`IN FILE`)) |>
-    # Updating names to WildTrax species codes
-    dplyr::mutate(species = case_when(species == "NoID" ~ "UBAT",
-                                      species == "H_freq_Bat" ~ "HighF",
-                                      species == "L_freq_Bat" ~ "LowF",
-                                      TRUE ~ species),
-                  startTime = dplyr::case_when(startTime == 0 ~ 0.1, TRUE ~ startTime)) |> #Adjusting startTime parameter
-    tibble::add_column(method = "1SPT", .after = "recordingDate") |>
+    dplyr::mutate(species = dplyr::case_when(species == "NOID" ~ "UBAT",
+                                             species == "NoID" ~ "UBAT",
+                                             species == "HIF" ~ "HighF",
+                                             species == "LOF" ~ "LowF",
+                                             species == "EPFU" ~ "EPTFUS",
+                                             species == "LANO" ~ "LASNOC",
+                                             species == "MYLU" ~ "MYOLUC",
+                                             species == "MYVO" ~ "MYOVOL",
+                                             species == "MYSE" ~ "MYOSEP",
+                                             species == "MYEV" ~ "MYOEVO",
+                                             species == "LACI" ~ "LASCIN",
+                                             species == "LABO" ~ "LASBOR",
+                                             species == "MYCI" ~ "MYOCIL",
+                                             TRUE ~ species),
+                  startTime = dplyr::case_when(startTime == 0 ~ 0.1, TRUE ~ startTime)) |>
+    tibble::add_column(method = "None", .after = "recordingDate") |>
     tibble::add_column(transcriber = "Not Assigned", .after = "taskLength") |>
     dplyr::group_by(location, recordingDate, taskLength, species) |>
-    dplyr::mutate(speciesIndividualNumber = row_number()) |>
+    dplyr::mutate(speciesIndividualNumber = dplyr::row_number()) |>
     dplyr::ungroup() |>
     tibble::add_column(vocalization = "", .after = "speciesIndividualNumber") |>
     tibble::add_column(abundance = 1, .after= "vocalization") |>
-    dplyr::mutate(vocalization = case_when(species == "Noise" ~ "Non-vocal", TRUE ~ "Call")) |>
+    dplyr::mutate(vocalization = dplyr::case_when(species == "Noise" ~ "Non-vocal", TRUE ~ "Call")) |>
     tibble::add_column(internal_tag_id = "", .after = "maxFreq") |>
     dplyr::mutate(recordingDate = as.character(recordingDate)) |>
     dplyr::rowwise() |>
@@ -875,8 +884,7 @@ wt_kaleidoscope_tags <- function (input, output, freq_bump = T) {
                   minFreq = dplyr::case_when(is.na(minFreq) ~ 12000, TRUE ~ minFreq * 1000),
                   maxFreq = dplyr::case_when(is.na(maxFreq) ~ 96000, TRUE ~ maxFreq * 1000)) |>
     dplyr::ungroup() |>
-    dplyr::mutate_at(vars(taskLength,minFreq,maxFreq), ~round(.,2)) |>
-    #Apply the frequency bump (+/- 10000 Hz)
+    dplyr::mutate_at(dplyr::vars(taskLength,minFreq,maxFreq), ~round(.,2)) |>
     dplyr::mutate(minFreq = dplyr::case_when(freq_bump == TRUE ~ minFreq - 10000, TRUE ~ minFreq),
                   maxFreq = dplyr::case_when(freq_bump == TRUE ~ maxFreq + 10000, TRUE ~ maxFreq)) |>
     dplyr::relocate(taskLength, .after = method) |>
@@ -887,7 +895,6 @@ wt_kaleidoscope_tags <- function (input, output, freq_bump = T) {
     dplyr::relocate(internal_tag_id, .after = maxFreq) |>
     tidyr::drop_na()
 
-  #Write the file
   return(write.csv(in_tbl_wtd, file = output, row.names = F))
 
   print("Converted to WildTrax tags. Go to your WildTrax project > Manage > Upload Tags.")
