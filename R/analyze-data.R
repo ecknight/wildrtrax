@@ -44,30 +44,20 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
                              detection_id_col = detection,
                              start_col_det = start_time) {
 
-  # Make sure one of raw_data or effort_data is supplied
-  if (rlang::is_missing(raw_data) & is.null(effort_data)) {
-    stop("Please supply a value for one of `raw_data` or `effort_data`.")
+  # Ensure one and only one of `raw_data` or `effort_data` is supplied
+  if (xor(rlang::is_missing(raw_data), is.null(effort_data)) == FALSE) {
+    stop("Please supply a value for one and only one of `raw_data` or `effort_data`.")
   }
 
-  # Check that only one is supplied
+  # Incorporate effort data if provided
   if (!rlang::is_missing(raw_data) & !is.null(effort_data)) {
-    stop("Please only supply a value for one of `raw_data` or `effort_data`.")
-  }
-
-  # Parse the raw or effort data to get time ranges for each camera deployment.
-  if (!is_missing(raw_data)) {
-    x <- raw_data |>
-      mutate(date_detected = as.POSIXct(date_detected, format = "%Y-%m-%d %H:%M:%S")) |>
-      group_by(project, location) |>
-      summarise(start_date = as.Date(min(date_detected)),
-                end_date = as.Date(max(date_detected))) |>
-      ungroup()
-  } else {
     x <- effort_data |>
-      select(project = {{project_col}},
-             location = {{station_col}},
-             start_date = {{start_col}},
-             end_date = {{end_col}}) |>
+      select(
+        project = {{ project_col }},
+        location = {{ station_col }},
+        start_date = {{ start_col }},
+        end_date = {{ end_col }}
+      ) |>
       ungroup()
   }
 
@@ -281,8 +271,8 @@ wt_ind_detect <- function(x, threshold, units = "minutes", datetime_col = image_
     threshold
   }
 
-  # Tags to discard - not sure if UNKNOWN is ever wanted?
-  t <- c("NONE", "STAFF/SETUP", "UNKNOWN")
+  # Tags to discard
+  t <- c("NONE", "STAFF/SETUP", "UNKNOWN", NA)
   if (remove_human) {
     # Standard WildTrax tags that refer to human(ish) objects
     t <- c(t, "Human", "Vehicle", "Unknown Vehicle", "All Terrain Vehicle", "Train", "Heavy Equipment")
@@ -308,7 +298,6 @@ wt_ind_detect <- function(x, threshold, units = "minutes", datetime_col = image_
     group_by(project_id, location, species_common_name) |>
     # Calculate the time difference between subsequent images
     mutate(interval = as.numeric(difftime({{datetime_col}}, lag({{datetime_col}}), units = "secs"))) |>
-    # Is this considered a new detection?
     mutate(new_detection = ifelse(is.na(interval) | abs(interval) >= threshold, TRUE, FALSE)) |>
     ungroup() |>
     # Number independent detections
