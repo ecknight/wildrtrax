@@ -461,7 +461,7 @@ wt_glean_ap <- function(x = NULL, input_dir, purpose = c("quality","abiotic","bi
     do.call("c", .) %>%
     magick::image_append()
 
-  # Trim top and bottom and crop
+  # Trim top and bottom and crop - experimental
   img_info <- magick::image_info(ldfc)
   img_width <- img_info$width
   img_height <- img_info$height
@@ -476,7 +476,7 @@ wt_glean_ap <- function(x = NULL, input_dir, purpose = c("quality","abiotic","bi
                                   remaining_height,
                                   top_crop_height))
 
-  return(list(joined,plotted,cropped_img))
+  return(list(joined,plotted,ldfc))
 
 }
 
