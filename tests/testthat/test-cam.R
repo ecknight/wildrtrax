@@ -11,9 +11,6 @@ eff_data <- tibble(
   end_col = as.Date(c("2023-03-01", "2023-06-15", "2023-12-31"))
 )
 
-wt_summarise_cam(ind_detections, effort_data = )
-
-
 ################################### Camera Test suite
 
 test_that("Downloading CAM report", {
