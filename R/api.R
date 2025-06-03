@@ -1081,3 +1081,81 @@ wt_get_project_tags <- function(project_id) {
 
     return(tags)
 }
+
+#' Get column headers from WildTrax Sync APIs
+#'
+#' @description Fetch column headers for a sync APIs in WildTrax. You must specify at least one of `project` or `organization`.
+#'
+#' @param api A string specifying the API to query. Must be one of:
+#' \itemize{
+#'   \item `"download-location-by-org-id"`
+#'   \item `"download-point-count-by-project-id"`
+#' }
+#' @param project The project ID to query. (Optional if `organization` is provided.)
+#' @param organization The organization ID to query. (Optional if `project` is provided.)
+#'
+#' @import httr2
+#' @import readr
+#' @import tibble
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' # Authenticate first:
+#' wt_auth()
+#'
+#' # Fetch column headers by organization
+#' wt_get_sync_columns("download-location-by-org-id", organization = 5)
+#'
+#' # Fetch column headers by project
+#' wt_get_sync_columns("download-point-count-by-project-id", project = 3355)
+#' }
+#'
+#' @return A tibble with column headers for the specified API call.
+
+
+wt_get_sync_columns <- function(api, project = NULL, organization = NULL) {
+
+  if (.wt_auth_expired())
+    stop("Please authenticate with wt_auth().", call. = FALSE)
+
+  if (is.null(api) || api == "")
+    stop("The 'api' field is required.", call. = FALSE)
+
+  if (is.null(project) && is.null(organization))
+    stop("You must provide at least one of 'project' or 'organization'.", call. = FALSE)
+
+  api_path <- paste0("/bis/", api)
+
+  if (is.null(project)) {
+    o <- .wt_api_gr(
+      path = api_path,
+      orgId = organization
+    ) |>
+      httr2::resp_body_raw()
+
+    col_headers <- rawToChar(o) %>%
+      read_csv(show_col_types = FALSE) %>%
+      colnames() %>%
+      as_tibble_col()
+
+    return(col_headers)
+
+  } else {
+
+    p <- .wt_api_gr(
+      path = api_path,
+      projectId = project
+    ) |>
+      httr2::resp_body_raw()
+
+    col_headers <- rawToChar(p) %>%
+      read_csv(show_col_types = FALSE) %>%
+      colnames() %>%
+      as_tibble_col()
+
+    return(col_headers)
+  }
+}
+
