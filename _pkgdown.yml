@@ -36,6 +36,7 @@ reference:
   - wt_get_project_species
   - wt_get_project_tags
   - wt_get_species
+  - wt_get_sync_columns
   - wt_get_recordings
   - wt_get_visits
   - wt_glean_ap
@@ -55,6 +56,7 @@ reference:
   - wt_wac_info
 news:
   releases:
+  - text: wildrtrax 1.3.4
   - text: wildrtrax 1.3.3
   - text: wildrtrax 1.3.2
   - text: wildrtrax 1.3.1

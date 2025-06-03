@@ -243,9 +243,9 @@
 
 .make_x <- function(data, tz="local", check_xy=TRUE) {
 
-  if(!requireNamespace("QPAD")) {
-    stop("The QPAD package is required for this function. Please install it using devtools::install_github('borealbirds/QPAD')")
-  }
+  # if(!requireNamespace("QPAD")) {
+  #   stop("The QPAD package is required for this function. Please install it using devtools::install_github('borealbirds/QPAD')")
+  # }
 
   # Download message
   message("Downloading geospatial assets. This may take a moment.")
@@ -410,7 +410,7 @@
 
 .make_off <- function(spp, x){
 
-  if(!requireNamespace("QPAD")) {
+  if(!requireNamespace("QPAD", quietly = T)) {
     stop("The QPAD package is required for this function. Please install it using devtools::install_github('borealbirds/QPAD')")
   }
 
@@ -418,16 +418,22 @@
     stop("spp argument must be length 1. Use a loop or map for multiple species.")
   spp <- as.character(spp)
 
+  getBAMspecieslist <- get("getBAMspecieslist", envir = asNamespace("QPAD"))
+  coefBAMspecies <- get("coefBAMspecies", envir = asNamespace("QPAD"))
+  bestmodelBAMspecies <- get("bestmodelBAMspecies",  envir = asNamespace("QPAD"))
+  sra_fun <- get("sra_fun",  envir = asNamespace("QPAD"))
+  edr_fun <- get("edr_fun",  envir = asNamespace("QPAD"))
+
   #checks
-  if (!(spp %in% QPAD:::getBAMspecieslist()))
+  if (!(spp %in% getBAMspecieslist()))
     stop(sprintf("Species %s has no QPAD estimate available", spp))
 
   #constant for NA cases
-  cf0 <- exp(unlist(QPAD:::coefBAMspecies(spp, 0, 0)))
+  cf0 <- exp(unlist(coefBAMspecies(spp, 0, 0)))
 
   #best model
-  mi <- QPAD:::bestmodelBAMspecies(spp, type="BIC")
-  cfi <- QPAD:::coefBAMspecies(spp, mi$sra, mi$edr)
+  mi <- bestmodelBAMspecies(spp, type="BIC")
+  cfi <- coefBAMspecies(spp, mi$sra, mi$edr)
 
   TSSR <- x$TSSR
   DSLS <- x$DSLS
@@ -466,22 +472,22 @@
   OKq <- rowSums(is.na(Xq2)) == 0
 
   #calculate p, q, and A based on constant phi and tau for the respective NAs
-  p[!OKp] <- QPAD:::sra_fun(MAXDUR[!OKp], cf0[1])
+  p[!OKp] <- sra_fun(MAXDUR[!OKp], cf0[1])
   unlim <- ifelse(MAXDIS[!OKq] == Inf, TRUE, FALSE)
   A[!OKq] <- ifelse(unlim, pi * cf0[2]^2, pi * MAXDIS[!OKq]^2)
-  q[!OKq] <- ifelse(unlim, 1, QPAD:::edr_fun(MAXDIS[!OKq], cf0[2]))
+  q[!OKq] <- ifelse(unlim, 1, edr_fun(MAXDIS[!OKq], cf0[2]))
 
   #calculate time/lcc varying phi and tau for non-NA cases
   phi1 <- exp(drop(Xp2[OKp,,drop=FALSE] %*% cfi$sra))
   tau1 <- exp(drop(Xq2[OKq,,drop=FALSE] %*% cfi$edr))
-  p[OKp] <- QPAD:::sra_fun(MAXDUR[OKp], phi1)
+  p[OKp] <- sra_fun(MAXDUR[OKp], phi1)
   unlim <- ifelse(MAXDIS[OKq] == Inf, TRUE, FALSE)
   A[OKq] <- ifelse(unlim, pi * tau1^2, pi * MAXDIS[OKq]^2)
-  q[OKq] <- ifelse(unlim, 1, QPAD:::edr_fun(MAXDIS[OKq], tau1))
+  q[OKq] <- ifelse(unlim, 1, edr_fun(MAXDIS[OKq], tau1))
 
   #log(0) is not a good thing, apply constant instead
   ii <- which(p == 0)
-  p[ii] <- QPAD:::sra_fun(MAXDUR[ii], cf0[1])
+  p[ii] <- sra_fun(MAXDUR[ii], cf0[1])
 
   #package output
   data.frame(

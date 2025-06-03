@@ -65,6 +65,7 @@ utils::globalVariables(
     "location_from",
     "longer",
     "longitude",
+    "MANUAL ID",
     "maxFreq",
     "max_animals",
     "method",

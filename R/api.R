@@ -1031,7 +1031,7 @@ wt_get_project_species <- function(project_id) {
 #' @import httr2
 #' @import purrr
 #' @import dplyr
-#' @import readr
+#' @importFrom readr cols col_datetime
 #'
 #' @export
 #'
@@ -1095,7 +1095,7 @@ wt_get_project_tags <- function(project_id) {
 #' @param organization The organization ID to query. (Optional if `project` is provided.)
 #'
 #' @import httr2
-#' @import readr
+#' @importFrom readr read_csv
 #' @import tibble
 #'
 #' @export
