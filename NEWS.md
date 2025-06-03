@@ -4,7 +4,7 @@
 
 ## Major changes
 
-* New hidden function `wt_get_sync_columns()` allowing users to get all columns from syncs across the system
+* New functions: `wt_get_sync_columns()` allowing users to get all columns from syncs across the system and `wt_get_project_tags()` to get tag data from ARU project sync
 
 ## Minor changes
 
