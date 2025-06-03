@@ -19,6 +19,7 @@
 #' @param end_col Defaults to `end_date`. The column indicating the end date of the camera location
 #' @param detection_id_col Defaults to `detection`. The column indicating the detection id
 #' @param start_col_det Defaults to `start_time`. The column indicating the start time of the independent detections
+#' @param image_set_id Defaults to `image_set_id`.
 #'
 #' @import dplyr
 #' @importFrom tidyr pivot_longer pivot_wider unnest crossing replace_na drop_na
@@ -42,23 +43,12 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
                              date_time_col = image_date_time,
                              start_col = start_date, end_col = end_date,
                              detection_id_col = detection,
-                             start_col_det = start_time) {
+                             start_col_det = start_time,
+                             image_set_id = image_set_id) {
 
-  # Ensure one and only one of `raw_data` or `effort_data` is supplied
-  if (xor(rlang::is_missing(raw_data), is.null(effort_data)) == FALSE) {
-    stop("Please supply a value for one and only one of `raw_data` or `effort_data`.")
-  }
-
-  # Incorporate effort data if provided
+  # Check that only one is supplied
   if (!rlang::is_missing(raw_data) & !is.null(effort_data)) {
-    x <- effort_data |>
-      select(
-        project = {{ project_col }},
-        location = {{ station_col }},
-        start_date = {{ start_col }},
-        end_date = {{ end_col }}
-      ) |>
-      ungroup()
+    stop("Please only supply a value for one of `raw_data` or `effort_data`.")
   }
 
   if (variable == "all") {
@@ -88,7 +78,7 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
 
     if (exclude_out_of_range == FALSE) {
       x <- raw_data |>
-        group_by({{ project_col }}, {{ station_col }}) |>
+        group_by({{ project_col }}, {{ station_col }}, {{ image_set_id }}) |>
         summarise(start_date = as.Date(min({{ date_time_col }})),
                   end_date = as.Date(max({{ date_time_col }}))) |>
         ungroup()
@@ -100,20 +90,20 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
 
       # Expand the time ranges into individual days of operation (smallest unit)
       x <- x |>
-        group_by({{ project_col }}, {{ station_col }}) |>
+        group_by({{ project_col }}, {{ station_col }}, {{ image_set_id }}) |>
         mutate(day = list(seq.Date(start_date, end_date, by = "day"))) |>
         tidyr::unnest(day) |>
         mutate(year = as.integer(format(day, "%Y"))) |>
-        select({{ project_col }}, {{ station_col }}, year, day) |>
+        select({{ project_col }}, {{ station_col }}, {{ image_set_id }}, year, day) |>
         ungroup()
 
     } else {
       x <- raw_data |>
-        group_by({{ project_col }}, {{ station_col }}) |>
+        group_by({{ project_col }}, {{ station_col }}, {{ image_set_id }}) |>
         arrange({{ date_time_col }}) |>
         mutate(period = rep(seq_along(rle(image_fov)$lengths), rle(image_fov)$lengths)) |>
         filter(image_fov == "WITHIN") |>
-        group_by({{ project_col }}, {{ station_col }}, period) |>
+        group_by({{ project_col }}, {{ station_col }}, {{ image_set_id }},  period) |>
         summarise(
           start_date = as.Date(min({{ date_time_col }})),
           end_date = as.Date(max({{ date_time_col }}))
@@ -127,12 +117,22 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
 
       # Expand the time ranges into individual days of operation (smallest unit)
       x <- x |>
-        group_by({{ project_col }}, {{ station_col }}, period) |>
+        group_by({{ project_col }}, {{ station_col }}, {{ image_set_id }}, period) |>
         mutate(day = list(seq.Date(start_date, end_date, by = "day"))) |>
         tidyr::unnest(day) |>
         mutate(year = as.integer(format(day, "%Y"))) |>
-        select({{ project_col }}, {{ station_col }}, year, day)
+        select({{ project_col }}, {{ station_col }}, {{ image_set_id }}, year, day)
     }
+
+  } else {
+
+    # Create x with just effort data (assume raw data is missing)
+    x <- effort_data |>
+      select(project = {{project_col}},
+             location = {{station_col}},
+             start_date = {{start_col}},
+             end_date = {{end_col}}) |>
+      ungroup()
 
   }
 
@@ -156,6 +156,7 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
 
   # Summarise variable of interest
   y <- y |>
+    # I think it's okay to leave out image_set_id here
     group_by(across(all_of(grouping_cols)), {{ project_col }}, {{ station_col }}, {{ species_col }}) |>
     summarise(detections = n(),
               counts = sum(max_animals)) |>
