@@ -1084,15 +1084,23 @@ wt_get_project_tags <- function(project_id) {
 
 #' Get column headers from WildTrax Sync APIs
 #'
-#' @description Fetch column headers for a sync APIs in WildTrax. You must specify at least one of `project` or `organization`.
+#' @description Fetch column headers for a sync APIs in WildTrax. You must specify at least one of `project` or `organization` depending on the APIs
 #'
 #' @param api A string specifying the API to query. Must be one of:
 #' \itemize{
 #'   \item `"download-location-by-org-id"`
+#'   \item `"download-visits-by-org-id"`
+#'   \item `"download-equipment-by-org-id"`
+#'   \item `"download-location-equipment-by-org-id"`
+#'   \item `"download-location"`
+#'   \item `"download-tasks-by-project-id"`
+#'   \item `"download-tags-by-project-id"`
+#'   \item `"download-camera-tasks-by-project-id"`
+#'   \item `"download-camera-tags-by-project-id"`
 #'   \item `"download-point-count-by-project-id"`
 #' }
-#' @param project The project ID to query. (Optional if `organization` is provided.)
-#' @param organization The organization ID to query. (Optional if `project` is provided.)
+#' @param project The project ID
+#' @param organization The organization ID
 #'
 #' @import httr2
 #' @importFrom readr read_csv
@@ -1145,10 +1153,10 @@ wt_get_sync_columns <- function(api, project = NULL, organization = NULL) {
   } else {
 
     p <- .wt_api_gr(
-      path = api_path,
-      projectId = project
+      path = "download-camera-tags-by-project-id",
+      projectId = 3177
     ) |>
-      httr2::resp_body_raw()
+      httr2::resp_body_html()
 
     col_headers <- rawToChar(p) %>%
       read_csv(show_col_types = FALSE) %>%
