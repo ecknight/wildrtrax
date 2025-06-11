@@ -10,18 +10,26 @@ wt_get_sync_columns(api, project = NULL, organization = NULL)
 \item{api}{A string specifying the API to query. Must be one of:
 \itemize{
 \item \code{"download-location-by-org-id"}
+\item \code{"download-visits-by-org-id"}
+\item \code{"download-equipment-by-org-id"}
+\item \code{"download-location-equipment-by-org-id"}
+\item \code{"download-location"}
+\item \code{"download-tasks-by-project-id"}
+\item \code{"download-tags-by-project-id"}
+\item \code{"download-camera-tasks-by-project-id"}
+\item \code{"download-camera-tags-by-project-id"}
 \item \code{"download-point-count-by-project-id"}
 }}
 
-\item{project}{The project ID to query. (Optional if \code{organization} is provided.)}
+\item{project}{The project ID}
 
-\item{organization}{The organization ID to query. (Optional if \code{project} is provided.)}
+\item{organization}{The organization ID}
 }
 \value{
 A tibble with column headers for the specified API call.
 }
 \description{
-Fetch column headers for a sync APIs in WildTrax. You must specify at least one of \code{project} or \code{organization}.
+Fetch column headers for a sync APIs in WildTrax. You must specify at least one of \code{project} or \code{organization} depending on the APIs
 }
 \examples{
 \dontrun{

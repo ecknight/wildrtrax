@@ -239,6 +239,7 @@
 #'
 #' @import dplyr httr2
 #' @importFrom terra extract rast vect project
+#' @importFrom suntools sunriset
 #'
 
 .make_x <- function(data, tz="local", check_xy=TRUE) {
@@ -258,7 +259,7 @@
     # Save the response content to a file
     writeBin(req$body, filename)
 
-    return(terra::rast(filename))  # Read the raster file
+    return(rast(filename))  # Read the raster file
   }
 
   # Download and read TIFF files
@@ -323,7 +324,7 @@
   xy <- project(xy, crs)
 
   #LCC4 and LCC2
-  vlcc <- terra::extract(.rlcc, xy)$lcc
+  vlcc <- extract(.rlcc, xy)$lcc
   lcclevs <- c("0"="", "1"="Conif", "2"="Conif", "3"="", "4"="",
                "5"="DecidMixed", "6"="DecidMixed", "7"="", "8"="Open", "9"="",
                "10"="Open", "11"="Open", "12"="Open", "13"="Open", "14"="Wet",
@@ -333,16 +334,16 @@
   levels(lcc2) <- c("Forest", "Forest", "OpenWet", "OpenWet")
 
   #TREE
-  vtree <- terra::extract(.rtree, xy)$tree
+  vtree <- extract(.rtree, xy)$tree
   TREE <- vtree / 100
   TREE[TREE < 0 | TREE > 1] <- 0
 
   #raster::extract seedgrow value (this is rounded)
-  d1 <- terra::extract(.rd1, xy)$seedgrow
+  d1 <- extract(.rd1, xy)$seedgrow
 
   #UTC offset + 7 makes Alberta 0 (MDT offset) for local times
   if(tz=="local"){
-    ltz <- terra::extract(.rtz, xy)$utcoffset + 7
+    ltz <- extract(.rtz, xy)$utcoffset + 7
   }
   if(tz=="utc"){
     ltz <- 0
@@ -357,12 +358,12 @@
   ok_dt <- !is.na(dtm)
   dtm[is.na(dtm)] <- mean(dtm, na.rm=TRUE)
   if(tz=="local"){
-    sr <- suntools::sunriset(cbind("X"=xydf$x, "Y"=xydf$y),
+    sr <- sunriset(cbind("X"=xydf$x, "Y"=xydf$y),
                              as.POSIXct(dtm, tz="America/Edmonton"),
                              direction="sunrise", POSIXct.out=FALSE) * 24
   }
   if(tz=="utc"){
-    sr <- suntools::sunriset(cbind("X"=xydf$x, "Y"=xydf$y),
+    sr <- sunriset(cbind("X"=xydf$x, "Y"=xydf$y),
                              as.POSIXct(dtm, tz="GMT"),
                              direction="sunrise", POSIXct.out=FALSE) * 24
   }
@@ -405,7 +406,6 @@
 #'
 #' @keywords internal
 #'
-#' @import dplyr
 #'
 
 .make_off <- function(spp, x){

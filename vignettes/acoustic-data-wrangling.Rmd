@@ -29,6 +29,10 @@ library(wildrtrax)
 library(dplyr)
 library(QPAD)
 
+if (!requireNamespace("QPAD", quietly = TRUE)) {
+  stop("QPAD package required for this vignette")
+}
+
 ```
 
 ```{r, warning = F, message = F, eval = T, include = T, echo = T}
