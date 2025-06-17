@@ -8,8 +8,9 @@
 
 ## Minor changes
 
-* Additional argument to `wt_summarise_cam()` using `image_set_id` to adjust for effort across multiple deployments
-* Fixed a bug that incorrectly adjusted time zones in `wt_qpad_offsets()`. This bug affected QPAD offsets used for [species with time since sunrise in the top model](https://github.com/borealbirds/QPAD-offsets-correction/blob/main/qpad_tssr_species.csv) and in areas outside the Mountain Time Zone (MST/MDT). For more information, please see the [BAM QPAD correction repository](https://github.com/borealbirds/QPAD-offsets-correction) for further details or email bamp@ualberta.ca for assistance.
+* Additional argument to `wt_summarise_cam()` using `image_set_id` to adjust for effort across multiple deployments (see #80); additional enhancements for `wt_ind_detect()` (see #81, #82)
+* Refined usage of `wt_kaleidoscope_tags()` (see #77).
+* Fixed a bug that incorrectly adjusted time zones in `wt_qpad_offsets()`. This bug affected QPAD offsets used for [species with time since sunrise in the top model](https://github.com/borealbirds/QPAD-offsets-correction/blob/main/qpad_tssr_species.csv) and in areas outside the Mountain Time Zone (MST/MDT). For more information, please see the [BAM QPAD correction repository](https://github.com/borealbirds/QPAD-offsets-correction) for further details or email bamp@ualberta.ca for assistance
 
 # wildrtrax 1.3.3
 
