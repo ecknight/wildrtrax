@@ -1,4 +1,5 @@
 library(testthat)
+library(QPAD)
 
 Sys.setenv(WT_USERNAME = "guest", WT_PASSWORD = "Apple123")
 wt_auth(force = TRUE)

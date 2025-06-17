@@ -15,8 +15,20 @@ knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(ggplot2)
 library(gridExtra)
+library(httr2)
 
-load("classifiers.RData")
+download_and_load_rdata <- function(url, filename) {
+  req <- request(url) |> 
+    req_perform()
+  writeBin(req$body, filename)
+  load(filename, envir = .GlobalEnv)
+  unlink(filename)  # Deletes the file from the disk
+}
+
+download_and_load_rdata(
+  url = "https://raw.githubusercontent.com/ABbiodiversity/wildRtrax-assets/main/classifiers.RData",
+  filename = "classifiers.RData"
+)
 #save.image("classifiers.RData")
 ```
 
@@ -25,7 +37,7 @@ load("classifiers.RData")
 Recent advances in deep learning have led to the development of neural network models that can classify the sounds within acoustic recordings, such as those captured by autonomous recording units (ARUs). These classifiers can be trained to detect just a single focal species, or to classify thousands of species. The process of using automated classifiers to extract species detections from acoustic recordings is collectively called "computer listening". This tutorial will show you how to access and work with classifier results for recordings in WildTrax.
 
 ## BirdNET
-[BirdNET](https://birdnet.cornell.edu/) is a deep learning classifier developed by the Cornell Lab of Ornithology that is trained to classify more than 6,000 of the world's most common bird species, including most North American bird species @kahl_2022. The model converts audio recordings into windows of spectrograms and outputs a probability score for each species in each one.
+[BirdNET](https://birdnet.cornell.edu/) is a deep learning classifier that is trained to classify more than 6,000 of the world's most common bird species, including most North American bird species @kahl_2022. The model converts audio recordings into windows of spectrograms and outputs a probability score for each species in each one.
 
 ## Classifier performance
 Classifier scores can be converted to species detections by setting a threshold (e.g., 0.8) above which to consider a species present within a given spectrogram @wood_2024. False positives can still occur at high score thresholds, so often verification by a human observer is still necessary.
@@ -300,7 +312,7 @@ ggplot(occupied_ccsp) +
 
 ## Other applications
 
-Visit the [BirdNET Github repository](https://github.com/kahst/BirdNET-Analyzer) to run BirdNET on your own computer. The decision to pursue other applications should be made with the effect of BirdNET's low recall rate in mind:
+Visit the [BirdNET Github repository](https://github.com/birdnet-team/BirdNET-Analyzer) to run BirdNET on your own computer. The decision to pursue other applications should be made with the effect of BirdNET's low recall rate in mind:
 
 1. With presence / absence data, BirdNET is unlikely to be reliably to confirm absences due to the low recall.
 
