@@ -814,7 +814,6 @@ wt_make_aru_tasks <- function(input, output=NULL, task_method = c("1SPM","1SPT",
 #' @param input Character; The path to the input csv
 #' @param output Character; Path where the output file will be stored
 #' @param freq_bump Boolean; Set to TRUE to add a buffer to the frequency values exported from Kaleidoscope. Helpful for getting more context around a signal in species verification
-#'
 #' @import dplyr tibble
 #' @importFrom readr read_csv
 #' @importFrom tidyr drop_na separate

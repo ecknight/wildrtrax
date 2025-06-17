@@ -1095,16 +1095,12 @@ wt_get_project_tags <- function(project_id) {
 #'   \item `"download-location"`
 #'   \item `"download-tasks-by-project-id"`
 #'   \item `"download-tags-by-project-id"`
-#'   \item `"download-camera-tasks-by-project-id"`
 #'   \item `"download-camera-tags-by-project-id"`
 #'   \item `"download-point-count-by-project-id"`
 #' }
-#' @param project The project ID
-#' @param organization The organization ID
 #'
-#' @import httr2
+#' @import httr2 tibble dplyr
 #' @importFrom readr read_csv
-#' @import tibble
 #'
 #' @export
 #'
@@ -1114,56 +1110,83 @@ wt_get_project_tags <- function(project_id) {
 #' wt_auth()
 #'
 #' # Fetch column headers by organization
-#' wt_get_sync_columns("download-location-by-org-id", organization = 5)
+#' wt_get_sync_columns("download-location-by-org-id")
 #'
 #' # Fetch column headers by project
-#' wt_get_sync_columns("download-point-count-by-project-id", project = 3355)
+#' wt_get_sync_columns("download-point-count-by-project-id")
 #' }
 #'
 #' @return A tibble with column headers for the specified API call.
 
+wt_get_sync_columns <- function(api) {
 
-wt_get_sync_columns <- function(api, project = NULL, organization = NULL) {
-
-  if (.wt_auth_expired())
+  # Check authentication
+  if (.wt_auth_expired()) {
     stop("Please authenticate with wt_auth().", call. = FALSE)
+  }
 
-  if (is.null(api) || api == "")
+  if (is.null(api) || api == "") {
     stop("The 'api' field is required.", call. = FALSE)
+  }
 
-  if (is.null(project) && is.null(organization))
-    stop("You must provide at least one of 'project' or 'organization'.", call. = FALSE)
+  api_defaults <- list(
+    "download-location" = list(projectId = 2),
+    "download-tasks-by-project-id" = list(projectId = 2),  # ARU
+    "download-tags-by-project-id" = list(projectId = 2),   # ARU
+    "download-camera-tasks-by-project-id" = list(projectId = 220), # CAM
+    "download-camera-tags-by-project-id" = list(projectId = 220),  # CAM
+    "download-point-count-by-project-id" = list(projectId = 887)   # PC
+  )
 
+  if (!api %in% names(api_defaults)) {
+    stop("API not recognized or defaults not defined for the provided API.", call. = FALSE)
+  }
+
+  # Retrieve default IDs for the specified API
+  api_params <- api_defaults[[api]]
   api_path <- paste0("/bis/", api)
 
-  if (is.null(project)) {
-    o <- .wt_api_gr(
-      path = api_path,
-      orgId = organization
-    ) |>
-      httr2::resp_body_raw()
+  # Perform the API request
+  response <- do.call(.wt_api_gr, c(list(path = api_path), api_params))
 
-    col_headers <- rawToChar(o) %>%
-      read_csv(show_col_types = FALSE) %>%
-      colnames() %>%
+  # Determine content type and process response
+  content_type <- httr2::resp_content_type(response)
+
+  if (content_type == "application/csv") {
+    col_headers <- response |>
+      httr2::resp_body_raw() |>
+      rawToChar() |>
+      read_csv(show_col_types = FALSE) |>
+      colnames() |>
       as_tibble_col()
 
-    return(col_headers)
+  } else if (content_type == "application/zip") {
+    tmp_file <- tempfile(fileext = ".zip")
+    writeBin(httr2::resp_body_raw(response), tmp_file)
+    unzip_dir <- tempfile()
+    unzip(tmp_file, exdir = unzip_dir)
+
+    # Assuming the zip contains a single CSV file
+    csv_files <- list.files(unzip_dir, pattern = "\\.csv$", full.names = TRUE)
+    if (length(csv_files) == 0) stop("No CSV file found in the zip archive.", call. = FALSE)
+
+    col_headers <- read_csv(csv_files[1], show_col_types = FALSE) |>
+      colnames() |>
+      as_tibble_col()
+
+  } else if (content_type %in% c("text/html", "application/xhtml+xml")) {
+    col_headers <- response |>
+      httr2::resp_body_html() |>
+      rvest::html_table(header = TRUE) |>
+      purrr::pluck(1) |>
+      colnames() |>
+      as_tibble_col()
 
   } else {
-
-    p <- .wt_api_gr(
-      path = "download-camera-tags-by-project-id",
-      projectId = 3177
-    ) |>
-      httr2::resp_body_html()
-
-    col_headers <- rawToChar(p) %>%
-      read_csv(show_col_types = FALSE) %>%
-      colnames() %>%
-      as_tibble_col()
-
-    return(col_headers)
+    stop(paste("Unexpected content type:", content_type), call. = FALSE)
   }
+
+  return(col_headers)
 }
+
 

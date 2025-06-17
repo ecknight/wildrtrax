@@ -27,11 +27,6 @@ load("package.RData")
 # Attach package
 library(wildrtrax)
 library(dplyr)
-library(QPAD)
-
-if (!requireNamespace("QPAD", quietly = TRUE)) {
-  stop("QPAD package required for this vignette")
-}
 
 ```
 
@@ -73,7 +68,13 @@ head(my_wide_data)
 
 Now you can calculate statistical offsets to account for imperfect detection following the [QPAD method](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.12106). Ensure you have QPAD [downloaded](https://github.com/borealbirds/QPAD) before proceeding and installed via `devtools::install_github("psolymos/QPAD")`.
 
-```{r, eval = T, echo = T, warning = F, message = F}
+```{r, eval = FALSE, echo = T, warning = F, message = F}
+library(QPAD)
+
+if (!requireNamespace("QPAD", quietly = TRUE)) {
+  stop("QPAD package required for this vignette")
+}
+
 my_offset_data <- wt_qpad_offsets(data = my_wide_data, species = "all", version = 3, together = TRUE)
 
 head(my_offset_data)

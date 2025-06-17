@@ -4,7 +4,7 @@
 \alias{wt_get_sync_columns}
 \title{Get column headers from WildTrax Sync APIs}
 \usage{
-wt_get_sync_columns(api, project = NULL, organization = NULL)
+wt_get_sync_columns(api)
 }
 \arguments{
 \item{api}{A string specifying the API to query. Must be one of:
@@ -16,14 +16,9 @@ wt_get_sync_columns(api, project = NULL, organization = NULL)
 \item \code{"download-location"}
 \item \code{"download-tasks-by-project-id"}
 \item \code{"download-tags-by-project-id"}
-\item \code{"download-camera-tasks-by-project-id"}
 \item \code{"download-camera-tags-by-project-id"}
 \item \code{"download-point-count-by-project-id"}
 }}
-
-\item{project}{The project ID}
-
-\item{organization}{The organization ID}
 }
 \value{
 A tibble with column headers for the specified API call.
@@ -37,10 +32,10 @@ Fetch column headers for a sync APIs in WildTrax. You must specify at least one 
 wt_auth()
 
 # Fetch column headers by organization
-wt_get_sync_columns("download-location-by-org-id", organization = 5)
+wt_get_sync_columns("download-location-by-org-id")
 
 # Fetch column headers by project
-wt_get_sync_columns("download-point-count-by-project-id", project = 3355)
+wt_get_sync_columns("download-point-count-by-project-id")
 }
 
 }
