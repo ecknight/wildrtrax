@@ -64,4 +64,25 @@ test_that("Get functions", {
 #   expect_true(!is.null(wt_download_report(197, 'CAM', 'main', F, max_seconds = 3000)))
 # })
 
+test_that("Get functions for all API combinations with specific project restrictions", {
+
+  # Set environment variables and authenticate
+  Sys.setenv(WT_USERNAME = "guest", WT_PASSWORD = "Apple123")
+  wt_auth(force = TRUE)
+
+  # Test for each API
+  expect_no_error(wt_get_sync_columns(api = "download-location"))
+
+  expect_no_error(wt_get_sync_columns(api = "download-tasks-by-project-id"))
+
+  expect_no_error(wt_get_sync_columns(api = "download-tags-by-project-id"))
+
+  # Uncomment if testing camera tasks is applicable
+  # expect_no_error(wt_get_sync_columns(api = "download-camera-tasks-by-project-id"))
+
+  expect_no_error(wt_get_sync_columns(api = "download-camera-tags-by-project-id"))
+
+  expect_no_error(wt_get_sync_columns(api = "download-point-count-by-project-id"))
+})
+
 

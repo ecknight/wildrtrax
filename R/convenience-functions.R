@@ -51,11 +51,11 @@ wt_location_distances <- function(input_from_tibble = NULL, input_from_file = NU
   locs <- locs |>
     dplyr::select(location, latitude, longitude) |>
     dplyr::distinct() |>
-    sf::st_as_sf(coords = c("longitude","latitude"), crs = 4326) |>
+    st_as_sf(coords = c("longitude","latitude"), crs = 4326) |>
     dplyr::select(location, geometry) |>
     dplyr::mutate(id = row_number())
 
-  distances <- sf::st_distance(locs, locs)
+  distances <- st_distance(locs, locs)
 
   location_ids <- locs |>
     tibble::as_tibble() |>
@@ -520,16 +520,18 @@ wt_qpad_offsets <- function(data, species = c("all"), version = 3, together=FALS
       ungroup()
   }
 
+  #Load QPAD estimates
+  cat("\nLoading QPAD estimates... ")
+  load_BAM_QPAD <- get("load_BAM_QPAD", envir = asNamespace("QPAD"))
+  getBAMspecieslist <- get("getBAMspecieslist", envir = asNamespace("QPAD"))
+  load_BAM_QPAD(version)
+
   #Make prediction object
   cat("Extracting covariates for offset calculation. This may take a moment.")
   x <- .make_x(data)
 
-  #Load QPAD estimates
-  cat("\nLoading QPAD estimates... ")
-  QPAD::load_BAM_QPAD(version)
-
   #Make the species list
-  if("all" %in% species) spp <- sort(intersect(QPAD::getBAMspecieslist(), colnames(data))) else spp <- species
+  if("all" %in% species) spp <- sort(intersect(getBAMspecieslist(), colnames(data))) else spp <- species
 
   #Set up the offset loop
   cat("\nCalculating offsets...")
@@ -605,13 +607,13 @@ wt_add_grts <- function(data, group_locations_in_cell = FALSE) {
   }
 
   # Filter things down a bit by bbox so the intersection doesn't take too long
-  points_sf <- sf::st_as_sf(data, coords = c("longitude", "latitude"), crs = 4326)
-  points_bbox <- sf::st_as_sfc(st_bbox(points_sf))
-  bbox_sf <- sf::st_sf(geometry = points_bbox)
+  points_sf <- st_as_sf(data, coords = c("longitude", "latitude"), crs = 4326)
+  points_bbox <- st_as_sfc(st_bbox(points_sf))
+  bbox_sf <- st_sf(geometry = points_bbox)
   # Define bounding boxes for each region
-  bbox_canada <- sf::st_set_crs(sf::st_sf(sf::st_as_sfc(sf::st_bbox(c(xmin = -173.179, ymin = 34.43, xmax = -16.35, ymax = 85.17)), crs = 4326)), 4326)
-  bbox_alaska <-  sf::st_set_crs(sf::st_sf(sf::st_as_sfc(sf::st_bbox(c(xmin = -179.99863, ymin = 51.214183, xmax = -129.9795, ymax = 71.538800)), crs = 4326)),4326)
-  bbox_contig <- sf::st_set_crs(sf::st_sf(sf::st_as_sfc(sf::st_bbox(c(xmin = -127.94485, ymin = 22.91700, xmax = -65.26265, ymax = 51.54421)), crs = 4326)),4326)
+  bbox_canada <- st_set_crs(st_sf(st_as_sfc(st_bbox(c(xmin = -173.179, ymin = 34.43, xmax = -16.35, ymax = 85.17)), crs = 4326)), 4326)
+  bbox_alaska <-  st_set_crs(st_sf(st_as_sfc(st_bbox(c(xmin = -179.99863, ymin = 51.214183, xmax = -129.9795, ymax = 71.538800)), crs = 4326)),4326)
+  bbox_contig <- st_set_crs(st_sf(st_as_sfc(st_bbox(c(xmin = -127.94485, ymin = 22.91700, xmax = -65.26265, ymax = 51.54421)), crs = 4326)),4326)
 
   # Initialize an empty list to collect the datasets
   grts_list <- list()
@@ -652,7 +654,7 @@ wt_add_grts <- function(data, group_locations_in_cell = FALSE) {
     tidyr::separate(center, into = c("center_lat", "center_lon"), sep = ",", convert = TRUE) %>%
     dplyr::rowwise() %>%
     dplyr::mutate(
-      geometry = list(sf::st_polygon(list(matrix(
+      geometry = list(st_polygon(list(matrix(
         c(
           lowerleft_lon, lowerleft_lat,
           upperleft_lon, upperleft_lat,
@@ -665,28 +667,28 @@ wt_add_grts <- function(data, group_locations_in_cell = FALSE) {
       ))))
     ) |>
     dplyr::ungroup() |>
-    sf::st_as_sf(crs = 4326) |>
+    st_as_sf(crs = 4326) |>
     dplyr::select(GRTS_ID, geometry)
 
   # If CRS are different, transform bbox_sf to match the CRS of grid_cells_sf
   if (!identical(st_crs(grid_cells_sf), st_crs(bbox_sf))) {
-    bbox_sf <- st_transform(sf::st_make_valid(bbox_sf), st_crs(sf::st_make_valid(grid_cells_sf)))
+    bbox_sf <- st_transform(st_make_valid(bbox_sf), st_crs(st_make_valid(grid_cells_sf)))
   }
 
-  grid_cells_filtered <- grid_cells_sf |> suppressWarnings(sf::st_intersection(bbox_sf))
+  grid_cells_filtered <- grid_cells_sf |> suppressWarnings(st_intersection(bbox_sf))
 
   # Perform spatial join to find which polygon each point falls into
   if(nrow(grid_cells_filtered) == 0){
     stop('There are no grid cells that intersect the points')
   } else {
-    result <- suppressWarnings(sf::st_join(points_sf, grid_cells_filtered, join = sf::st_within))
+    result <- suppressWarnings(st_join(points_sf, grid_cells_filtered, join = st_within))
   }
 
   # Convert back to tibble and select relevant columns
   new_data <- result |>
     tibble::as_tibble() |>
     dplyr::relocate(GRTS_ID, .after = location) %>%
-    sf::st_drop_geometry() %>%
+    st_drop_geometry() %>%
     dplyr::mutate(longitude = unlist(purrr::map(.$geometry, 1)),
                   latitude = unlist(purrr::map(.$geometry, 2))) %>%
     dplyr::relocate(latitude, .after = GRTS_ID) |>

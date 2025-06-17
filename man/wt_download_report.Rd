@@ -36,7 +36,7 @@ Valid values for argument \code{report} when \code{sensor_id} = "CAM" currently 
 \item project
 \item location
 \item image_report
-\item image_set
+\item image_set_report
 \item tag
 \item megadetector
 \item megaclassifier
@@ -68,7 +68,7 @@ Valid values for argument \code{report} when \code{sensor_id} = "PC" currently a
 # Authenticate first:
 wt_auth()
 a_camera_project <- wt_download_report(
-project_id = 397, sensor_id = "CAM", reports = c("tag", "image_set"),
+project_id = 397, sensor_id = "CAM", reports = c("tag", "image_set_report"),
 weather_cols = TRUE)
 
 an_aru_project <- wt_download_report(
