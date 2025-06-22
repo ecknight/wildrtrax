@@ -443,6 +443,7 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
     tok_used <- ._wt_auth_env_$access_token
   }
 
+  # Generate user agent
   u <- .gen_ua()
 
   if(is.null(tok_used)) {
@@ -675,125 +676,6 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
   ))
 }
 
-#' Get locations from a WildTrax Organization
-#'
-#' @description Obtain a table listing locations emulating the Locations tab in a WildTrax Organization
-#'
-#' @param organization Either the short letter or numeric digit representing the Organization
-#'
-#' @import httr2
-#' @import dplyr
-#'
-#' @export
-#'
-#' @examples
-#' \dontrun{
-#' # Authenticate first:
-#' wt_auth()
-#' wt_get_locations(organization = 'ABMI')
-#' }
-#'
-#' @return A data frame listing an Organizations' locations
-#'
-
-wt_get_locations <- function(organization) {
-
-  # Check if authentication has expired:
-  if (.wt_auth_expired())
-    stop("Please authenticate with wt_auth().", call. = FALSE)
-
-  # Check if organization is numeric or character, and handle accordingly
-  org_numeric <- .get_org_id(organization)
-
-  # Request location data
-  r <- .wt_api_gr(
-    path = "/bis/get-location-summary",
-    organizationId = org_numeric,
-    sort = "locationName",
-    order = "asc",
-    limit = 1e9
-  )
-
-  # Stop if response is NULL or empty
-  if (is.null(r) || length(httr2::resp_body_json(r)$results) == 0) {
-    stop("No location data returned.")
-  }
-
-  # Convert response into a data frame
-  x <- data.frame(do.call(rbind, httr2::resp_body_json(r)$results))
-
-  # Rename columns for clarity
-  new_names <- c("location_id", "location", "longitude", "latitude", "location_buffer",
-                 "location_visibility", "location_recording_count", "location_image_count")
-  colnames(x) <- new_names
-
-  # Convert location_visibility to integer for joining
-  x$location_visibility <- as.integer(x$location_visibility)
-
-  # Fetch visibility options for the locations
-  op <- .wt_api_gr(path = "/bis/get-location-options") |>
-    httr2::resp_body_json() |>
-    purrr::pluck("visibility") |>
-    purrr::map_df(~ data.frame(id = .x$id, type = .x$type))
-
-  # Replace visibilityId with human-readable type from the op data frame
-  x <- x |>
-    left_join(op, by = c("location_visibility" = "id")) |>
-    select(-location_visibility) |>
-    rename(location_visibility = type)  # Renaming the 'type' to 'location_visibility'
-
-  return(x)
-
-}
-
-#' Get visits from a WildTrax Organization
-#'
-#' @description Obtain a table listing visits emulating the Visits tab in a WildTrax Organization
-#'
-#' @param organization Either the short letter or numeric digit representing the Organization
-#'
-#' @import httr2
-#' @import dplyr
-#'
-#' @export
-#'
-#' @examples
-#' \dontrun{
-#' # Authenticate first:
-#' wt_auth()
-#' wt_get_visits(organization = 'ABMI')
-#' }
-#'
-#' @return A data frame listing an Organizations' visits
-#'
-
-wt_get_visits <- function(organization) {
-
-  if (.wt_auth_expired())
-    stop("Please authenticate with wt_auth().", call. = FALSE)
-
-  org_numeric <- .get_org_id(organization)
-
-  # Request data
-  r <- .wt_api_gr(
-    path = "/bis/get-location-visit-summary",
-    organizationId = org_numeric,
-    sort = "locationName",
-    order = "asc",
-    limit = 1e9
-  ) |>
-    httr2::resp_body_json()
-
-  x <- data.frame(do.call(rbind, r$results))
-
-  # Rename columns for clarity
-  new_names <- c("location_id", "location", "organization_id", "has_location_photos", "first_visit_date", "last_visit_date")
-  colnames(x) <- new_names
-
-  return(x)
-
-}
-
 #' Get an Organizations' list of recordings
 #'
 #' @description Obtain a table listing all recordings belonging to an Organization emulating the Recordings tab
@@ -1022,69 +904,9 @@ wt_get_project_species <- function(project_id) {
     return(included_names)
 }
 
-#' Get tags from WildTrax project sync
+#' Get column headers and data from WildTrax Sync APIs
 #'
-#' @description Obtain a table listing tags added to a specific project in WildTrax
-#'
-#' @param project_id The project_id of the WildTrax project
-#'
-#' @import httr2
-#' @import purrr
-#' @import dplyr
-#' @importFrom readr cols col_datetime
-#'
-#' @export
-#'
-#' @examples
-#' \dontrun{
-#' # Authenticate first:
-#' wt_auth()
-#' my_project <- wt_get_download_summary(sensor_id = 'ARU') |>
-#' filter(grepl('Ecosystem Health 2023',project)) |>
-#' pull(project_id)
-#' wt_get_project_tags(project_id = my_project)
-#' }
-#'
-#' @return A data frame listing an Organizations' locations
-#'
-
-wt_get_project_tags <- function(project_id) {
-
-  # Check if authentication has expired:
-  if (.wt_auth_expired())
-    stop("Please authenticate with wt_auth().", call. = FALSE)
-
-    r <- .wt_api_gr(
-      path = "/bis/download-tags-by-project-id",
-      projectId = project_id,
-      limit = 1e9
-    )
-
-    if (r$status_code == 403) {
-      stop("Permission denied: You do not have access to request this data.", call. = FALSE)
-      return(NULL)
-    }
-
-    x <- read_csv(
-      rawToChar(httr2::resp_body_raw(r)),
-      col_types = readr::cols(
-        recordingDate = readr::col_datetime(format = "%Y-%m-%d %H:%M:%S")
-      )
-    ) |> as_tibble()
-
-    # Check if `x` contains the error field
-    if (!is.null(x$error) && x$error == "Permission denied") {
-      stop("You do not have permission for this data")
-    }
-
-    tags <- x |> as_tibble()
-
-    return(tags)
-}
-
-#' Get column headers from WildTrax Sync APIs
-#'
-#' @description Fetch column headers for a sync APIs in WildTrax. You must specify at least one of `project` or `organization` depending on the APIs
+#' @description Fetch column headers and data for sync APIs in WildTrax. You must specify at least one of `project` or `organization` depending on the API and at what level of the system you're looking for data for
 #'
 #' @param api A string specifying the API to query. Must be one of:
 #' \itemize{
@@ -1098,6 +920,7 @@ wt_get_project_tags <- function(project_id) {
 #'   \item `"download-camera-tags-by-project-id"`
 #'   \item `"download-point-count-by-project-id"`
 #' }
+#' @param option An option
 #'
 #' @import httr2 tibble dplyr
 #' @importFrom readr read_csv
@@ -1118,7 +941,9 @@ wt_get_project_tags <- function(project_id) {
 #'
 #' @return A tibble with column headers for the specified API call.
 
-wt_get_sync_columns <- function(api) {
+wt_get_sync <- function(api, option = c("columns", "data"), project = NULL, organization = NULL) {
+
+  option <- match.arg(option)
 
   # Check authentication
   if (.wt_auth_expired()) {
@@ -1130,35 +955,42 @@ wt_get_sync_columns <- function(api) {
   }
 
   api_defaults <- list(
-    "download-location" = list(projectId = 2),
-    "download-tasks-by-project-id" = list(projectId = 2),  # ARU
-    "download-tags-by-project-id" = list(projectId = 2),   # ARU
-    "download-camera-tasks-by-project-id" = list(projectId = 220), # CAM
-    "download-camera-tags-by-project-id" = list(projectId = 220),  # CAM
-    "download-point-count-by-project-id" = list(projectId = 887)   # PC
+    "download-location-by-org-id" = list(orgId = organization),
+    "download-visits-by-org-id" = list(orgId = organization),
+    "download-equipment-by-org-id" = list(orgId = organization),
+    "download-location-equipment-by-org-id" = list(orgId = organization),
+    "download-location" = list(projectId = project),
+    "download-tasks-by-project-id" = list(projectId = project),  # ARU
+    "download-tags-by-project-id" = list(projectId = project),   # ARU
+    #"download-camera-tasks-by-project-id" = list(projectId = 220), # CAM
+    "download-camera-tags-by-project-id" = list(projectId = project),  # CAM
+    "download-point-count-by-project-id" = list(projectId = project)   # PC
   )
 
   if (!api %in% names(api_defaults)) {
     stop("API not recognized or defaults not defined for the provided API.", call. = FALSE)
   }
 
-  # Retrieve default IDs for the specified API
   api_params <- api_defaults[[api]]
   api_path <- paste0("/bis/", api)
-
-  # Perform the API request
   response <- do.call(.wt_api_gr, c(list(path = api_path), api_params))
 
-  # Determine content type and process response
   content_type <- httr2::resp_content_type(response)
+  message("Content-Type returned: ", content_type)
+
+  process_csv <- function(csv_path) {
+    data <- read_csv(csv_path, show_col_types = FALSE)
+    if (option == "columns") {
+      return(data |> colnames() |> as_tibble_col())
+    } else if (option == "data") {
+      return(data)
+    }
+  }
 
   if (content_type == "application/csv") {
-    col_headers <- response |>
-      httr2::resp_body_raw() |>
-      rawToChar() |>
-      read_csv(show_col_types = FALSE) |>
-      colnames() |>
-      as_tibble_col()
+    tmp_file <- tempfile(fileext = ".csv")
+    writeLines(rawToChar(httr2::resp_body_raw(response)), tmp_file)
+    data <- process_csv(tmp_file)
 
   } else if (content_type == "application/zip") {
     tmp_file <- tempfile(fileext = ".zip")
@@ -1170,23 +1002,11 @@ wt_get_sync_columns <- function(api) {
     csv_files <- list.files(unzip_dir, pattern = "\\.csv$", full.names = TRUE)
     if (length(csv_files) == 0) stop("No CSV file found in the zip archive.", call. = FALSE)
 
-    col_headers <- read_csv(csv_files[1], show_col_types = FALSE) |>
-      colnames() |>
-      as_tibble_col()
-
-  } else if (content_type %in% c("text/html", "application/xhtml+xml")) {
-    col_headers <- response |>
-      httr2::resp_body_html() |>
-      rvest::html_table(header = TRUE) |>
-      purrr::pluck(1) |>
-      colnames() |>
-      as_tibble_col()
+    data <- process_csv(csv_files[1])
 
   } else {
     stop(paste("Unexpected content type:", content_type), call. = FALSE)
   }
 
-  return(col_headers)
+  return(data)
 }
-
-
