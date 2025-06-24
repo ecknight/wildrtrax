@@ -960,11 +960,11 @@ wt_get_sync <- function(api, option = c("columns", "data"), project = NULL, orga
     "download-equipment-by-org-id" = list(orgId = organization),
     "download-location-equipment-by-org-id" = list(orgId = organization),
     "download-location" = list(projectId = project),
-    "download-tasks-by-project-id" = list(projectId = project),  # ARU
-    "download-tags-by-project-id" = list(projectId = project),   # ARU
-    #"download-camera-tasks-by-project-id" = list(projectId = 220), # CAM
-    "download-camera-tags-by-project-id" = list(projectId = project),  # CAM
-    "download-point-count-by-project-id" = list(projectId = project)   # PC
+    "download-tasks-by-project-id" = list(projectId = project),
+    "download-tags-by-project-id" = list(projectId = project),
+    #"download-camera-tasks-by-project-id" = list(projectId = 220),
+    "download-camera-tags-by-project-id" = list(projectId = project),
+    "download-point-count-by-project-id" = list(projectId = project)
   )
 
   if (!api %in% names(api_defaults)) {

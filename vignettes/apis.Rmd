@@ -46,7 +46,7 @@ The Auth0 token you obtained will last for 12 hours. After that time, you will n
 
 ## Making API calls
 
-Once authenticated, you can now use various functions that call upon the WildTrax API. For instance, you can use `wt_get_download_summary()` to see basic metadata about projects that you can download data for.  
+Once authenticated, you can now use various functions that call upon the WildTrax APIs. For instance, you can use `wt_get_download_summary()` to see basic metadata about projects that you can download data for.  
 
 ```{r echo=TRUE, eval=TRUE, wanring=F, message=F}
 # Download the project summary you have access to
@@ -167,3 +167,7 @@ discover <- wt_dd_summary(sensor = "ARU", species = "White-throated Sparrow", bo
 head(discover)
 
 ```
+
+## Sync columns
+
+  
