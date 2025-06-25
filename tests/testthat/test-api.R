@@ -52,8 +52,6 @@ test_that("Download with authentication with boundary; multiple species logged i
 # })
 
 test_that("Get functions", {
-  expect_true(!is.null(wt_get_locations('GUEST')))
-  expect_true(!is.null(wt_get_visits('GUEST')))
   expect_true(!is.null(wt_get_recordings('GUEST')))
   expect_true(!is.null(wt_get_project_species(3286)))
 })
@@ -70,18 +68,18 @@ test_that("Get functions for all API combinations with specific project restrict
   wt_auth(force = TRUE)
 
   # Test for each API
-  expect_no_error(wt_get_sync_columns(api = "download-location"))
-
-  expect_no_error(wt_get_sync_columns(api = "download-tasks-by-project-id"))
-
-  expect_no_error(wt_get_sync_columns(api = "download-tags-by-project-id"))
-
+  expect_no_error(wt_get_sync(api = "download-location-by-org-id", organization = 5205))
+  expect_no_error(wt_get_sync(api = "download-visits-by-org-id", organization = 5205))
+  expect_no_error(wt_get_sync(api = "download-equipment-by-org-id" = organization = 5205))
+  #expect_no_error(wt_get_sync(api = "download-location-equipment-by-org-id" = organization = 5205))
+  expect_no_error(wt_get_sync(api = "download-location", option = "columns", project = 2))
+  expect_no_error(wt_get_sync(api = "download-tasks-by-project-id", option = "columns", project = 2))
+  expect_no_error(wt_get_sync(api = "download-tags-by-project-id", option = "columns", project = 2))
   # Uncomment if testing camera tasks is applicable
-  # expect_no_error(wt_get_sync_columns(api = "download-camera-tasks-by-project-id"))
+  # expect_no_error(wt_get_sync_columns(api = "download-camera-tasks-by-project-id", option = "columns"))
+  expect_no_error(wt_get_sync(api = "download-camera-tags-by-project-id", option = "columns", project = 252))
+  expect_no_error(wt_get_sync(api = "download-point-count-by-project-id", option = "columns", project = 252))
 
-  expect_no_error(wt_get_sync_columns(api = "download-camera-tags-by-project-id"))
-
-  expect_no_error(wt_get_sync_columns(api = "download-point-count-by-project-id"))
 })
 
 

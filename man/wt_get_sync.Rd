@@ -14,15 +14,17 @@ wt_get_sync(
 \arguments{
 \item{api}{A string specifying the API to query. Must be one of:
 \itemize{
-\item \code{"download-location-by-org-id"}
-\item \code{"download-visits-by-org-id"}
-\item \code{"download-equipment-by-org-id"}
-\item \code{"download-location-equipment-by-org-id"}
-\item \code{"download-location"}
-\item \code{"download-tasks-by-project-id"}
-\item \code{"download-tags-by-project-id"}
-\item \code{"download-camera-tags-by-project-id"}
-\item \code{"download-point-count-by-project-id"}
+\item \code{"organization_locations"} - Fetch location summaries for an organization (\code{get-location-summary}).
+\item \code{"organization_visits"} - Fetch visit summaries for an organization (\code{get-location-visit-summary}).
+\item \code{"organization_equipment"} - Fetch equipment details for an organization (\code{get-equipment}).
+\item \code{"recording_summary"} - Fetch recording summaries for an organization (\code{get-recording-summary}).
+\item \code{"image_deployment_summary"} - Fetch image deployment summaries for an organization (\code{get-image-deployment-summary}).
+\item \code{"project_locations"} - Fetch location details for a project (\code{download-location}).
+\item \code{"project_tasks"} - Fetch task summaries for a project (\code{download-tasks-by-project-id}).
+\item \code{"project_tags"} - Fetch tag summaries for a project (\code{download-tags-by-project-id}).
+\item \code{"project_camera_tags"} - Fetch camera tag summaries for a project (\code{download-camera-tags-by-project-id}).
+\item \code{"project_point_counts"} - Fetch point count summaries for a project (\code{download-point-count-by-project-id}).
+\item \code{"project_species"} - Fetch species details for a project (\code{get-project-species-details}).
 }}
 
 \item{option}{An option}
