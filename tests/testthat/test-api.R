@@ -63,7 +63,7 @@ test_that("Get functions", {
 
 test_that("Get functions for all API combinations with specific project restrictions", {
   # Set environment variables and authenticate
-  Sys.setenv(WT_USERNAME = "agmacpha@ualberta.ca", WT_PASSWORD = "k1ttyco0zoobad00!!")
+  Sys.setenv(WT_USERNAME = "guest", WT_PASSWORD = "Apple123")
   wt_auth(force = TRUE)
 
   # Test for each API using pseudonyms
