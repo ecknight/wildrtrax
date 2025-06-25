@@ -62,24 +62,25 @@ test_that("Get functions", {
 # })
 
 test_that("Get functions for all API combinations with specific project restrictions", {
-
   # Set environment variables and authenticate
-  Sys.setenv(WT_USERNAME = "guest", WT_PASSWORD = "Apple123")
+  Sys.setenv(WT_USERNAME = "agmacpha@ualberta.ca", WT_PASSWORD = "k1ttyco0zoobad00!!")
   wt_auth(force = TRUE)
 
-  # Test for each API
-  expect_no_error(wt_get_sync(api = "download-location-by-org-id", organization = 5205))
-  expect_no_error(wt_get_sync(api = "download-visits-by-org-id", organization = 5205))
-  expect_no_error(wt_get_sync(api = "download-equipment-by-org-id" = organization = 5205))
-  #expect_no_error(wt_get_sync(api = "download-location-equipment-by-org-id" = organization = 5205))
-  expect_no_error(wt_get_sync(api = "download-location", option = "columns", project = 2))
-  expect_no_error(wt_get_sync(api = "download-tasks-by-project-id", option = "columns", project = 2))
-  expect_no_error(wt_get_sync(api = "download-tags-by-project-id", option = "columns", project = 2))
-  # Uncomment if testing camera tasks is applicable
-  # expect_no_error(wt_get_sync_columns(api = "download-camera-tasks-by-project-id", option = "columns"))
-  expect_no_error(wt_get_sync(api = "download-camera-tags-by-project-id", option = "columns", project = 252))
-  expect_no_error(wt_get_sync(api = "download-point-count-by-project-id", option = "columns", project = 252))
-
+  # Test for each API using pseudonyms
+  expect_no_error(wt_get_sync(api = "organization_locations", organization = 5205))
+  expect_no_error(wt_get_sync(api = "organization_visits", organization = 5205))
+  # expect_no_error(wt_get_sync(api = "organization_equipment", organization = 5205))
+  # expect_no_error(wt_get_sync(api = "organization_location_equipment", organization = 5205))
+  expect_no_error(wt_get_sync(api = "organization_recording_summary", organization = 5205))
+  expect_no_error(wt_get_sync(api = "organization_image_summary", organization = 5205))
+  expect_no_error(wt_get_sync(api = "project_locations", option = "columns", project = 2))
+  expect_no_error(wt_get_sync(api = "project_aru_tasks", option = "columns", project = 2))
+  expect_no_error(wt_get_sync(api = "project_aru_tags", option = "columns", project = 2))
+  # expect_no_error(wt_get_sync(api = "project_camera_tasks", option = "columns", project = 252))
+  expect_no_error(wt_get_sync(api = "project_camera_tags", option = "columns", project = 220))
+  expect_no_error(wt_get_sync(api = "project_point_counts", option = "columns", project = 804))
+  expect_no_error(wt_get_sync(api = "project_species", project = 2))
 })
+
 
 
