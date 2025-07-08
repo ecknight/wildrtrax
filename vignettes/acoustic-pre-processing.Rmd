@@ -59,7 +59,7 @@ files %>%
 
 ## Running the QUT Ecoacoustics AnalysisPrograms software on a wt_* standard data set
 
-The `wt_run_ap()` function allows you to run the QUT Analysis Programs [(AP.exe)](https://ap.qut.ecoacoustics.info/) on your audio data. AP generates acoustic index values and false-colour spectrograms for each audio minute of data. Note that you must have the AP program installed on your computer. See more here [(Towsey et al., 2018)](https://researchoutput.csu.edu.au/ws/portalfiles/portal/28556441/28544328_Published_article.pdf).
+The `wt_run_ap()` function allows you to run the QUT Analysis Programs [(AP.exe)](https://ap.qut.ecoacoustics.info/) on your audio data. AP generates acoustic index values and false-colour spectrograms for each audio minute of data. Note that you must have the AP program installed on your computer. See more here [(Towsey et al., 2018)](https://jea.jams.pub/article/2/1/48).
 
 ```{r echo=TRUE, include=T, eval=F, warning = F, message = F}
 # Use the wt_* tibble to execute the AP on the files

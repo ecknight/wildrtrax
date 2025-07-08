@@ -4,7 +4,12 @@ Sys.setenv(WT_USERNAME = "guest", WT_PASSWORD = "Apple123")
 wt_auth(force = TRUE)
 test_data_set <- wt_download_report(project_id = 391, sensor_id = 'CAM', reports = 'main', weather_cols = F)
 ind_detections <- wt_ind_detect(test_data_set, threshold = 60, units = "minutes", datetime_col = image_date_time, remove_human = TRUE, remove_domestic = TRUE)
-
+eff_data <- tibble(
+  project_col = c(391, 391, 391),
+  station_col = c("OGW-ABMI-1057-71-11", "OGW-ABMI-1057-71-12", "OGW-ABMI-1057-71-13"),
+  start_col = as.Date(c("2023-01-01", "2023-05-15", "2023-09-10")),
+  end_col = as.Date(c("2023-03-01", "2023-06-15", "2023-12-31"))
+)
 
 ################################### Camera Test suite
 
@@ -106,6 +111,8 @@ test_that("exclude_out_of_range removes data outside of the camera's field of vi
   result_out <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, exclude_out_of_range = FALSE, time_interval = "day", output_format = "long", variable = "counts")
   expect_true(nrow(result_out) > nrow(result))
 })
+
+
 
 
 

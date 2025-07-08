@@ -93,7 +93,7 @@ wt_get_download_summary <- function(sensor_id) {
 #'  \item project
 #'  \item location
 #'  \item image_report
-#'  \item image_set
+#'  \item image_set_report
 #'  \item tag
 #'  \item megadetector
 #'  \item megaclassifier
@@ -127,7 +127,7 @@ wt_get_download_summary <- function(sensor_id) {
 #' # Authenticate first:
 #' wt_auth()
 #' a_camera_project <- wt_download_report(
-#' project_id = 397, sensor_id = "CAM", reports = c("tag", "image_set"),
+#' project_id = 397, sensor_id = "CAM", reports = c("tag", "image_set_report"),
 #' weather_cols = TRUE)
 #'
 #' an_aru_project <- wt_download_report(
@@ -443,6 +443,7 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
     tok_used <- ._wt_auth_env_$access_token
   }
 
+  # Generate user agent
   u <- .gen_ua()
 
   if(is.null(tok_used)) {
@@ -675,222 +676,6 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
   ))
 }
 
-#' Get locations from a WildTrax Organization
-#'
-#' @description Obtain a table listing locations emulating the Locations tab in a WildTrax Organization
-#'
-#' @param organization Either the short letter or numeric digit representing the Organization
-#'
-#' @import httr2
-#' @import dplyr
-#'
-#' @export
-#'
-#' @examples
-#' \dontrun{
-#' # Authenticate first:
-#' wt_auth()
-#' wt_get_locations(organization = 'ABMI')
-#' }
-#'
-#' @return A data frame listing an Organizations' locations
-#'
-
-wt_get_locations <- function(organization) {
-
-  # Check if authentication has expired:
-  if (.wt_auth_expired())
-    stop("Please authenticate with wt_auth().", call. = FALSE)
-
-  # Check if organization is numeric or character, and handle accordingly
-  org_numeric <- .get_org_id(organization)
-
-  # Request location data
-  r <- .wt_api_gr(
-    path = "/bis/get-location-summary",
-    organizationId = org_numeric,
-    sort = "locationName",
-    order = "asc",
-    limit = 1e9
-  )
-
-  # Stop if response is NULL or empty
-  if (is.null(r) || length(httr2::resp_body_json(r)$results) == 0) {
-    stop("No location data returned.")
-  }
-
-  # Convert response into a data frame
-  x <- data.frame(do.call(rbind, httr2::resp_body_json(r)$results))
-
-  # Rename columns for clarity
-  new_names <- c("location_id", "location", "longitude", "latitude", "location_buffer",
-                 "location_visibility", "location_recording_count", "location_image_count")
-  colnames(x) <- new_names
-
-  # Convert location_visibility to integer for joining
-  x$location_visibility <- as.integer(x$location_visibility)
-
-  # Fetch visibility options for the locations
-  op <- .wt_api_gr(path = "/bis/get-location-options") |>
-    httr2::resp_body_json() |>
-    purrr::pluck("visibility") |>
-    purrr::map_df(~ data.frame(id = .x$id, type = .x$type))
-
-  # Replace visibilityId with human-readable type from the op data frame
-  x <- x |>
-    left_join(op, by = c("location_visibility" = "id")) |>
-    select(-location_visibility) |>
-    rename(location_visibility = type)  # Renaming the 'type' to 'location_visibility'
-
-  return(x)
-
-}
-
-#' Get visits from a WildTrax Organization
-#'
-#' @description Obtain a table listing visits emulating the Visits tab in a WildTrax Organization
-#'
-#' @param organization Either the short letter or numeric digit representing the Organization
-#'
-#' @import httr2
-#' @import dplyr
-#'
-#' @export
-#'
-#' @examples
-#' \dontrun{
-#' # Authenticate first:
-#' wt_auth()
-#' wt_get_visits(organization = 'ABMI')
-#' }
-#'
-#' @return A data frame listing an Organizations' visits
-#'
-
-wt_get_visits <- function(organization) {
-
-  if (.wt_auth_expired())
-    stop("Please authenticate with wt_auth().", call. = FALSE)
-
-  org_numeric <- .get_org_id(organization)
-
-  # Request data
-  r <- .wt_api_gr(
-    path = "/bis/get-location-visit-summary",
-    organizationId = org_numeric,
-    sort = "locationName",
-    order = "asc",
-    limit = 1e9
-  ) |>
-    httr2::resp_body_json()
-
-  x <- data.frame(do.call(rbind, r$results))
-
-  # Rename columns for clarity
-  new_names <- c("location_id", "location", "organization_id", "has_location_photos", "first_visit_date", "last_visit_date")
-  colnames(x) <- new_names
-
-  return(x)
-
-}
-
-#' Get an Organizations' list of recordings
-#'
-#' @description Obtain a table listing all recordings belonging to an Organization emulating the Recordings tab
-#'
-#' @param organization Either the short letter or numeric digit representing the Organization
-#'
-#' @import httr2
-#' @import dplyr
-#'
-#' @export
-#'
-#' @examples
-#' \dontrun{
-#' # Authenticate first:
-#' wt_auth()
-#' wt_get_recordings(organization = 'ABMI')
-#' }
-#'
-#' @return A data frame listing an Organizations' recordings
-#'
-
-wt_get_recordings <- function(organization) {
-
-  if (.wt_auth_expired())
-    stop("Please authenticate with wt_auth().", call. = FALSE)
-
-  org_numeric <- .get_org_id(organization)
-
-  # Request data
-  r <- .wt_api_gr(
-    path = "/bis/get-recording-summary",
-    organizationId = org_numeric,
-    sort = "locationName",
-    order = "asc",
-    limit = 1e9
-  ) |>
-    httr2::resp_body_json()
-
-  x <- data.frame(do.call(rbind, r$results))
-
-  # Rename columns for clarity
-  new_names <- c("location_id", "organization_id", "location", "recording_date_time", "recording_length", "task_count")
-  colnames(x) <- new_names
-
-  return(x)
-
-}
-
-#' Get an Organizations' list of image sets
-#'
-#' @description Obtain a table listing all image sets belonging to an Organization emulating the Image Sets tab
-#'
-#' @param organization Either the short letter or numeric digit representing the Organization
-#'
-#' @import httr2
-#' @import dplyr
-#'
-#' @export
-#'
-#' @examples
-#' \dontrun{
-#' # Authenticate first:
-#' wt_auth()
-#' wt_get_image_sets(organization = 'ABMI')
-#' }
-#'
-#' @return A data frame listing an Organizations' recordings
-#'
-
-wt_get_image_sets <- function(organization) {
-
-  if (.wt_auth_expired())
-    stop("Please authenticate with wt_auth().", call. = FALSE)
-
-  org_numeric <- .get_org_id(organization)
-
-  # Request data
-  r <- .wt_api_gr(
-    path = "/bis/get-image-deployment-summary",
-    organizationId = org_numeric,
-    sort = "locationName",
-    order = "asc",
-    limit = 1e9
-  ) |>
-    httr2::resp_body_json()
-
-  x <- data.frame(do.call(rbind, r$results))
-
-  # Rename columns for clarity
-  new_names <- c("location_id", "organization_id", "location", "image_set_start_date",
-                 "image_set_end_date", "motion_image_count", "total_image_count", "task_count")
-  colnames(x) <- new_names
-
-  return(x)
-
-}
-
 #' Batch upload and download locations photos
 #'
 #' @description A two-way street to upload and download location photos
@@ -957,15 +742,23 @@ wt_location_photos <- function(data, direction, dir) {
 
 }
 
-#' Get project-species from WildTrax project
+#' Get column headers and data from WildTrax Sync APIs
 #'
-#' @description Obtain a table listing species added to a specific project in WildTrax
+#' @description Fetch column headers and data for sync APIs in WildTrax. You must specify at least one of `project` or `organization` depending on the API and at what level of the system you're looking for data for
 #'
-#' @param project_id The project_id of the WildTrax project
+#' @param api A string specifying the API to query. Must be one of:
+#' \itemize{
+#'   \item `"organization_locations"`
+#'   \item `"organization_visits"`
+#'   \item `"project_locations"`
+#'   \item `"project_aru_tasks"`
+#'   \item `"project_aru_tags"`
+#'   \item `"project_camera_tags"`
+#'   \item `"project_point_counts"`
+#' }
+#' @param option An option
 #'
-#' @import httr2
-#' @import purrr
-#' @import dplyr
+#' @import httr2 tibble dplyr
 #'
 #' @export
 #'
@@ -973,50 +766,204 @@ wt_location_photos <- function(data, direction, dir) {
 #' \dontrun{
 #' # Authenticate first:
 #' wt_auth()
-#' my_project <- wt_get_download_summary(sensor_id = 'ARU') |>
-#' filter(grepl('Ecosystem Health 2023',project)) |>
-#' pull(project_id)
-#' wt_get_project_species(project_id = my_project)
+#'
+#' # Fetch column headers by organization
+#' wt_get_sync("organization_locations")
+#'
+#' # Fetch column headers by project
+#' wt_get_sync("project_point_counts")
 #' }
 #'
-#' @return A data frame listing an Organizations' locations
-#'
+#' @return A tibble with column headers for the specified API call.
 
-wt_get_project_species <- function(project_id) {
+wt_get_sync <- function(api, option = c("columns", "data"), project = NULL, organization = NULL) {
 
-  # Check if authentication has expired:
-  if (.wt_auth_expired())
+  option <- match.arg(option)
+
+  # Check authentication
+  if (.wt_auth_expired()) {
     stop("Please authenticate with wt_auth().", call. = FALSE)
+  }
 
-    r <- .wt_api_gr(
-      path = "/bis/get-project-species-details",
-      projectId = project_id,
-      limit = 1e9
-    )
+  if (is.null(api) || api == "") {
+    stop("The 'api' field is required.", call. = FALSE)
+  }
 
-    if (r$status_code == 403) {
-      stop("Permission denied: You do not have access to request this data.", call. = FALSE)
-      return(NULL)
+  api_pseudonyms <- list(
+    organization_locations    = "get-location-summary",
+    organization_visits       = "get-location-visit-summary",
+    #organization_equipment    = "get-equipment",
+    #organization_deployments = "get-location-equipment"
+    organization_recording_summary = "get-recording-summary",
+    organization_image_summary = "get-image-deployment-summary",
+    project_locations         = "download-location",
+    project_aru_tasks             = "download-tasks-by-project-id",
+    project_aru_tags              = "download-tags-by-project-id",
+    #project_camera_tasks     = "download-camera-tasks-by-project-id"
+    project_camera_tags       = "download-camera-tags-by-project-id",
+    project_point_counts      = "download-point-count-by-project-id",
+    project_species           = "get-project-species-details"
+  )
+
+  api <- api_pseudonyms[[api]] %||% api
+
+  api_defaults <- list(
+    "get-location-summary" = list(organizationId = organization),
+    "get-location-visit-summary" = list(organizationId = organization),
+    #"get-equipment" = list(organizationId = organization),
+    #"get-location-equipment" = list(organizationId = organization),
+    "get-recording-summary" = list(organizationId = organization),
+    "get-image-deployment-summary" = list(organizationId = organization),
+    "download-location" = list(projectId = project),
+    "download-tasks-by-project-id" = list(projectId = project),
+    "download-tags-by-project-id" = list(projectId = project),
+    #"download-camera-tasks-by-project-id" = list(projectId = project),
+    "download-camera-tags-by-project-id" = list(projectId = project),
+    "download-point-count-by-project-id" = list(projectId = project),
+    "get-project-species-details" = list(projectId = project)
+  )
+
+  print(api)
+
+  if (!api %in% names(api_defaults)) {
+    stop("API not recognized or defaults not defined for the provided API.", call. = FALSE)
+  }
+
+  api_params <- api_defaults[[api]]
+  api_path <- paste0("/bis/", api)
+
+  print(paste0('Calling...', api_path))
+
+  response <- do.call(.wt_api_gr, c(list(path = api_path), api_params))
+
+  content_type <- httr2::resp_content_type(response)
+  message("Content-Type returned: ", content_type)
+
+  process_json <- function(response) {
+    json_data <- httr2::resp_body_json(response)
+
+    if (api == "get-location-summary") {
+      results <- json_data$results
+      if (length(results) == 0) stop("No location data returned.")
+
+      x <- data.frame(do.call(rbind, results))
+
+      new_names <- c("location_id", "location", "longitude", "latitude", "location_buffer",
+                     "location_visibility", "location_recording_count", "location_image_count")
+      colnames(x) <- new_names
+
+      x$location_visibility <- as.integer(unlist(x$location_visibility))
+
+      op <- .wt_api_gr(path = "/bis/get-location-options") |>
+        httr2::resp_body_json() |>
+        purrr::pluck("visibility") |>
+        purrr::map_df(~ data.frame(id = .x$id, type = .x$type))
+
+      x <- x |>
+        left_join(op, by = c("location_visibility" = "id")) |>
+        select(-location_visibility) |>
+        rename(location_visibility = type) |>
+        as_tibble() |>
+        unnest(everything())
+
+      return(x)
     }
 
-    x <- resp_body_json(r)
+    if (api == "get-location-visit-summary") {
+      results <- json_data$results
+      if (length(results) == 0) stop("No visit data returned.")
 
-    # Check if `x` contains the error field
-    if (!is.null(x$error) && x$error == "Permission denied") {
-      stop("You do not have permission for this data")
+      # Safely replace NULLs with NA and return as a tibble
+      return(purrr::map_df(results, ~ purrr::modify(.x, ~ if (is.null(.)) NA else .)))
     }
 
-    included_data <- x$Included %||% list()  # Use an empty list if not present
-    excluded_data <- x$Excluded %||% list()
+    if (api == "get-recording-summary") {
+      results <- json_data$results
+      if (length(results) == 0) stop("No recording summary data returned.")
 
-    # Map the columns
-    included <- map_dfr(included_data, ~ tibble(
-      species_id = .x$speciesId,
-      exists = .x$exists
-    ))
+      # Safely replace NULLs with NA and return as a tibble
+      return(purrr::map_df(results, ~ purrr::modify(.x, ~ if (is.null(.)) NA else .)))
+    }
 
-    # Join against common names
-    included_names <- inner_join(included, wt_get_species() |> select(species_id, species_common_name), by = "species_id")
+    if (api == "get-image-deployment-summary") {
+      results <- json_data$results
+      if (length(results) == 0) stop("No image data returned.")
 
-    return(included_names)
+      # Safely replace NULLs with NA and return as a tibble
+      return(purrr::map_df(results, ~ purrr::modify(.x, ~ if (is.null(.)) NA else .)))
+    }
+
+    if (api == "get-project-species-details") {
+      response <- .wt_api_gr(path = api_path, projectId = project, limit = 1e9)
+
+      if (response$status_code == 403) {
+        stop("Permission denied: You do not have access to request this data.", call. = FALSE)
+      }
+
+      x <- httr2::resp_body_json(response)
+
+      if (!is.null(x$error) && x$error == "Permission denied") {
+        stop("You do not have permission for this data.")
+      }
+
+      # Safely process Included and Excluded data
+      included_data <- x$Included %||% list()
+      excluded_data <- x$Excluded %||% list()
+
+      included <- purrr::map_dfr(included_data, ~ tibble(
+        species_id = .x$speciesId,
+        exists = .x$exists
+      ))
+
+      # Fetch species common names
+      species_lookup <- wt_get_species() |> select(species_id, species_common_name)
+
+      # Join included species with their names
+      included_names <- included |>
+        inner_join(species_lookup, by = "species_id") |>
+        arrange(species_common_name) |> # Sort alphabetically by species_common_name
+        as_tibble()
+
+      # Include sorting debug
+      message("Sorted species details by common name.")
+
+      return(included_names)
+    }
+
+    # Default JSON processing
+    return(json_data)
+  }
+
+  process_csv <- function(csv_path) {
+    data <- read_csv(csv_path, show_col_types = FALSE)
+    if (option == "columns") {
+      return(data |> colnames() |> as_tibble_col())
+    } else if (option == "data") {
+      return(data)
+    }
+  }
+
+  if (content_type == "application/csv") {
+    tmp_file <- tempfile(fileext = ".csv")
+    writeLines(rawToChar(httr2::resp_body_raw(response)), tmp_file)
+    data <- process_csv(tmp_file)
+
+  } else if (content_type == "application/zip") {
+    tmp_file <- tempfile(fileext = ".zip")
+    writeBin(httr2::resp_body_raw(response), tmp_file)
+    unzip_dir <- tempfile()
+    unzip(tmp_file, exdir = unzip_dir)
+
+    csv_files <- list.files(unzip_dir, pattern = "\\.csv$", full.names = TRUE)
+    if (length(csv_files) == 0) stop("No CSV file found in the zip archive.", call. = FALSE)
+
+    data <- process_csv(csv_files[1])
+
+  } else if (content_type == "application/json") {
+    data <- process_json(response)
+  } else {
+    stop(paste("Unexpected content type:", content_type), call. = FALSE)
+  }
+
+  return(data)
 }

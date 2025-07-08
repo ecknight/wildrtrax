@@ -1,12 +1,16 @@
+# wildrtrax 
+
 # wildrtrax 1.3.4
 
 ## Major changes
 
-* Remove QPAD from Remotes. Users should be prompted to download QPAD separately.
+* New functions: `wt_get_sync_columns()` allowing users to get all columns from syncs across the system and `wt_get_project_tags()` to get tag data from ARU project sync
 
 ## Minor changes
 
-* Introduced the `max_seconds` argument in `wt_download_report()` to provide customizable timeout control for users with slower internet connections or larger project downloads
+* Additional argument to `wt_summarise_cam()` using `image_set_id` to adjust for effort across multiple deployments (see #80); additional enhancements for `wt_ind_detect()` (see #81, #82)
+* Fixed bugs in usage of `wt_kaleidoscope_tags()` (see #77).
+* Fixed a bug that incorrectly adjusted time zones in `wt_qpad_offsets()`. This bug affected QPAD offsets used for [species with time since sunrise in the top model](https://github.com/borealbirds/QPAD-offsets-correction/blob/main/qpad_tssr_species.csv) and in areas outside the Mountain Time Zone (MST/MDT). For more information, please see the [BAM QPAD correction repository](https://github.com/borealbirds/QPAD-offsets-correction) for further details or email bamp@ualberta.ca for assistance
 
 # wildrtrax 1.3.3
 
@@ -19,6 +23,8 @@
 
 * Camera function maintenance for [#70](https://github.com/ABbiodiversity/wildrtrax/issues/70); increasing camera test suites for common permutations 
 * Branching development to prepare package for WildTrax 2.0
+* Introduced the `max_seconds` argument in `wt_download_report()` to provide customizable timeout control for users with slower internet connections or larger project downloads
+* Remove QPAD from Remotes. Users should be prompted to download QPAD separately if not already installed. Fix in timezone ([#78](https://github.com/ABbiodiversity/wildrtrax/pull/78)).
 
 # wildrtrax 1.3.2
 
