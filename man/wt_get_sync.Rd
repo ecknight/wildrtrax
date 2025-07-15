@@ -14,17 +14,16 @@ wt_get_sync(
 \arguments{
 \item{api}{A string specifying the API to query. Must be one of:
 \itemize{
-\item \code{"organization_locations"} - Fetch location summaries for an organization (\code{get-location-summary}).
-\item \code{"organization_visits"} - Fetch visit summaries for an organization (\code{get-location-visit-summary}).
-\item \code{"organization_equipment"} - Fetch equipment details for an organization (\code{get-equipment}).
-\item \code{"recording_summary"} - Fetch recording summaries for an organization (\code{get-recording-summary}).
-\item \code{"image_deployment_summary"} - Fetch image deployment summaries for an organization (\code{get-image-deployment-summary}).
-\item \code{"project_locations"} - Fetch location details for a project (\code{download-location}).
-\item \code{"project_tasks"} - Fetch task summaries for a project (\code{download-tasks-by-project-id}).
-\item \code{"project_tags"} - Fetch tag summaries for a project (\code{download-tags-by-project-id}).
-\item \code{"project_camera_tags"} - Fetch camera tag summaries for a project (\code{download-camera-tags-by-project-id}).
-\item \code{"project_point_counts"} - Fetch point count summaries for a project (\code{download-point-count-by-project-id}).
-\item \code{"project_species"} - Fetch species details for a project (\code{get-project-species-details}).
+\item \code{"organization_locations"}
+\item \code{"organization_visits"}
+\item \verb{"organization_recording_summary}"
+\item \verb{"organization_image_summary}"
+\item \code{"project_locations"}
+\item \code{"project_species"}
+\item \code{"project_aru_tasks"}
+\item \code{"project_aru_tags"}
+\item \code{"project_camera_tags"}
+\item \code{"project_point_counts"}
 }}
 
 \item{option}{An option}
@@ -41,10 +40,10 @@ Fetch column headers and data for sync APIs in WildTrax. You must specify at lea
 wt_auth()
 
 # Fetch column headers by organization
-wt_get_sync_columns("download-location-by-org-id")
+wt_get_sync("organization_locations")
 
 # Fetch column headers by project
-wt_get_sync_columns("download-point-count-by-project-id")
+wt_get_sync("project_point_counts")
 }
 
 }
