@@ -159,7 +159,7 @@ individual_detections <- wt_ind_detect(raw, 30, "minutes")
 
 ### Ultrasonic work flows
 
-Format tags from [Kaleidoscope](https://www.wildlifeacoustics.com/products/kaleidoscope-pro?token=Sz_0cuFdrlAp3tVX2sJzcZanTHahEguB) for a WildTrax project. Download data from a project into an [NABAT]() acceptable format.
+Format tags from [Kaleidoscope](https://www.wildlifeacoustics.com/products/kaleidoscope-pro?token=Sz_0cuFdrlAp3tVX2sJzcZanTHahEguB) for a WildTrax project. Download data from a project into an [NABAT](https://www.nabatmonitoring.org/) acceptable format.
 
 ``` r
 library(wildrtrax)
@@ -170,7 +170,7 @@ output <- ".../bats" # A folder to store the tags
 
 wt_kaleidoscope_tags(input, output, tz, freq_bump = T) # Add a frequency buffer to the tag, e.g. 20000 kHz
 
-## Upload the tags to a WildTrax project, then authenticate to WildTrax
+## Authenticate to WildTrax, then upload the tags to a WildTrax project
 wt_auth()
 
 # Get a project id
