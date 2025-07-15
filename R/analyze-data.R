@@ -284,38 +284,57 @@ wt_ind_detect <- function(x, threshold, units = "minutes", datetime_col = image_
     x <- filter(x, !grepl("^Domestic", species_common_name))
   }
 
-  # Create ordered dataframe, and calculate time interval between images.
+  # Amalgamate tags of same species in same image; currently broken into two separate rows
   x1 <- x |>
     # Sometimes VNA sneaks in here
     mutate(individual_count = as.numeric(ifelse(individual_count == "VNA", 1, individual_count))) |>
-    # Amalgamate tags of same species in same image; currently broken into two separate rows
     # Use image_id because sometimes {{datetime_col}} is same for 2 images
     group_by(location, image_id, species_common_name) |>
     mutate(individual_count = sum(individual_count)) |>
     distinct(location, {{datetime_col}}, species_common_name, individual_count, .keep_all = TRUE) |>
-    ungroup() |>
-    # Order the dataframe
-    arrange(project_id, location, {{datetime_col}}, species_common_name) |>
-    group_by(project_id, location, species_common_name) |>
-    # Calculate the time difference between subsequent images
-    mutate(interval = as.numeric(difftime({{datetime_col}}, lag({{datetime_col}}), units = "secs"))) |>
-    mutate(new_detection = ifelse(is.na(interval) | abs(interval) >= threshold, TRUE, FALSE)) |>
-    ungroup() |>
-    # Number independent detections
-    mutate(detection = c(1, cumsum(new_detection[-1]) + 1))
+    ungroup()
+
+  # Determine independent detections by species in loop;
+  # Done this way so that detections of different species do not reset the timer on one another
+  species <- unique(x1$species_common_name)
+
+  # Set up list to store results
+  detections <- list()
+
+  for (sp in species) {
+
+    x2 <- x1 |>
+      filter(species_common_name == sp) |>
+      # Order the dataframe
+      arrange(project_id, location, image_date_time, species_common_name) |>
+      group_by(project_id, location, species_common_name) |>
+      # Calculate the time difference between subsequent images
+      mutate(interval = as.numeric(difftime(image_date_time, lag(image_date_time), units = "secs"))) |>
+      # Is this considered a new detection?
+      mutate(new_detection = ifelse(is.na(interval) | abs(interval) >= threshold, TRUE, FALSE)) |>
+      ungroup() |>
+      # Number the independent detections
+      mutate(detection = c(1, cumsum(new_detection[-1]) + 1)) |>
+      ungroup()
+
+    detections[[sp]] <- x2
+
+  }
 
   # Summarise detections
-  x2 <- x1 |>
+  x3 <- bind_rows(detections) |>
     group_by(detection, project_id, location, species_common_name) |>
-    summarise(start_time = min({{datetime_col}}),
-              end_time = max({{datetime_col}}),
+    summarise(start_time = min(image_date_time),
+              end_time = max(image_date_time),
               total_duration_seconds = as.numeric(difftime(end_time, start_time, units = "secs")),
               n_images = n(),
               avg_animals_per_image = mean(individual_count),
               max_animals = max(individual_count)) |>
-    ungroup()
+    ungroup() |>
+    # Rename detection so that it is clear which species it belongs to
+    mutate(detection = paste0(species_common_name, " ", detection))
 
-  # Return x2
-  return(x2)
+  # Return x3
+  return(x3)
 
 }
