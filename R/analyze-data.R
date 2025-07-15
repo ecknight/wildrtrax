@@ -306,10 +306,10 @@ wt_ind_detect <- function(x, threshold, units = "minutes", datetime_col = image_
     x2 <- x1 |>
       filter(species_common_name == sp) |>
       # Order the dataframe
-      arrange(project_id, location, image_date_time, species_common_name) |>
+      arrange(project_id, location, {{datetime_col}}, species_common_name) |>
       group_by(project_id, location, species_common_name) |>
       # Calculate the time difference between subsequent images
-      mutate(interval = as.numeric(difftime(image_date_time, lag(image_date_time), units = "secs"))) |>
+      mutate(interval = as.numeric(difftime({{datetime_col}}, lag({{datetime_col}}), units = "secs"))) |>
       # Is this considered a new detection?
       mutate(new_detection = ifelse(is.na(interval) | abs(interval) >= threshold, TRUE, FALSE)) |>
       ungroup() |>
@@ -324,8 +324,8 @@ wt_ind_detect <- function(x, threshold, units = "minutes", datetime_col = image_
   # Summarise detections
   x3 <- bind_rows(detections) |>
     group_by(detection, project_id, location, species_common_name) |>
-    summarise(start_time = min(image_date_time),
-              end_time = max(image_date_time),
+    summarise(start_time = min({{datetime_col}}),
+              end_time = max({{datetime_col}}),
               total_duration_seconds = as.numeric(difftime(end_time, start_time, units = "secs")),
               n_images = n(),
               avg_animals_per_image = mean(individual_count),
