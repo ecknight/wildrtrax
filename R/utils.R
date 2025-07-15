@@ -245,7 +245,7 @@
 .make_x <- function(data, tz="local", check_xy=TRUE) {
 
   # if(!requireNamespace("QPAD")) {
-  #   stop("The QPAD package is required for this function. Please install it using devtools::install_github('borealbirds/QPAD')")
+  #   stop("The QPAD package is required for this function. Please install it using remotes::install_github('borealbirds/QPAD')")
   # }
 
   # Download message
@@ -411,7 +411,7 @@
 .make_off <- function(spp, x){
 
   if(!requireNamespace("QPAD", quietly = T)) {
-    stop("The QPAD package is required for this function. Please install it using devtools::install_github('borealbirds/QPAD')")
+    stop("The QPAD package is required for this function. Please install it using remotes::install_github('borealbirds/QPAD')")
   }
 
   if (length(spp) > 1L)
