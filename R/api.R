@@ -750,7 +750,10 @@ wt_location_photos <- function(data, direction, dir) {
 #' \itemize{
 #'   \item `"organization_locations"`
 #'   \item `"organization_visits"`
+#'   \item `"organization_recording_summary`"
+#'   \item `"organization_image_summary`"
 #'   \item `"project_locations"`
+#'   \item `"project_species"`
 #'   \item `"project_aru_tasks"`
 #'   \item `"project_aru_tags"`
 #'   \item `"project_camera_tags"`
@@ -795,6 +798,7 @@ wt_get_sync <- function(api, option = c("columns", "data"), project = NULL, orga
     #organization_equipment    = "get-equipment",
     #organization_deployments = "get-location-equipment"
     organization_recording_summary = "get-recording-summary",
+    #organization_task_creator = "get-task-creator-results",
     organization_image_summary = "get-image-deployment-summary",
     project_locations         = "download-location",
     project_aru_tasks             = "download-tasks-by-project-id",
@@ -803,6 +807,7 @@ wt_get_sync <- function(api, option = c("columns", "data"), project = NULL, orga
     project_camera_tags       = "download-camera-tags-by-project-id",
     project_point_counts      = "download-point-count-by-project-id",
     project_species           = "get-project-species-details"
+    #project_files = "get-project-file-data"
   )
 
   api <- api_pseudonyms[[api]] %||% api
@@ -821,9 +826,8 @@ wt_get_sync <- function(api, option = c("columns", "data"), project = NULL, orga
     "download-camera-tags-by-project-id" = list(projectId = project),
     "download-point-count-by-project-id" = list(projectId = project),
     "get-project-species-details" = list(projectId = project)
+    #"get-project-file-data" = list(projectId = project)
   )
-
-  print(api)
 
   if (!api %in% names(api_defaults)) {
     stop("API not recognized or defaults not defined for the provided API.", call. = FALSE)
@@ -832,7 +836,7 @@ wt_get_sync <- function(api, option = c("columns", "data"), project = NULL, orga
   api_params <- api_defaults[[api]]
   api_path <- paste0("/bis/", api)
 
-  print(paste0('Calling...', api_path))
+  print(paste('Calling...', api_path))
 
   response <- do.call(.wt_api_gr, c(list(path = api_path), api_params))
 
@@ -846,43 +850,63 @@ wt_get_sync <- function(api, option = c("columns", "data"), project = NULL, orga
       results <- json_data$results
       if (length(results) == 0) stop("No location data returned.")
 
-      x <- data.frame(do.call(rbind, results))
+      locations <- data.frame(do.call(rbind, results))
 
       new_names <- c("location_id", "location", "longitude", "latitude", "location_buffer",
                      "location_visibility", "location_recording_count", "location_image_count")
-      colnames(x) <- new_names
+      colnames(locations) <- new_names
 
-      x$location_visibility <- as.integer(unlist(x$location_visibility))
+      locations$location_visibility <- as.integer(unlist(locations$location_visibility))
 
       op <- .wt_api_gr(path = "/bis/get-location-options") |>
         httr2::resp_body_json() |>
         purrr::pluck("visibility") |>
-        purrr::map_df(~ data.frame(id = .x$id, type = .x$type))
+        purrr::map_df(~ data.frame(id = .$id, type = .$type))
 
-      x <- x |>
+      locations <- locations |>
         left_join(op, by = c("location_visibility" = "id")) |>
         select(-location_visibility) |>
         rename(location_visibility = type) |>
         as_tibble() |>
         unnest(everything())
 
-      return(x)
+      return(locations)
     }
 
     if (api == "get-location-visit-summary") {
       results <- json_data$results
       if (length(results) == 0) stop("No visit data returned.")
 
-      # Safely replace NULLs with NA and return as a tibble
-      return(purrr::map_df(results, ~ purrr::modify(.x, ~ if (is.null(.)) NA else .)))
+      visits <- purrr::map_df(results, ~ purrr::modify(.x, ~ if (is.null(.)) NA else .)) |>
+        rename(
+          location_id = locationId,
+          location = locationName,
+          organization_id = organizationId,
+          has_visit_images = hasImage,
+          first_visit_date = firstVisit,
+          last_visit_date = lastVisit
+        ) |>
+        mutate_at(vars(first_visit_date,last_visit_date), as.POSIXct)
+
+      return(visits)
     }
 
     if (api == "get-recording-summary") {
       results <- json_data$results
       if (length(results) == 0) stop("No recording summary data returned.")
 
-      # Safely replace NULLs with NA and return as a tibble
-      return(purrr::map_df(results, ~ purrr::modify(.x, ~ if (is.null(.)) NA else .)))
+      recordings <- purrr::map_df(results, ~ purrr::modify(.x, ~ if (is.null(.)) NA else .)) |>
+        rename(
+          recording_id = id,
+          location = locationName,
+          organization_id = organizationId,
+          recording_date_time = recordingDate,
+          recording_length = length,
+          recording_task_count = taskCount
+        ) |>
+        mutate(recording_date_time = as.POSIXct(recording_date_time))
+
+      return(recordings)
     }
 
     if (api == "get-image-deployment-summary") {
@@ -890,7 +914,20 @@ wt_get_sync <- function(api, option = c("columns", "data"), project = NULL, orga
       if (length(results) == 0) stop("No image data returned.")
 
       # Safely replace NULLs with NA and return as a tibble
-      return(purrr::map_df(results, ~ purrr::modify(.x, ~ if (is.null(.)) NA else .)))
+      image_summary <- purrr::map_df(results, ~ purrr::modify(.x, ~ if (is.null(.)) NA else .)) |>
+        rename(
+          image_set_id = id,
+          organization_id = organizationId,
+          location = locationName,
+          image_set_start_date = startDate,
+          image_set_end_date = endDate,
+          image_set_motion_image_count = motionImages,
+          image_set_total_image_count = allImages,
+          image_set_task_count = taskCount
+        ) |>
+        mutate_at(vars(image_set_start_date,image_set_end_date), as.POSIXct)
+
+      return(image_summary)
     }
 
     if (api == "get-project-species-details") {
