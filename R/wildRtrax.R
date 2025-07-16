@@ -191,6 +191,9 @@ utils::globalVariables(
     "u",
     "week",
     "year",
-    "start_date","end_date","typ","length_sec"
+    "start_date","end_date","typ","length_sec",
+    "allImages", "endDate", "firstVisit", "first_visit_date", "hasImage",
+    "image_set_end_date", "image_set_start_date", "lastVisit", "last_visit_date",
+    "locationId", "locationName", "motionImages", "startDate", "taskCount"
   )
 )

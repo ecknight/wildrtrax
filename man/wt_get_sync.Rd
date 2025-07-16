@@ -26,7 +26,11 @@ wt_get_sync(
 \item \code{"project_point_counts"}
 }}
 
-\item{option}{An option}
+\item{option}{Choose between just returning column headers or the entire dataframe itself}
+
+\item{project}{The project id}
+
+\item{organization}{The organization id}
 }
 \value{
 A tibble with column headers for the specified API call.

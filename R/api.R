@@ -759,7 +759,9 @@ wt_location_photos <- function(data, direction, dir) {
 #'   \item `"project_camera_tags"`
 #'   \item `"project_point_counts"`
 #' }
-#' @param option An option
+#' @param option Choose between just returning column headers or the entire dataframe itself
+#' @param project The project id
+#' @param organization The organization id
 #'
 #' @import httr2 tibble dplyr
 #'

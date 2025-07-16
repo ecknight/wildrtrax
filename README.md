@@ -212,7 +212,7 @@ We encourage ongoing contributions and collaborations to improve the package int
 
 ## License
 
-This R package is licensed under [MIT license](https://github.com/ABbiodiversity/wildrtrax/blob/master/LICENSE)©2024 [Alberta Biodiversity Monitoring Institute](https://abmi.ca).
+This R package is licensed under [MIT license](https://github.com/ABbiodiversity/wildrtrax/blob/master/LICENSE)©2025 [Alberta Biodiversity Monitoring Institute](https://abmi.ca).
 
 ## Code of Conduct
 
