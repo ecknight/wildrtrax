@@ -4,13 +4,14 @@
 
 ## Major changes
 
-* New functions: `wt_get_sync()` allowing users to get all columns from syncs across the system. Huge development leap as users can now GET all relevant APIs. Also replaces wt_get_recordings(), wt_get_locations(), wt_get_visits(), wt_get_image_sets() in one smooth function relevant to the Organization and Project you want.
-* Fixed a bug that incorrectly adjusted time zones in `wt_qpad_offsets()`. This bug affected QPAD offsets used for [species with time since sunrise in the top model](https://github.com/borealbirds/QPAD-offsets-correction/blob/main/qpad_tssr_species.csv) and in areas outside the Mountain Time Zone (MST/MDT). For more information, please see the [BAM QPAD correction repository](https://github.com/borealbirds/QPAD-offsets-correction) for further details or email bamp@ualberta.ca for assistance
+* New function, `wt_get_sync()`, allows users to get all columns and data from syncs (upload / download and table views) across the system. Huge development leap as users can now GET all relevant APIs. Functionally replaces `wt_get_recordings()`, `wt_get_locations()`, `wt_get_visits()`, `wt_get_image_sets()` in one smooth function relevant to the Organization and Project you want.
+* Fixed a bug that incorrectly adjusted time zones in `wt_qpad_offsets()`. This bug affected QPAD offsets used for [species with time since sunrise in the top model](https://github.com/borealbirds/QPAD-offsets-correction/blob/main/qpad_tssr_species.csv) and in areas outside the Mountain Time Zone (MST/MDT). For more information, please see the [BAM QPAD correction repository](https://github.com/borealbirds/QPAD-offsets-correction) for further details or email bamp@ualberta.ca for assistance.
 
 ## Minor changes
 
-* Additional argument to `wt_summarise_cam()` using `image_set_id` to adjust for effort across multiple deployments (see #80); additional enhancements for `wt_ind_detect()` (see #81, #82)
-* Fixed bugs in usage of `wt_kaleidoscope_tags()` (see #77).
+* Additional argument to `wt_summarise_cam()` using `image_set_id` to adjust for effort across multiple deployments (see [#80](https://github.com/ABbiodiversity/wildrtrax/issues/80)); additional enhancements for `wt_ind_detect()` (see [#81](https://github.com/ABbiodiversity/wildrtrax/issues/81), [#82](https://github.com/ABbiodiversity/wildrtrax/issues/82).
+* #84 through e2e181a for `wt_ind_detect()`, species detections are now generated separately for each species and then combined afterward into a single output.
+* Fixed bugs and enhanced usage of `wt_kaleidoscope_tags()` (see [#77](https://github.com/ABbiodiversity/wildrtrax/issues/77)).
 
 # wildrtrax 1.3.3
 
@@ -22,8 +23,8 @@
 ## Minor changes
 
 * Camera function maintenance for [#70](https://github.com/ABbiodiversity/wildrtrax/issues/70); increasing camera test suites for common permutations 
-* Branching development to prepare package for WildTrax 2.0
-* Introduced the `max_seconds` argument in `wt_download_report()` to provide customizable timeout control for users with slower internet connections or larger project downloads
+* Branching development to prepare package for WildTrax 2.0.
+* Introduced the `max_seconds` argument in `wt_download_report()` to provide customizable timeout control for users with slower internet connections or larger project downloads.
 * Remove QPAD from Remotes. Users should be prompted to download QPAD separately if not already installed. Fix in timezone ([#78](https://github.com/ABbiodiversity/wildrtrax/pull/78)).
 
 # wildrtrax 1.3.2

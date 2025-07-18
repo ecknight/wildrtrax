@@ -31,9 +31,9 @@ wt_auth <- function(force = FALSE) {
 #'
 #' @param sensor_id Can be one of "ARU", "CAM", or "PC"
 #'
-#' @import dplyr
-#' @import httr2
-#'
+#' @importFrom dplyr across everything select
+#' @importFrom httr2 resp_body_json
+#
 #' @export
 #'
 #' @examples
@@ -64,15 +64,15 @@ wt_get_download_summary <- function(sensor_id) {
 
   if(is.null(r)) {stop('')}
 
-  x <- data.frame(do.call(rbind, httr2::resp_body_json(r)$results)) |>
-    dplyr::select(organization_id = organizationId,
+  x <- as_tibble(do.call(rbind, resp_body_json(r)$results)) |>
+    select(organization_id = organizationId,
                   organization = organizationName,
                   project = fullNm,
                   project_id = id,
                   sensor = sensorId,
                   tasks,
                   status) |>
-    dplyr::mutate(dplyr::across(dplyr::everything(), unlist))
+    mutate(across(everything(), unlist))
 
   return(x)
 
