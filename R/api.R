@@ -445,13 +445,13 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
 
   if(is.null(tok_used)) {
     #Provide non-login user a way to search species - limited by dd-get-species however
-    ddspp <- request("https://www-api.wildtrax.ca") |>
+    ddspp <- request("https://dev-api.wildtrax.ca") |>
       req_url_path_append("/bis/dd-get-species") |>
       req_headers(
         Authorization = tok_used,
-        Origin = "https://discover.wildtrax.ca",
+        Origin = "https://dev.wildtrax.ca/discover",
         Pragma = "no-cache",
-        Referer = "https://discover.wildtrax.ca/"
+        Referer = "https://dev.wildtrax.ca/discover"
       ) |>
       req_user_agent(u) |>
       req_body_json(list(sensorId = sensor)) |>
