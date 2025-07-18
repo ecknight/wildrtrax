@@ -569,13 +569,13 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
 
     if(is.null(boundary)) {payload_ll$polygonBoundary <- NULL}
 
-    rr <- request("https://www-api.wildtrax.ca") |>
+    rr <- request("https://dev-api.wildtrax.ca") |>
       req_url_path_append("/bis/get-data-discoverer-long-lat-summary") |>
       req_headers(
         Authorization = tok_used,
-        Origin = "https://discover.wildtrax.ca",
+        Origin = "https://dev.wildtrax.ca/discover",
         Pragma = "no-cache",
-        Referer = "https://discover.wildtrax.ca/"
+        Referer = "https://dev.wildtrax.ca/discover"
       ) |>
       req_user_agent(u) |>
       req_body_json(payload_ll) |>
@@ -591,13 +591,13 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
       zoomLevel = 20
     )
 
-    rr2 <- request("https://www-api.wildtrax.ca") |>
+    rr2 <- request("https://dev-api.wildtrax.ca") |>
       req_url_path_append("/bis/get-data-discoverer-map-and-projects") |>
       req_headers(
         Authorization = tok_used,
-        Origin = "https://discover.wildtrax.ca",
+        Origin = "https://dev.wildtrax.ca/discover",
         Pragma = "no-cache",
-        Referer = "https://discover.wildtrax.ca/"
+        Referer = "https://dev.wildtrax.ca/discover"
       ) |>
       req_user_agent(u) |>
       req_body_json(payload_mp) |>
@@ -793,39 +793,36 @@ wt_get_sync <- function(api, option = c("columns", "data"), project = NULL, orga
 
   api_pseudonyms <- list(
     organization_locations    = "get-location-summary",
-    organization_visits       = "get-location-visit-summary",
-    #organization_equipment    = "get-equipment",
-    #organization_deployments = "get-location-equipment"
-    organization_recording_summary = "get-recording-summary",
-    #organization_task_creator = "get-task-creator-results",
-    organization_image_summary = "get-image-deployment-summary",
+    organization_visits       = "get-location-visits",
+    organization_equipment    = "get-equipment-summary",
+    organization_deployments = "get-location-visit-equipment-summary",
+    organization_task_creator = "recording-task-creator-results",
+    organization_image_summary = "get-camera-pud-summary",
     project_locations         = "download-location",
     project_aru_tasks             = "download-tasks-by-project-id",
     project_aru_tags              = "download-tags-by-project-id",
-    #project_camera_tasks     = "download-camera-tasks-by-project-id"
+    project_camera_tasks     = "download-camera-tasks-by-project-id",
     project_camera_tags       = "download-camera-tags-by-project-id",
     project_point_counts      = "download-point-count-by-project-id",
     project_species           = "get-project-species-details"
-    #project_files = "get-project-file-data"
   )
 
   api <- api_pseudonyms[[api]] %||% api
 
   api_defaults <- list(
     "get-location-summary" = list(organizationId = organization),
-    "get-location-visit-summary" = list(organizationId = organization),
-    #"get-equipment" = list(organizationId = organization),
-    #"get-location-equipment" = list(organizationId = organization),
-    "get-recording-summary" = list(organizationId = organization),
+    "get-location-visits" = list(organizationId = organization),
+    "get-equipment-summary" = list(organizationId = organization),
+    "get-location-visit-equipment-summary" = list(organizationId = organization),
+    "recording-task-creator-results" = list(organizationId = organization),
     "get-image-deployment-summary" = list(organizationId = organization),
     "download-location" = list(projectId = project),
     "download-tasks-by-project-id" = list(projectId = project),
     "download-tags-by-project-id" = list(projectId = project),
-    #"download-camera-tasks-by-project-id" = list(projectId = project),
+    "download-camera-tasks-by-project-id" = list(projectId = project),
     "download-camera-tags-by-project-id" = list(projectId = project),
     "download-point-count-by-project-id" = list(projectId = project),
     "get-project-species-details" = list(projectId = project)
-    #"get-project-file-data" = list(projectId = project)
   )
 
   if (!api %in% names(api_defaults)) {
