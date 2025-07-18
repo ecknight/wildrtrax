@@ -54,6 +54,7 @@ test_that('Making wide', {
 })
 
 test_that('Getting QPAD offsets', {
+  library(QPAD)
   cypress_hills_tidy <- wt_tidy_species(cypress_hills, remove = c("mammal", "abiotic", "amphibian", "unknown"), zerofill = T)
   cypress_hills_tmtt <- wt_replace_tmtt(cypress_hills_tidy, calc = "round")
   cypress_hills_wide <- wt_make_wide(cypress_hills_tmtt, sound = "all")

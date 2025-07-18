@@ -32,7 +32,6 @@ test_that("Download without authentication, boundary; multiple single-species", 
   expect_true(!is.null(wt_dd_summary(sensor = 'ARU', species = c('White-throated Sparrow','Hermit Thrush'), boundary = aoi)))
 })
 
-
 Sys.setenv(WT_USERNAME = "guest", WT_PASSWORD = "Apple123")
 wt_auth(force = TRUE)
 
@@ -48,41 +47,31 @@ test_that("Download with authentication with boundary; multiple species logged i
   expect_true(!is.null(wt_dd_summary(sensor = 'ARU', species = c('White-throated Sparrow','Townsend\'s Warbler'), boundary = aoi)))
 })
 
-# test_that("Test project-species", {
-#   expect_true(!is.null(wt_get_project_species(2460)))
-# })
-
-test_that("Get functions", {
-  expect_true(!is.null(wt_get_locations('GUEST')))
-  expect_true(!is.null(wt_get_visits('GUEST')))
-  expect_true(!is.null(wt_get_recordings('GUEST')))
-  expect_true(!is.null(wt_get_project_species(3286)))
-})
-
 # Possible test but not necessary due to length it takes to run
 # test_that("Timeout test", {
 #   expect_true(!is.null(wt_download_report(197, 'CAM', 'main', F, max_seconds = 3000)))
 # })
 
 test_that("Get functions for all API combinations with specific project restrictions", {
-
   # Set environment variables and authenticate
   Sys.setenv(WT_USERNAME = "guest", WT_PASSWORD = "Apple123")
   wt_auth(force = TRUE)
 
-  # Test for each API
-  expect_no_error(wt_get_sync_columns(api = "download-location"))
-
-  expect_no_error(wt_get_sync_columns(api = "download-tasks-by-project-id"))
-
-  expect_no_error(wt_get_sync_columns(api = "download-tags-by-project-id"))
-
-  # Uncomment if testing camera tasks is applicable
-  # expect_no_error(wt_get_sync_columns(api = "download-camera-tasks-by-project-id"))
-
-  expect_no_error(wt_get_sync_columns(api = "download-camera-tags-by-project-id"))
-
-  expect_no_error(wt_get_sync_columns(api = "download-point-count-by-project-id"))
+  # Test for each API using pseudonyms
+  expect_no_error(wt_get_sync(api = "organization_locations", organization = 5205))
+  expect_no_error(wt_get_sync(api = "organization_visits", organization = 5205))
+  # expect_no_error(wt_get_sync(api = "organization_equipment", organization = 5205))
+  # expect_no_error(wt_get_sync(api = "organization_location_equipment", organization = 5205))
+  expect_no_error(wt_get_sync(api = "organization_recording_summary", organization = 5205))
+  expect_no_error(wt_get_sync(api = "organization_image_summary", organization = 5205))
+  expect_no_error(wt_get_sync(api = "project_locations", option = "columns", project = 2))
+  expect_no_error(wt_get_sync(api = "project_aru_tasks", option = "columns", project = 2))
+  expect_no_error(wt_get_sync(api = "project_aru_tags", option = "columns", project = 2))
+  # expect_no_error(wt_get_sync(api = "project_camera_tasks", option = "columns", project = 252))
+  expect_no_error(wt_get_sync(api = "project_camera_tags", option = "columns", project = 220))
+  expect_no_error(wt_get_sync(api = "project_point_counts", option = "columns", project = 804))
+  expect_no_error(wt_get_sync(api = "project_species", project = 2))
 })
+
 
 

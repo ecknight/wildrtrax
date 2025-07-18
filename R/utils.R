@@ -150,7 +150,7 @@
     query_params <- as.list(query_params)
   }
 
-  r <- request("https://www-api.wildtrax.ca") |>
+  r <- request("https://dev-api.wildtrax.ca") |>
     req_url_path_append(path) |>
     req_url_query(!!!query_params) |>  # Unpack the list of query parameters
     req_headers(Authorization = paste("Bearer", ._wt_auth_env_$access_token)) |>
@@ -203,7 +203,7 @@
     query_params <- as.list(query_params)
   }
 
-  r <- request("https://www-api.wildtrax.ca") |>
+  r <- request("https://dev-api.wildtrax.ca") |>
     req_url_path_append(path) |>
     req_url_query(!!!query_params) |>  # Unpack the list of query parameters
     #req_url_path_append(`Accept-Language` = accept_language) |>
@@ -245,7 +245,7 @@
 .make_x <- function(data, tz="local", check_xy=TRUE) {
 
   # if(!requireNamespace("QPAD")) {
-  #   stop("The QPAD package is required for this function. Please install it using devtools::install_github('borealbirds/QPAD')")
+  #   stop("The QPAD package is required for this function. Please install it using remotes::install_github('borealbirds/QPAD')")
   # }
 
   # Download message
@@ -411,7 +411,7 @@
 .make_off <- function(spp, x){
 
   if(!requireNamespace("QPAD", quietly = T)) {
-    stop("The QPAD package is required for this function. Please install it using devtools::install_github('borealbirds/QPAD')")
+    stop("The QPAD package is required for this function. Please install it using remotes::install_github('borealbirds/QPAD')")
   }
 
   if (length(spp) > 1L)

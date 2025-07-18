@@ -485,7 +485,7 @@ wt_format_occupancy <- function(data,
 #'
 #' @examples
 #' \dontrun{
-#' devtools::install_github("borealbirds/QPAD")
+#' remotes::install_github("borealbirds/QPAD")
 #'
 #' dat.clean <- wt_tidy_species(dat)
 #' dat.tmtt <- wt_replace_tmtt(dat.clean)
@@ -497,7 +497,7 @@ wt_format_occupancy <- function(data,
 wt_qpad_offsets <- function(data, species = c("all"), version = 3, together=FALSE) {
 
   if(!requireNamespace("QPAD")) {
-    stop("The QPAD package is required for this function. Please install it using devtools::install_github('borealbirds/QPAD')")
+    stop("The QPAD package is required for this function. Please install it using remotes::install_github('borealbirds/QPAD')")
   }
 
   # Rename fields if PC
