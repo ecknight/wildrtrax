@@ -47,11 +47,11 @@ The Auth0 token you obtained will last for 12 hours. After that time, you will n
 
 ## Making API calls
 
-Once authenticated, you can now use various functions that call upon the WildTrax APIs. For instance, you can use `wt_get_download_summary()` to see basic metadata about projects that you can download data for.  
+Once authenticated, you can now use various functions that call upon the WildTrax APIs. For instance, you can use `wt_get_projects()` to see basic metadata about projects that you can download data for.  
 
 ```{r echo=TRUE, eval=TRUE, wanring=F, message=F}
 # Download the project summary you have access to
-my_projects <- wt_get_download_summary(sensor_id = 'ARU')
+my_projects <- wt_get_projects(sensor_id = 'ARU')
 
 head(my_projects)
 ```
@@ -73,11 +73,11 @@ head(my_report)
 
 ```
 
-An easy way to download multiple projects at once is to use `wt_get_download_summary()` and then filter by a substring in order to get the project ids to download the data.
+An easy way to download multiple projects at once is to use `wt_get_projects()` and then filter by a substring in order to get the project ids to download the data.
 
 ```{r echo=T, include=T, eval=FALSE, warning = F, message = F}
 # Download all of the published Ecosystem Health ARU data to a single object
-wt_get_download_summary(sensor_id = "ARU") %>%
+wt_get_projects(sensor_id = "ARU") %>%
   tibble::as_tibble() %>%
   dplyr::filter(grepl('^Ecosystem Health',project)) %>%
   dplyr::mutate(data = purrr::map(.x = project_id, .f = ~wt_download_report(project_id = .x, sensor_id = "ARU", weather_cols = F, reports = "main")))
@@ -85,7 +85,7 @@ wt_get_download_summary(sensor_id = "ARU") %>%
 ```
 ```{r echo=T, include=F, eval=F, warning = F, message = F}
 # Download all of the published Ecosystem Health ARU data to a single object
-wt_get_download_summary(sensor_id = "ARU") %>%
+wt_get_projects(sensor_id = "ARU") %>%
   tibble::as_tibble() %>%
   dplyr::filter(grepl('^Ecosystem Health',project)) %>%
   dplyr::mutate(data = purrr::map(.x = project_id, .f = ~wt_download_report(project_id = .x, sensor_id = "ARU", weather_cols = F, reports = "main")))
@@ -184,7 +184,7 @@ head(discover)
 
 `wt_get_sync()` is the primary function used to access WildTrax **sync** APIs, such as getting locations, visits, equipment, project tasks and tags and more. 
 ```{r, echo=T, include=T, eval=F, warning=F, message = FALSE}
-my_project_tasks <- wt_get_download_summary('ARU') |>
+my_project_tasks <- wt_get_projects('ARU') |>
   filter(grepl('Cypress', project)) |>
   select(project_id) |>
   pull() |>

@@ -91,7 +91,7 @@ Sys.setenv(WT_USERNAME = "*****",
 wt_auth()
 
 
-projects <- wt_get_download_summary("CAM") |>
+projects <- wt_get_projects("CAM") |>
   filter(project == "ABMI Ecosystem Health 2014") |>
   select(project_id) |>
   pull()

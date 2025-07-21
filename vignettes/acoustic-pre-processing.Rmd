@@ -160,7 +160,7 @@ my_files <- wt_audio_scanner(path = '/my/BigGrid/files', file_type = 'all', extr
 And then download the project data you wish to compare it to:
 
 ```{r eval=F, message=FALSE, warning=FALSE, include=T}
-my_projects <- wt_get_download_summary(sensor_id = 'ARU') %>%
+my_projects <- wt_get_projects(sensor_id = 'ARU') %>%
   tibble::as_tibble() %>%
   filter(grepl('Big Grids',project)) %>% # Customized as needed
   mutate(data = purrr::map(.x = project_id, .f = ~wt_download_report(project_id = .x, sensor_id = 'ARU', weather_cols = F, reports = 'main')))

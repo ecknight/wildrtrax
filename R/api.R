@@ -25,7 +25,7 @@ wt_auth <- function(force = FALSE) {
 
 }
 
-#' Get a download summary from WildTrax
+#' Get a project summary from WildTrax
 #'
 #' @description Obtain a table listing projects that the user is able to download data for
 #'
@@ -40,13 +40,13 @@ wt_auth <- function(force = FALSE) {
 #' \dontrun{
 #' # Authenticate first:
 #' wt_auth()
-#' wt_get_download_summary(sensor_id = "ARU")
+#' wt_get_projects(sensor_id = "ARU")
 #' }
 #'
 #' @return A data frame listing the projects that the user can download data for, including: project name, id, year, number of tasks, a geographic bounding box and project status.
 #'
 
-wt_get_download_summary <- function(sensor_id) {
+wt_get_projects <- function(sensor_id) {
 
   sens <- c("PC", "ARU", "CAM")
 
@@ -55,24 +55,22 @@ wt_get_download_summary <- function(sensor_id) {
     stop("A valid value for sensor_id must be supplied. See ?wt_get_download_summary for a list of possible values", call. = TRUE)
   }
 
-  r <- .wt_api_gr(
-    path = "/bis/get-download-summary",
-    sensorId = sensor_id,
-    sort = "fullNm",
-    order = "asc"
+  r <- .wt_api_pr(
+    path = "/bis/get-projects",
+    sensorId = 'ARU'
   )
 
   if(is.null(r)) {stop('')}
 
-  x <- as_tibble(do.call(rbind, resp_body_json(r)$results)) |>
-    select(organization_id = organizationId,
-                  organization = organizationName,
-                  project = fullNm,
-                  project_id = id,
-                  sensor = sensorId,
-                  tasks,
-                  status) |>
-    mutate(across(everything(), unlist))
+  # x <- as_tibble(do.call(rbind, resp_body_json(r)$results)) |>
+  #   select(organization_id = organizationId,
+  #                 organization = organizationName,
+  #                 project = fullNm,
+  #                 project_id = id,
+  #                 sensor = sensorId,
+  #                 tasks,
+  #                 status) |>
+  #   mutate(across(everything(), unlist))
 
   return(x)
 

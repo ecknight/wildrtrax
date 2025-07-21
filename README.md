@@ -76,7 +76,7 @@ Sys.setenv(WT_USERNAME = "*****", WT_PASSWORD = "*****")
 wt_auth()
 
 # Get a project id
-projects <- wt_get_download_summary("ARU") |>
+projects <- wt_get_projects("ARU") |>
   filter(project == "Ecosystem Health 2023") |>
   select(project_id) |>
   pull()
@@ -120,14 +120,14 @@ Sys.setenv(WT_USERNAME = "*****", WT_PASSWORD = "*****")
 # Authenticate to WildTrax
 wt_auth()
 
-data <- wt_download_report(project_id = 1144, sensor_id = "ARU", reports = c("main", "birdnet"),  weather_cols = FALSE)
+data <- wt_download_report(project_id = 1144, sensor_id = "ARU", reports = c("main", "ai"),  weather_cols = FALSE)
                            
-eval <- wt_evaluate_classifier(data, resolution = "task", remove_species = TRUE, thresholds = c(10, 99))
+eval <- wt_evaluate_classifier(data, classifier = "hawkears", resolution = "task", remove_species = TRUE, thresholds = c(10, 99))
 
 threshold_use <- wt_classifier_threshold(eval)
 
 # Find additional species
-wt_additional_species(data, remove_species = TRUE, threshold = threshold_use, resolution="task")
+wt_additional_species(data, classifier = "hawkears", remove_species = TRUE, threshold = threshold_use, resolution="task")
 ```
 
 ### Camera work flows
@@ -145,7 +145,7 @@ Sys.setenv(WT_USERNAME = "*****", WT_PASSWORD = "*****")
 wt_auth()
 
 # Get a project id
-projects <- wt_get_download_summary("CAM") |>
+projects <- wt_get_projects("CAM") |>
   filter(project == "ABMI Ecosystem Health 2014") |>
   select(project_id) |>
   pull()
@@ -174,7 +174,7 @@ wt_kaleidoscope_tags(input, output, tz, freq_bump = T) # Add a frequency buffer 
 wt_auth()
 
 # Get a project id
-projects <- wt_get_download_summary("ARU") |>
+projects <- wt_get_projects("ARU") |> # Bat projects are under the ARU sensor
   filter(project == "BATS & LATS") |>
   select(project_id) |>
   pull()
