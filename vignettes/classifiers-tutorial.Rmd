@@ -8,27 +8,14 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-
-#bibliography: references.bib
 knitr::opts_chunk$set(echo = TRUE)
 
 library(dplyr)
 library(ggplot2)
+library(stringr)
 library(gridExtra)
-library(httr2)
 
-download_and_load_rdata <- function(url, filename) {
-  req <- request(url) |> 
-    req_perform()
-  writeBin(req$body, filename)
-  load(filename, envir = .GlobalEnv)
-  unlink(filename)  # Deletes the file from the disk
-}
-
-download_and_load_rdata(
-  url = "https://raw.githubusercontent.com/ABbiodiversity/wildRtrax-assets/main/classifiers.RData",
-  filename = "classifiers.RData"
-)
+load("classifiers.RData")
 #save.image("classifiers.RData")
 ```
 
@@ -37,7 +24,7 @@ download_and_load_rdata(
 Recent advances in deep learning have led to the development of neural network models that can classify the sounds within acoustic recordings, such as those captured by autonomous recording units (ARUs). These classifiers can be trained to detect just a single focal species, or to classify thousands of species. The process of using automated classifiers to extract species detections from acoustic recordings is collectively called "computer listening". This tutorial will show you how to access and work with classifier results for recordings in WildTrax.
 
 ## BirdNET
-[BirdNET](https://birdnet.cornell.edu/) is a deep learning classifier that is trained to classify more than 6,000 of the world's most common bird species, including most North American bird species @kahl_2022. The model converts audio recordings into windows of spectrograms and outputs a probability score for each species in each one.
+[BirdNET](https://birdnet.cornell.edu/) is a deep learning classifier developed by the Cornell Lab of Ornithology that is trained to classify more than 6,000 of the world's most common bird species, including most North American bird species @kahl_2022. The model converts audio recordings into windows of spectrograms and outputs a probability score for each species in each one.
 
 ## Classifier performance
 Classifier scores can be converted to species detections by setting a threshold (e.g., 0.8) above which to consider a species present within a given spectrogram @wood_2024. False positives can still occur at high score thresholds, so often verification by a human observer is still necessary.
@@ -72,27 +59,33 @@ dat <- curl::curl_download('https://raw.githubusercontent.com/ABbiodiversity/wil
 
 ```
 
-```{r Plots, eval=T, include=T, echo=F, message=F, warning=F, fig.alt="Plots"}
+```{r, eval=T, include=T, echo=F, message=F, warning=F}
 plot.p <- ggplot(dat) +
-  geom_line(aes(x=thresh, y=p), linewidth=1.5) +
+  geom_line(aes(x=thresh, y=p), size=1.5) +
   xlab("Score threshold") +
   ylab("Precision") +
+  xlim(c(0.1, 1)) +
+  ylim(c(0, 1)) +
   theme_bw()
 
 plot.r <- ggplot(dat) +
-  geom_line(aes(x=thresh, y=r), linewidth=1.5) +
+  geom_line(aes(x=thresh, y=r), size=1.5) +
   xlab("Score threshold") +
   ylab("Recall") +
+  xlim(c(0.1, 1)) +
+  ylim(c(0, 1)) +
   theme_bw()
 
 plot.f <- ggplot(dat) +
-  geom_line(aes(x=thresh, y=f), linewidth=1.5) +
+  geom_line(aes(x=thresh, y=f), size=1.5) +
   xlab("Score threshold") +
   ylab("F-score") +
+  xlim(c(0.1, 1)) +
+  ylim(c(0, 1)) +
   theme_bw()
 
 plot.pr <- ggplot(dat) +
-  geom_line(aes(x=r, y=p), linewidth=1.5) +
+  geom_line(aes(x=r, y=p), size=1.5) +
   xlab("Recall") +
   ylab("Precision") +
   xlim(c(0.1, 1)) +
@@ -118,9 +111,10 @@ library(wildrtrax)
 Sys.setenv(WT_USERNAME = 'guest', WT_PASSWORD = 'Apple123')
 wt_auth()
 
+#This line will take a minute to run while it downloads the data
 data <- wt_download_report(project_id = 1144,
                            sensor_id = "ARU",
-                           reports = c("main", "birdnet"), 
+                           reports = c("main", "ai"), 
                            weather_cols = FALSE)
 
 ```
@@ -134,7 +128,7 @@ wt_auth()
 #This line will take a minute to run while it downloads the data
 data <- wt_download_report(project_id = 1144,
                            sensor_id = "ARU",
-                           reports = c("main", "birdnet"), 
+                           reports = c("main", "ai"), 
                            weather_cols = FALSE)
 
 ```
@@ -154,7 +148,7 @@ tail(eval, 5)
 
 We can plot the results of our evaluation to get an idea of how BirdNET is performing:
 
-```{r More plots, message=F, warning=F, fig.alt="More plots"}
+```{r, message=F, warning=F}
 plot.p.e <- ggplot(eval) +
   geom_line(aes(x=threshold, y=precision), size=1.5) +
   xlab("Score threshold") +
@@ -223,7 +217,7 @@ eval[eval$threshold==threshold_use,]
 
 ```
 
-A precision at our chosen score threshold of approximately `round(eval[eval$threshold==threshold_use,]$precision,3)` means that ~1/3 of detections are likely still false positives, we should probably visually verify to remove those false positives. Given that the overall recall rate of BirdNET is < 10% for precision values above 0.7, the detections should be used with caution in ecological analyses. From a detectability perspective, a recall rate of 10% means that your detection probability with BirdNET is 10% of what it would be with a human listener.
+A precision at our chosen score threshold of approximately `r round(eval$precision,2)` means that more than half of these detections are likely still false positives, we should probably visually verify to remove those false positives. Given that the overall recall rate of BirdNET is < 10% for precision values above 0.7, the detections should be used with caution in ecological analyses. From a detectability perspective, a recall rate of 10% means that your detection probability with BirdNET is 10% of what it would be with a human listener.
 
 ## Check for additional species detected
 
@@ -280,7 +274,9 @@ detections_ccsp <- data[[1]] |>
 
 As before, you'll probably want to upload your detections to WildTrax for verification, even though BirdNET performance for Clay-coloured Sparrow is pretty good. Let's take a look at our BirdNET output as call rate to see if it's higher at the beginning of the season, as we would expect:
 
-```{r CCSP plot, include=T, message=F, warning=F, fig.alt="CCSP Plot"}
+```{r, include=T, message=F, warning=F}
+library(lubridate)
+
 #Calculate detections per second and mean confidence in each recording
 rate_ccsp <- detections_ccsp |> 
   group_by(location_id, recording_date_time, recording_length) |>
@@ -289,9 +285,9 @@ rate_ccsp <- detections_ccsp |>
             .groups = "keep") |> 
   ungroup() |> 
   mutate(rate = calls/recording_length*60,
-  recording_date_time = as.POSIXct(recording_date_time, format = "%Y-%m-%d %H:%M:%S"),
-  yday = as.numeric(format(recording_date_time, "%j")),
-  hour = as.numeric(format(recording_date_time, "%H")))
+         recording_date_time = ymd_hms(recording_date_time),
+         yday = yday(recording_date_time),
+         hour = hour(recording_date_time))
 
 #Filter to the sites with most recordings with detections
 occupied_ccsp <- rate_ccsp |> 
@@ -312,7 +308,7 @@ ggplot(occupied_ccsp) +
 
 ## Other applications
 
-Visit the [BirdNET Github repository](https://github.com/birdnet-team/BirdNET-Analyzer) to run BirdNET on your own computer. The decision to pursue other applications should be made with the effect of BirdNET's low recall rate in mind:
+Visit the [BirdNET Github repository](https://github.com/kahst/BirdNET-Analyzer) to run BirdNET on your own computer. The decision to pursue other applications should be made with the effect of BirdNET's low recall rate in mind:
 
 1. With presence / absence data, BirdNET is unlikely to be reliably to confirm absences due to the low recall.
 

@@ -793,7 +793,7 @@ wt_get_sync <- function(api, option = c("columns", "data"), project = NULL, orga
     organization_locations    = "get-location-summary",
     organization_visits       = "get-location-visits",
     organization_equipment    = "get-equipment-summary",
-    organization_deployments = "get-location-visit-equipment-summary",
+    organization_deployments  = "get-location-visit-equipment-summary",
     organization_task_creator = "recording-task-creator-results",
     organization_image_summary = "get-camera-pud-summary",
     project_locations         = "download-location",
