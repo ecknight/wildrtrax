@@ -452,19 +452,13 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
         Referer = "https://dev.wildtrax.ca/discover"
       ) |>
       req_user_agent(u) |>
-      req_body_json(list(sensorId = sensor)) |>
+      req_body_json(list(sensorId = 'ARU')) |>
       req_perform()
 
     # Extract JSON content from the response
     spp_t <- resp_body_json(ddspp)
 
-    species_tibble <- purrr::map_df(spp_t, ~{
-      # Check if each column exists in the list
-      commonName <- if ("commonName" %in% names(.x)) .x$commonName else NA
-      speciesId <- if ("speciesId" %in% names(.x)) .x$speciesId else NA
-      sciName <- if ("sciName" %in% names(.x)) .x$sciName else NA
-      tibble(species_common_name = commonName, species_id = speciesId, species_scientific_name = sciName)
-    })
+    species_tibble <- tibble(species_id = map_int(spp_t, 1))
 
     # Fetch species if provided
     if (is.null(species)) {
