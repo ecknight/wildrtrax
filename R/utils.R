@@ -127,7 +127,7 @@
 #'
 #' @param path The path to the API
 #' @param ... Argument to pass along into POST query
-#' @param max_time The maximum number of seconds an API request can take. By default 300.
+#' @param max_time The maximum number of seconds the API request can take. By default 300.
 #'
 #' @keywords internal
 #'
@@ -152,7 +152,7 @@
 
   r <- request("https://dev-api.wildtrax.ca") |>
     req_url_path_append(path) |>
-    req_url_query(!!!query_params) |>  # Unpack the list of query parameters
+    req_body_json(query_params) |>  # Send in body instead of URL
     req_headers(Authorization = paste("Bearer", ._wt_auth_env_$access_token)) |>
     req_user_agent(u) |>
     req_method("POST") |>
@@ -178,12 +178,13 @@
 #'
 #' @param path The path to the API
 #' @param ... Argument to pass along into GET query
+#' @param max_time The maximum number of seconds the API request can take. By default 300.
 #'
 #' @keywords internal
 #'
 #' @import httr2
 
-.wt_api_gr <- function(path, ...) {
+.wt_api_gr <- function(path, ..., max_time=300) {
 
   # Check if authentication has expired:
   if (.wt_auth_expired()) {stop("Please authenticate with wt_auth().", call. = FALSE)}
@@ -205,11 +206,11 @@
 
   r <- request("https://dev-api.wildtrax.ca") |>
     req_url_path_append(path) |>
-    req_url_query(!!!query_params) |>  # Unpack the list of query parameters
-    #req_url_path_append(`Accept-Language` = accept_language) |>
+    req_body_json(query_params) |>
     req_headers(Authorization = paste("Bearer", ._wt_auth_env_$access_token)) |>
     req_user_agent(u) |>
     req_method("GET") |>
+    req_timeout(max_time) |>
     req_perform()
 
   # Handle errors

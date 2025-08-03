@@ -29,7 +29,7 @@ wt_auth <- function(force = FALSE) {
 #'
 #' @description Obtain a table listing projects that the user is able to download data for
 #'
-#' @param sensor_id Can be one of "ARU", "CAM", or "PC"
+#' @param sensor Can be one of "ARU", "CAM", or "PC"
 #'
 #' @importFrom dplyr across everything select
 #' @importFrom httr2 resp_body_json
@@ -46,31 +46,34 @@ wt_auth <- function(force = FALSE) {
 #' @return A data frame listing the projects that the user can download data for, including: project name, id, year, number of tasks, a geographic bounding box and project status.
 #'
 
-wt_get_projects <- function(sensor_id) {
+wt_get_projects <- function(sensor) {
 
   sens <- c("PC", "ARU", "CAM")
 
   # Stop call if sensor id value is not within range of possible values
-  if(!sensor_id %in% sens) {
+  if(!sensor %in% sens) {
     stop("A valid value for sensor_id must be supplied. See ?wt_get_download_summary for a list of possible values", call. = TRUE)
   }
 
   r <- .wt_api_pr(
     path = "/bis/get-projects",
-    sensorId = 'ARU'
+    sensorId = sensor
   )
 
   if(is.null(r)) {stop('')}
 
-  # x <- as_tibble(do.call(rbind, resp_body_json(r)$results)) |>
+  x <- as_tibble(do.call(rbind, resp_body_json(r)$results)) |>
+    unnest(everything()) |>
+    rename(project_id = id) |>
+    rename(organization = organizationId) |>
+    rename(project = fullNm)
   #   select(organization_id = organizationId,
   #                 organization = organizationName,
   #                 project = fullNm,
   #                 project_id = id,
-  #                 sensor = sensorId,
+  #                 sensor = sensor,
   #                 tasks,
-  #                 status) |>
-  #   mutate(across(everything(), unlist))
+  #                 status)
 
   return(x)
 
@@ -426,7 +429,7 @@ wt_download_media <- function(input, output, type = c("recording","image", "tag_
 #' dd <- wt_dd_summary(sensor = 'ARU', species = 'White-throated Sparrow', boundary = aoi)
 #' }
 #'
-#' @return Return
+#' @return A list of two tibbles one from the map and the other from the data
 
 wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary = NULL) {
 
@@ -665,14 +668,12 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
   ))
 }
 
-#' Batch upload and download locations photos
+#' Batch download location photos
 #'
-#' @description A two-way street to upload and download location photos
-#' `r lifecycle::badge("experimental")`
+#' @description Download location photos from an Organization
 #'
-#' @param data When going up, provide the joining data for locations and visits
-#' @param direction Either "up" or "down"; if "up" need to supply the appropriate data to join to a location and / or visit
-#' @param dir Folder of images either going "up" or "down"
+#' @param organization The Organization from which photos are being downloaded
+#' @param output Directory where location photos would be stored on your machine
 #'
 #' @import httr2
 #' @import dplyr
@@ -683,53 +684,32 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
 #' \dontrun{
 #' # Authenticate first:
 #' wt_auth()
-#' # When going up provide the folder of images and data for joining
-#' wt_location_photos(organization = 'ABMI', data = "/my/join/table",
-#' direction = "up", dir = "/my/dir/of/images")
-#'
-#' # When going down the directory where you want the files only
-#' wt_location_photos(organization = 'ABMI', direction = "down",
-#' dir = "/my/dir/to/download/images")
-#'
+#' wt_location_photos(organization = 'ABMI', output = NULL)
 #' }
 #'
-#' @return When "down", a folder of images
+#' @return
 #'
 
-wt_location_photos <- function(data, direction, dir) {
+wt_location_photos <- function(organization, output = NULL) {
 
   if (.wt_auth_expired())
     stop("Please authenticate with wt_auth().", call. = FALSE)
 
   org_numeric <- .get_org_id(organization)
 
-  visits <- data
-
-  if(direction == "down") {
-    # if going down make it a GET
-    # Request location data
-    r <- .wt_api_gr(
-      path = "/bis/get-location-visit-image-by-visit",
+  r <- .wt_api_gr(
+      path = "/bis/get-location-image-summary",
       organizationId = org_numeric,
       sort = "locationName",
       order = "asc",
       limit = 1e9
     )
-  } else if (direction == "up") {
-    # if going up make it a PUT
-    # Request location data
-    r <- .wt_api_pr(
-      path = "/bis/create-or-update-location-visit-image",
-      locationVisitId = visits,
-      sort = "locationName",
-      order = "asc",
-      limit = 1e9
-    )
-  } else {
-    stop("Need to provide either 'up' or 'down' as a parameter")
-  }
 
-}
+  photos <- resp_body_json(r)
+
+  return(photos)
+
+  }
 
 #' Get column headers and data from WildTrax Sync APIs
 #'
@@ -833,9 +813,11 @@ wt_get_sync <- function(api, option = c("columns", "data"), project = NULL, orga
   message("Content-Type returned: ", content_type)
 
   process_json <- function(response) {
+
     json_data <- httr2::resp_body_json(response)
 
     if (api == "get-location-summary") {
+
       results <- json_data$results
       if (length(results) == 0) stop("No location data returned.")
 
