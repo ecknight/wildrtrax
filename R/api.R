@@ -745,10 +745,11 @@ wt_location_photos <- function(data, direction, dir) {
 #'   \item `"project_species"`
 #'   \item `"project_aru_tasks"`
 #'   \item `"project_aru_tags"`
+#'   \item `"project_camera_tasks"`
 #'   \item `"project_camera_tags"`
 #'   \item `"project_point_counts"`
 #' }
-#' @param option Choose between just returning column headers or the entire dataframe itself
+#' @param option Choose between just returning column headers or the entire data frame itself
 #' @param project The project id
 #' @param organization The organization id
 #'
@@ -901,7 +902,6 @@ wt_get_sync <- function(api, option = c("columns", "data"), project = NULL, orga
       results <- json_data$results
       if (length(results) == 0) stop("No image data returned.")
 
-      # Safely replace NULLs with NA and return as a tibble
       image_summary <- purrr::map_df(results, ~ purrr::modify(.x, ~ if (is.null(.)) NA else .)) |>
         rename(
           image_set_id = id,
@@ -931,7 +931,6 @@ wt_get_sync <- function(api, option = c("columns", "data"), project = NULL, orga
         stop("You do not have permission for this data.")
       }
 
-      # Safely process Included and Excluded data
       included_data <- x$Included %||% list()
       excluded_data <- x$Excluded %||% list()
 
@@ -940,22 +939,18 @@ wt_get_sync <- function(api, option = c("columns", "data"), project = NULL, orga
         exists = .x$exists
       ))
 
-      # Fetch species common names
       species_lookup <- wt_get_species() |> select(species_id, species_common_name)
 
-      # Join included species with their names
       included_names <- included |>
         inner_join(species_lookup, by = "species_id") |>
         arrange(species_common_name) |> # Sort alphabetically by species_common_name
         as_tibble()
 
-      # Include sorting debug
       message("Sorted species details by common name.")
 
       return(included_names)
     }
 
-    # Default JSON processing
     return(json_data)
   }
 

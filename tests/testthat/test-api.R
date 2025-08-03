@@ -16,21 +16,21 @@ bad_aoi <- list(
   c(-112.85438, 57.13472)
 )
 
-# test_that("Download without authentication or boundary; single-species", {
-#   expect_true(!is.null(wt_dd_summary(sensor = 'ARU', species = 'White-throated Sparrow', boundary = NULL)))
-# })
-#
-# test_that("Download without authentication or boundary; single-species", {
-#   expect_true(!is.null(wt_dd_summary(sensor = 'ARU', species = 'White-throated Sparrow', boundary = aoi)))
-# })
-#
-# test_that("Download without authentication, bad boundary; single-species", {
-#   expect_error(!is.null(wt_dd_summary(sensor = 'ARU', species = 'White-throated Sparrow', boundary = bad_aoi)))
-# })
-#
-# test_that("Download without authentication, boundary; multiple single-species", {
-#   expect_true(!is.null(wt_dd_summary(sensor = 'ARU', species = c('White-throated Sparrow','Hermit Thrush'), boundary = aoi)))
-# })
+test_that("Download without authentication or boundary; single-species", {
+  expect_true(!is.null(wt_dd_summary(sensor = 'ARU', species = 'White-throated Sparrow', boundary = NULL)))
+})
+
+test_that("Download without authentication or boundary; single-species", {
+  expect_true(!is.null(wt_dd_summary(sensor = 'ARU', species = 'White-throated Sparrow', boundary = aoi)))
+})
+
+test_that("Download without authentication, bad boundary; single-species", {
+  expect_error(!is.null(wt_dd_summary(sensor = 'ARU', species = 'White-throated Sparrow', boundary = bad_aoi)))
+})
+
+test_that("Download without authentication, boundary; multiple single-species", {
+  expect_true(!is.null(wt_dd_summary(sensor = 'ARU', species = c('White-throated Sparrow','Hermit Thrush'), boundary = aoi)))
+})
 
 Sys.setenv(WT_USERNAME = "guest", WT_PASSWORD = "Apple123")
 wt_auth(force = TRUE)
