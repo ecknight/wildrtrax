@@ -452,7 +452,7 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
         Referer = "https://dev.wildtrax.ca/discover"
       ) |>
       req_user_agent(u) |>
-      req_body_json(list(sensorId = 'ARU')) |>
+      req_body_json(list(sensorId = sensor)) |>
       req_perform()
 
     # Extract JSON content from the response
