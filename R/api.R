@@ -455,12 +455,15 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
       req_body_json(list(sensorId = sensor)) |>
       req_perform()
 
-    # Extract JSON content from the response
     spp_t <- resp_body_json(ddspp)
 
-    species_tibble <- tibble(species_id = map_int(spp_t, 1))
+    species_tibble <- purrr::map_df(spp_t, ~{
+      commonName <- if ("commonName" %in% names(.x)) .x$commonName else NA
+      speciesId <- if ("speciesId" %in% names(.x)) .x$speciesId else NA
+      sciName <- if ("sciName" %in% names(.x)) .x$sciName else NA
+      tibble(species_common_name = commonName, species_id = speciesId, species_scientific_name = sciName)
+    })
 
-    # Fetch species if provided
     if (is.null(species)) {
       spp <- species_tibble$species_id
       if (length(spp) == 0) {
@@ -533,7 +536,7 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
     }
   }
 
-  # Here's da earth. Dat is a sweet earth you might say.
+  # OK so here's da earth. Dat is a sweet earth you might say.
   full_bounds <- list(
     `_sw` = list(
       lng = -180.0,
@@ -645,16 +648,13 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
       select(projectId, project_name, count, species_common_name, species_scientific_name) |>
       distinct()
 
-    # Add results to lists
     all_rpps_tibble[[length(all_rpps_tibble) + 1]] <- rpps_tibble
     all_result_tables[[length(all_result_tables) + 1]] <- result_table
   }
 
-  # Combine results
   combined_rpps_tibble <- bind_rows(all_rpps_tibble)
   combined_result_table <- bind_rows(all_result_tables)
 
-  # Check if any results found
   if (nrow(combined_rpps_tibble) == 0 | nrow(combined_result_table) == 0) {
     stop("No results were found on any of the search layers. Broaden your search and try again.")
   }
@@ -716,7 +716,7 @@ wt_location_photos <- function(data, direction, dir) {
       limit = 1e9
     )
   } else if (direction == "up") {
-    # if going up make it a POST
+    # if going up make it a PUT
     # Request location data
     r <- .wt_api_pr(
       path = "/bis/create-or-update-location-visit-image",
