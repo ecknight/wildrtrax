@@ -626,6 +626,8 @@
   project_id = readr::col_integer(),
   project_results = readr::col_character(),
   project_status = readr::col_character(),
+  project_creation_date = readr::col_date(),
+  project_due_date = readr::col_date(),
   recording_date_time = readr::col_datetime(),
   recording_id = readr::col_double(),
   recording_length = readr::col_double(),
