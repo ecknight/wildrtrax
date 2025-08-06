@@ -7,11 +7,10 @@
 #' @param extra_cols Boolean; Default set to FALSE for speed. If TRUE, returns additional columns for file duration, sample rate and number of channels.
 #'
 #' @importFrom fs dir_ls file_size
-#' @improtFrom tibble as_tibble
+#' @importFrom tibble as_tibble
 #' @importFrom dplyr mutate select filter case_when arrange group_by row_number ungroup bind_rows
 #' @importFrom tuneR readWave
 #' @importFrom purrr map map_dbl pluck
-#' @importFrom seewave
 #' @importFrom rlang env_has current_env
 #' @importFrom tidyr separate pivot_longer unnest_longer
 #' @export
