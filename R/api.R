@@ -31,7 +31,10 @@ wt_auth <- function(force = FALSE) {
 #'
 #' @param sensor Can be one of "ARU", "CAM", or "PC"
 #'
-#' @import dplyr
+#' @importFrom dplyr select filter inner_join rename everything distinct rowwise
+#' @importFrom tidyr unnest_longer
+#' @importFrom tibble as_tibble
+#' @importFrom purrr map_dfr
 #' @importFrom httr2 resp_body_json
 #
 #' @export
@@ -81,6 +84,10 @@ wt_get_projects <- function(sensor) {
     rename(organization_name = name) |>
     rename(project_creation_date = creationDate) |>
     rename(project_due_date = dueDate) |>
+    # rowwise() |>
+    # mutate(project_creation_date = case_when(!is.null(project_creation_date) ~ as.POSIXct(project_creation_date), TRUE ~ project_creation_date)) |>
+    # mutate(project_due_date = case_when(!is.null(project_due_date) ~ as.POSIXct(project_due_date), TRUE ~ project_due_date)) |>
+    # ungroup() |>
     rename(task_count = tasks) |>
     rename(tasks_completed = tasksCompleted) |>
     select(organization_id, organization_name, project_sensor, project_id, project, project_status, project_creation_date, project_due_date, task_count, tasks_completed) |>
@@ -748,7 +755,7 @@ wt_location_photos <- function(organization, output = NULL) {
 #' @param project The project id
 #' @param organization The organization id
 #'
-#' @import httr2 tibble dplyr
+#' @import httr2 tibble dplyr tidyr
 #'
 #' @export
 #'
@@ -768,6 +775,8 @@ wt_location_photos <- function(organization, output = NULL) {
 
 wt_get_sync <- function(api, option = c("columns", "data"), project = NULL, organization = NULL) {
 
+  api_match <- api
+
   option <- match.arg(option)
 
   # Check authentication
@@ -780,11 +789,11 @@ wt_get_sync <- function(api, option = c("columns", "data"), project = NULL, orga
   }
 
   api_pseudonyms <- list(
-    organization_locations = "get-location-summary", #JSON - POST
+    organization_locations = "get-location-summary",
     organization_visits = "get-location-visits", #500 - POST
     organization_equipment = "get-equipment-summary", #TEXT - POST
-    organization_deployments = "get-location-visit-equipment-summary", #JSON - POST
-    organization_task_creator = "recording-task-creator-results", #JSON - POST
+    organization_deployments = "get-location-visit-equipment-summary",
+    organization_recording_summary = "recording-task-creator-results", #JSON - POST
     organization_image_summary = "get-camera-pud-summary", #JSON - POST
     project_locations = "download-location", #CSV - GET
     project_aru_tasks = "download-tasks-by-project-id", #400 - GET
@@ -818,7 +827,7 @@ wt_get_sync <- function(api, option = c("columns", "data"), project = NULL, orga
   }
 
   api_params <- api_defaults[[api]]
-  #api_params$limit <- 1e2
+  api_params$limit <- 1e3
   api_path <- paste0("/bis/", api)
 
   print(api_params)
@@ -832,13 +841,106 @@ wt_get_sync <- function(api, option = c("columns", "data"), project = NULL, orga
   if(content_type == "application/json") {
 
     json_data <- resp_body_json(response)
-    results <- json_data$results
-    if (length(results) == 0) stop("No location data returned")
 
-    data <- as_tibble(do.call(rbind, results)) |>
-      unnest(everything())
+    if(api_match == "organization_locations") {
 
-    print(data)
+      results <- json_data$results
+      if (length(results) == 0) stop("No data returned")
+
+      data <- as_tibble(do.call(rbind, results)) |>
+        unnest(everything())
+
+      visibilities <- json_data$options$visibilityId |>
+        map_dfr(as_tibble)
+
+      location_summary <- data |>
+        rename(location_id = id) |>
+        rename(organization_id = organizationId) |>
+        rename(location = locationName) |>
+        rename(buffer_m = bufferRadius) |>
+        inner_join(visibilities, by = c("visibilityId" = "id")) |>
+        relocate(type, .after = buffer_m) |>
+        rename(visibility = type) |>
+        select(-visibilityId) |>
+        rename(true_coordinates = isTrueCoordinates) |>
+        rename(local_area_name = localAreaName) |>
+        rename(visit_count = visitCount) |>
+        rename(recording_count = recordingCount) |>
+        rename(image_count = imageCount)
+
+      return(location_summary)
+
+    } else if (api_match == "organization_deployments") {
+
+      results <- json_data$results
+      if (length(results) == 0) stop("No data returned")
+
+      data <- as_tibble(do.call(rbind, results)) |>
+        unnest(everything())
+
+      # equipments <- json_data$options$typeId |>
+      #   map_dfr(as_tibble)
+      #
+      # conditions <- json_data$options$conditionId |>
+      #   map_dfr(as_tibble)
+      #
+      # mounts <- json_data$options$mountId |>
+      #   map_dfr(as_tibble)
+      #
+      # targets <- json_data$options$targetId |>
+      #   map_dfr(as_tibble)
+      #
+      # print(equipments)
+      # print(conditions)
+      # print(mounts)
+      # print(targets)
+
+      message("Warning: Deployment and retrieval dates are not set to datetimes. You must manually search rows that are missing deployment and retrieval times (e.g. 2015-02-23 ??:??:??) before performing any datetime operations.")
+
+      deployment_summary <- data |>
+        rename(deployment_id = id) |>
+        rename(location = locationName) |>
+        rename(deployment_date = deploymentDate) |>
+        rename(retrieve_date = retrieveDate) |>
+        rename(equipment_code = code) |>
+        rename(equipment_serial_number = serialNo) |>
+        rename(equipment_make = make) |>
+        rename(equipment_model = model) |>
+        rename(direction_degrees = directionDegree) |>
+        rename(target_distance = stakeDistance) |>
+        rename(parent_equipment = parentEquipment)
+
+      return(deployment_summary)
+
+    } else if (api_match == "organization_recording_summary") {
+
+      data <- as_tibble(do.call(rbind, json_data))
+
+      unnest_all_lists_safely <- function(df) {
+
+        df_clean <- df |>
+          mutate(across(where(is.list), ~ map(.x, ~ if (is.null(.x)) NA else .x)))
+
+        for (col in names(df_clean)) {
+          if (!is.list(df_clean[[col]])) next
+          first_non_null <- discard(df_clean[[col]], is.null)[[1]]
+          if (is.null(first_non_null)) next
+          if (is.atomic(first_non_null) || is.null(names(first_non_null))) {
+            df_clean <- df_clean |>
+              unnest_longer(all_of(col), keep_empty = TRUE)
+          } else if (!is.null(names(first_non_null))) {
+            df_clean <- df_clean |>
+              unnest_wider(all_of(col))
+          }
+        }
+        df_clean
+      }
+
+      data <- unnest_all_lists_safely(data)
+
+      return(data)
+
+    }
 
   } else if (content_type == "application/csv") {
 
