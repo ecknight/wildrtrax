@@ -692,8 +692,9 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
 #'
 #' @description Download location photos from an Organization
 #'
-#' @param organization The Organization from which photos are being downloaded
-#' @param output Directory where location photos would be stored on your machine
+#' @param organization Character; The Organization acronym from which photos are being downloaded
+#' @param output Character; Directory where location photos would be stored on your machine
+#' @param download_all Logical; If `TRUE`, defaults to downloading all your location photos
 #'
 #' @import httr2
 #' @import dplyr
@@ -710,30 +711,75 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
 #' @return A folder of photos or an object containing the download information for said photos
 #'
 
-wt_location_photos <- function(organization, output = NULL) {
+wt_location_photos <- function(organization, output = NULL, download_all = FALSE) {
 
-  if (.wt_auth_expired())
-    stop("Please authenticate with wt_auth().", call. = FALSE)
+  if (.wt_auth_expired()) stop("Please authenticate with wt_auth().", call. = FALSE)
 
   org_numeric <- .get_org_id(organization)
 
   r <- .wt_api_gr(
-      path = "/bis/get-location-image-summary",
-      organizationId = org_numeric,
-      sort = "locationName",
-      order = "asc",
-      limit = 1e9
-    )
+    path = "/bis/get-location-image-summary",
+    organizationId = org_numeric,
+    sort = "locationName",
+    order = "asc",
+    limit = 1e9
+  )
 
-  photos <- resp_body_json(r)
+  photos_tbl <- str_extract_all(resp_body_string(r), "\\{[^}]+\\}")[[1]] |>
+    map_dfr(~{
+      fields <- str_match_all(.x, '"?([a-zA-Z0-9()]+)"?:("?[^",}]*"?)')[[1]]
+      vals <- str_remove_all(fields[, 3], '^"|"$')
+      names(vals) <- fields[, 2]
+      as_tibble(as.list(vals))
+    }) |>
+    filter(str_detect(id, "^[a-f0-9\\-]{36}$"), !is.na(timestamp)) |>
+    sl
 
-  return(photos)
+  if (download_all==TRUE) {
+    # create output folder if given, else current directory
+    outdir <- ifelse(is.null(output), ".", output)
+    if (!dir.exists(outdir)) dir.create(outdir, recursive = TRUE)
 
+    # helper to clean and build safe filename
+    safe_filename <- function(location, timestamp, directionId, verticalAngle) {
+      timestamp_clean <- str_replace_all(timestamp, "[:T]", "_")
+      dirId <- ifelse(is.na(directionId) | directionId == "null", "NA", directionId)
+      vertAng <- ifelse(is.na(verticalAngle) | verticalAngle == "null", "NA", verticalAngle)
+      fname <- paste(location, timestamp_clean, dirId, vertAng, sep = "_")
+      str_replace_all(fname, "[^A-Za-z0-9_\\-\\.]", "_")
+    }
+
+    # download function per row
+    download_one <- function(url, locationName, timestamp, directionId, verticalAngle) {
+      filename <- safe_filename(locationName, timestamp, directionId, verticalAngle)
+      filepath <- file.path(outdir, filename)
+
+      if (file.exists(filepath)) {
+        message(paste0("Skipping existing file:",filepath))
+        return(NULL)
+      }
+
+      resp <- request(url) |> req_perform()
+      if (resp_status(resp) == 200) {
+        writeBin(resp_body_raw(resp), filepath)
+        message(paste0("Downloaded, ", file_path))
+      } else {
+        warning(paste0("Failed to download", filepath,": HTTP", resp_status))
+      }
+    }
+
+    # Use purrr::pwalk to walk over photo metadata columns and download
+    photos_tbl %>%
+      select(largeURL, locationName, timestamp, directionId, verticalAngle) %>%
+      purrr::pwalk(download_one)
+  } else {
+    return(photos_tbl)
+  }
   }
 
-#' Get column headers and data from WildTrax syncs and downloads
+#' Get data from WildTrax syncs and downloads
 #'
-#' @description Fetch column headers and data for syncs and downloads in WildTrax. You must specify at least one of `project` or `organization` depending on the API and at what level of the system you're looking for data for. Use `wt_download_report()`.
+#' @description Fetch data for syncs and downloads in WildTrax. You must specify at least one of `project` or `organization` depending on the API and at what level of the system you're looking for data for. Use `wt_download_report()`.
 #'
 #' @param api A string specifying the API to query. Must be one of:
 #' \itemize{
@@ -751,7 +797,6 @@ wt_location_photos <- function(organization, output = NULL) {
 #'   \item `"project_camera_tags"`
 #'   \item `"project_point_counts"`
 #' }
-#' @param option Choose between just returning column headers or the entire data frame itself
 #' @param project The project id
 #' @param organization The organization id
 #'
@@ -773,11 +818,9 @@ wt_location_photos <- function(organization, output = NULL) {
 #'
 #' @return A tibble with column headers for the specified API call.
 
-wt_get_sync <- function(api, option = c("columns", "data"), project = NULL, organization = NULL) {
+wt_get_sync <- function(api, project = NULL, organization = NULL) {
 
   api_match <- api
-
-  option <- match.arg(option)
 
   # Check authentication
   if (.wt_auth_expired()) {
@@ -878,6 +921,7 @@ wt_get_sync <- function(api, option = c("columns", "data"), project = NULL, orga
       data <- as_tibble(do.call(rbind, results)) |>
         unnest(everything())
 
+      # Don't have Ids in response - create separate API calls potentially
       # equipments <- json_data$options$typeId |>
       #   map_dfr(as_tibble)
       #
@@ -916,6 +960,7 @@ wt_get_sync <- function(api, option = c("columns", "data"), project = NULL, orga
 
       data <- as_tibble(do.call(rbind, json_data))
 
+      # Unnest things safely given the size of the response
       unnest_all_lists_safely <- function(df) {
 
         df_clean <- df |>
@@ -935,12 +980,17 @@ wt_get_sync <- function(api, option = c("columns", "data"), project = NULL, orga
         }
         df_clean
       }
-
       data <- unnest_all_lists_safely(data)
 
-      return(data)
+      recording_summaru <-
 
-    }
+      return(recording_summary)
+
+    } else if (api_mathc == "organization_image_summary") {
+
+
+
+    } else {stop("No API provided.")}
 
   } else if (content_type == "application/csv") {
 
