@@ -101,7 +101,7 @@ wt_get_projects <- function(sensor) {
 #'
 #' @description Download various ARU, camera, or point count data from projects across WildTrax
 #'
-#' @param project_id Numeric; the project ID number that you would like to download data for. Use `wt_get_download_summary()` to retrieve these IDs.
+#' @param project_id Numeric; the project ID number that you would like to download data for. Use `wt_get_projects()` to retrieve these IDs.
 #' @param sensor_id Character; Can either be "ARU", "CAM", or "PC".
 #' @param reports Character; The report type to be returned. Multiple values are accepted as a concatenated string.
 #' @param weather_cols Logical; Do you want to include weather information for your stations? Defaults to TRUE.
@@ -136,7 +136,10 @@ wt_get_projects <- function(sensor) {
 #'  \item definitions
 #' }
 #'
-#' @import httr2 purrr dplyr
+#' @import httr2
+#' @import purrr
+#' @importFrom dplyr rename filter pull
+#' @importFrom tibble as_tibble
 #' @importFrom readr read_csv col_character col_logical
 #' @export
 #'
@@ -166,17 +169,13 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
 
   # Check if the project_id is valid:
   i <- wt_get_projects(sensor_id) |>
-    tibble::as_tibble() |>
-    dplyr::select(project_id, project_sensor)
+    as_tibble() |>
+    select(project_id, project_sensor)
 
   sensor_value <- i |>
-    dplyr::rename('id' = 1) |>
-    dplyr::filter(id %in% project_id) |>
-    dplyr::pull(project_sensor)
-
-  if (!project_id %in% i$project_id) {
-    stop("The project_id you specified is not among the projects you are able to download for.", call. = TRUE)
-  }
+    rename('id' = 1) |>
+    filter(id %in% project_id) |>
+    pull(project_sensor)
 
   # Make sure report is specified
   if(missing(reports)) {
@@ -202,35 +201,39 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
     stop("Please supply a valid report type. Use ?wt_download_report to view options.", call. = TRUE)
   }
 
-  # Prepare temporary file:
-  tmp <- tempfile(fileext = ".zip")
+  projectIds <- project_id
 
-  # tmp directory
+  query_params <- list(
+    projectIds = paste(projectIds, collapse = ","),
+    locationReport = "true",
+    projectReport = "true",
+    tagReport = "true",
+    recordingReport = "true",
+    mainReport = "true",
+    aiReport = "true",
+    includeMetaData = "true",
+    sensorId = sensor_id
+  )
+
+  body_json <- list(projectIds = projectIds)
+  tmp <- tempfile(fileext = ".zip")
   td <- tempdir()
 
-  download_report_params <- list(
-    sensorId = sensor_id,
-    projectIds = paste(project_id, collapse = ","),
-    locationReport = "location" %in% reports,
-    projectReport = "project" %in% reports,
-    tagReport = "tag" %in% reports,
-    recordingReport = "recording" %in% reports,
-    mainReport = "main" %in% reports,
-    aiReport = "ai" %in% reports,
-    max_time = max_seconds
-  )
+  req <- request("https://dev-api.wildtrax.ca") |>
+    req_url_path_append("bis/download-report") |>
+    req_url_query(!!!query_params) |>
+    req_headers(
+      Authorization = paste("Bearer", ._wt_auth_env_$access_token),
+      `Content-Type` = "application/json"
+    ) |>
+    req_user_agent(u) |>
+    req_method("POST") |>
+    req_body_json(body_json) |>
+    req_timeout(300) |>
+    req_perform()
 
-  r <- .wt_api_pr(
-    path = "/bis/download-report",
-    download_report_params
-  )
-
-  writeBin(httr2::resp_body_raw(r), tmp)
-
-  # Unzip
+  writeBin(httr2::resp_body_raw(req), tmp)
   unzip(tmp, exdir = td)
-
-  # Remove abstract file
   abstract <- list.files(td, pattern = "*_abstract.csv", full.names = TRUE, recursive = TRUE)
   file.remove(abstract)
 
