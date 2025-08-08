@@ -2,31 +2,27 @@
 % Please edit documentation in R/api.R
 \name{wt_get_sync}
 \alias{wt_get_sync}
-\title{Get column headers and data from WildTrax Sync APIs}
+\title{Get data from WildTrax syncs and downloads}
 \usage{
-wt_get_sync(
-  api,
-  option = c("columns", "data"),
-  project = NULL,
-  organization = NULL
-)
+wt_get_sync(api, project = NULL, organization = NULL)
 }
 \arguments{
 \item{api}{A string specifying the API to query. Must be one of:
 \itemize{
 \item \code{"organization_locations"}
 \item \code{"organization_visits"}
+\item \verb{"organization_equipment}"
+\item \verb{"organization_deployments}"
 \item \verb{"organization_recording_summary}"
 \item \verb{"organization_image_summary}"
 \item \code{"project_locations"}
 \item \code{"project_species"}
 \item \code{"project_aru_tasks"}
 \item \code{"project_aru_tags"}
+\item \code{"project_camera_tasks"}
 \item \code{"project_camera_tags"}
 \item \code{"project_point_counts"}
 }}
-
-\item{option}{Choose between just returning column headers or the entire dataframe itself}
 
 \item{project}{The project id}
 
@@ -36,7 +32,7 @@ wt_get_sync(
 A tibble with column headers for the specified API call.
 }
 \description{
-Fetch column headers and data for sync APIs in WildTrax. You must specify at least one of \code{project} or \code{organization} depending on the API and at what level of the system you're looking for data for
+Fetch data for syncs and downloads in WildTrax. You must specify at least one of \code{project} or \code{organization} depending on the API and at what level of the system you're looking for data for. Use \code{wt_download_report()}.
 }
 \examples{
 \dontrun{
@@ -47,7 +43,7 @@ wt_auth()
 wt_get_sync("organization_locations")
 
 # Fetch column headers by project
-wt_get_sync("project_point_counts")
+wt_get_sync("project_locations")
 }
 
 }
