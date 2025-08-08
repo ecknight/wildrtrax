@@ -208,27 +208,26 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
   # tmp directory
   td <- tempdir()
 
-  query_list <- list()
+  download_report_params <- list(
+    sensorId = sensor_id,
+    projectIds = paste(projectIds, collapse = ","),
+    locationReport = "location" %in% reports,
+    projectReport = "project" %in% reports,
+    tagReport = "tag" %in% reports,
+    recordingReport = "recording" %in% reports,
+    mainReport = "main" %in% reports,
+    aiReport = "ai" %in% reports,
+    includeMetaData = TRUE
+  )
 
   r <- .wt_api_pr(
     path = "/bis/download-report",
     projectIds = project_id,
-    sensorId = sensor_id,
-    mainReport = if ("main" %in% reports) query_list$mainReport <- TRUE,
-    projectReport = if ("project" %in% reports) query_list$projectReport <- TRUE,
-    recordingReport = if ("recording" %in% reports) query_list$recordingReport <- TRUE,
-    pointCountReport = if ("point_count" %in% reports) query_list$pointCountReport <- TRUE,
-    locationReport = if ("location" %in% reports) query_list$locationReport <- TRUE,
-    tagReport = if ("tag" %in% reports) query_list$tagReport <- TRUE,
-    imageReport = if ("image_report" %in% reports) query_list$imageReport <- TRUE,
-    imageSetReport = if ("image_set_report" %in% reports) query_list$imageSetReport <- TRUE,
-    aiReport = if ("ai" %in% reports) query_list$aiReport <- TRUE,
-    megaDetectorReport = if ("megadetector" %in% reports) query_list$megaDetectorReport <- TRUE,
-    dayLightReport = if ("daylight_report" %in% reports) query_list$dayLightReport <- TRUE,
-    includeMetaData = TRUE,
-    splitLocation = TRUE,
+    !!!download_report_params,
     max_time = max_seconds
   )
+
+  print(r)
 
   writeBin(httr2::resp_body_raw(r), tmp)
 
@@ -698,6 +697,7 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
 #'
 #' @import httr2
 #' @import dplyr
+#' @import tibble
 #'
 #' @export
 #'
@@ -711,9 +711,10 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
 #' @return A folder of photos or an object containing the download information for said photos
 #'
 
-wt_location_photos <- function(organization, output = NULL, download_all = FALSE) {
+wt_location_photos <- function(organization, output = NULL) {
 
-  if (.wt_auth_expired()) stop("Please authenticate with wt_auth().", call. = FALSE)
+  if (.wt_auth_expired())
+    stop("Please authenticate with wt_auth().", call. = FALSE)
 
   org_numeric <- .get_org_id(organization)
 
@@ -725,57 +726,11 @@ wt_location_photos <- function(organization, output = NULL, download_all = FALSE
     limit = 1e9
   )
 
-  photos_tbl <- str_extract_all(resp_body_string(r), "\\{[^}]+\\}")[[1]] |>
-    map_dfr(~{
-      fields <- str_match_all(.x, '"?([a-zA-Z0-9()]+)"?:("?[^",}]*"?)')[[1]]
-      vals <- str_remove_all(fields[, 3], '^"|"$')
-      names(vals) <- fields[, 2]
-      as_tibble(as.list(vals))
-    }) |>
-    filter(str_detect(id, "^[a-f0-9\\-]{36}$"), !is.na(timestamp)) |>
-    sl
+  photos <- resp_body_string(r)
 
-  if (download_all==TRUE) {
-    # create output folder if given, else current directory
-    outdir <- ifelse(is.null(output), ".", output)
-    if (!dir.exists(outdir)) dir.create(outdir, recursive = TRUE)
+  return(photos)
 
-    # helper to clean and build safe filename
-    safe_filename <- function(location, timestamp, directionId, verticalAngle) {
-      timestamp_clean <- str_replace_all(timestamp, "[:T]", "_")
-      dirId <- ifelse(is.na(directionId) | directionId == "null", "NA", directionId)
-      vertAng <- ifelse(is.na(verticalAngle) | verticalAngle == "null", "NA", verticalAngle)
-      fname <- paste(location, timestamp_clean, dirId, vertAng, sep = "_")
-      str_replace_all(fname, "[^A-Za-z0-9_\\-\\.]", "_")
-    }
-
-    # download function per row
-    download_one <- function(url, locationName, timestamp, directionId, verticalAngle) {
-      filename <- safe_filename(locationName, timestamp, directionId, verticalAngle)
-      filepath <- file.path(outdir, filename)
-
-      if (file.exists(filepath)) {
-        message(paste0("Skipping existing file:",filepath))
-        return(NULL)
-      }
-
-      resp <- request(url) |> req_perform()
-      if (resp_status(resp) == 200) {
-        writeBin(resp_body_raw(resp), filepath)
-        message(paste0("Downloaded, ", file_path))
-      } else {
-        warning(paste0("Failed to download", filepath,": HTTP", resp_status))
-      }
-    }
-
-    # Use purrr::pwalk to walk over photo metadata columns and download
-    photos_tbl %>%
-      select(largeURL, locationName, timestamp, directionId, verticalAngle) %>%
-      purrr::pwalk(download_one)
-  } else {
-    return(photos_tbl)
-  }
-  }
+}
 
 #' Get data from WildTrax syncs and downloads
 #'
@@ -835,7 +790,7 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
     organization_locations = "get-location-summary",
     organization_visits = "get-location-visits", #500 - POST
     organization_equipment = "get-equipment-summary", #TEXT - POST
-    organization_deployments = "get-location-visit-equipment-summary",
+    organization_deployments = "get-location-visit-equipment-summary", #JSON - POST
     organization_recording_summary = "recording-task-creator-results", #JSON - POST
     organization_image_summary = "get-camera-pud-summary", #JSON - POST
     project_locations = "download-location", #CSV - GET
@@ -870,7 +825,7 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
   }
 
   api_params <- api_defaults[[api]]
-  api_params$limit <- 1e3
+  api_params$limit <- 1e6
   api_path <- paste0("/bis/", api)
 
   print(api_params)
@@ -961,6 +916,9 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
       data <- as_tibble(do.call(rbind, json_data))
 
       # Unnest things safely given the size of the response
+
+      message("Organization-level recording summaries can be very large. Please be patient while the database retrieves your results.")
+
       unnest_all_lists_safely <- function(df) {
 
         df_clean <- df |>
@@ -982,15 +940,33 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
       }
       data <- unnest_all_lists_safely(data)
 
-      recording_summaru <-
+      recording_summary <- data |>
+        rename(location = locationName) |>
+        rename(recording_date_time = recordingDate) |>
+        mutate(recording_date_time = as.POSIXct(recording_date_time, format = "%Y-%m-%dT%H:%M:%S")) |>
+        rename(length_seconds = recordingAudioLength) |>
+        rename(birdnet_species = birdNetSpeciesIds) |>
+        rename(hawkears_species = hawkEarSpeciesIds) |>
+        rename(recording_sample_frequency = recordingSampleAudio)
 
       return(recording_summary)
 
-    } else if (api_mathc == "organization_image_summary") {
+    } else if (api_match == "organization_image_summary") {
 
+      results <- json_data$results
+      if (length(results) == 0) stop("No data returned")
 
+      data <- as_tibble(do.call(rbind, results)) |>
+        unnest(everything()) |>
+        unnest_longer(speciesIds) |>
+        inner_join(wt_get_species(), by = c("speciesIds" = "species_id")) |>
+        select(-c(species_class,species_order))
 
-    } else {stop("No API provided.")}
+      image_summary <- data
+
+      return(image_summary)
+
+    } else {stop('No api matches query.')}
 
   } else if (content_type == "application/csv") {
 
@@ -1013,5 +989,4 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
     message('Content type not recognized')
 
   }
-
-  }
+}
