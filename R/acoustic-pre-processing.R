@@ -626,7 +626,6 @@ wt_chop <- function(input = NULL, segment_length = NULL, output_folder = NULL) {
 #' @param output Character; Path where the output task csv file will be stored
 #' @param task_method Character; Method type of the task. Options are 1SPM, 1SPT and None.
 #' @param task_length Numeric; Task length in seconds. Must be between 1 - 1800 and can be up to two decimal places.
-#' @param sample_freq Numeric; The sampling frequency in Hz of the recording. If using `wt_audio_scanner()`, sampling frequency can be obtained using the `extra_cols = TRUE`.
 #'
 #' @importFrom dplyr select distinct mutate case_when
 #' @importFrom tibble add_column
@@ -641,11 +640,11 @@ wt_chop <- function(input = NULL, segment_length = NULL, output_folder = NULL) {
 #'
 #' @return A csv formatted as a WildTrax task template
 
-wt_make_aru_tasks <- function(input, output=NULL, task_method = c("1SPM","1SPT","None"), task_length, sample_freq) {
+wt_make_aru_tasks <- function(input, output=NULL, task_method = c("1SPM","1SPT","None"), task_length) {
 
   task_prep <- input
 
-  req_cols <- c("file_path","location","recording_date_time")
+  req_cols <- c("location","recording_date_time","length_seconds", "recording_sample_frequency")
 
   if (!any(names(task_prep) %in% req_cols)){
     stop("Missing certain columns. Check that you have file_path, location and recording_date_time at a minimum in order to generate tasks.")
@@ -661,25 +660,23 @@ wt_make_aru_tasks <- function(input, output=NULL, task_method = c("1SPM","1SPT",
     stop("task_length must be a number and between 1 and 1800 seconds.")
   }
 
-  if (sample_freq ) {
-    stop("task_length must be a number and between 1 and 1800 seconds.")
-  }
-
   tasks <- task_prep |>
-    select(location, recording_date_time, length_seconds) |>
+    select(location, recording_date_time, length_seconds, recording_sample_frequency) |>
     distinct() |>
     mutate(task_duration = case_when(length_seconds < task_length ~ NA_real_, TRUE ~ task_length)) |> #Make sure recording length is long enough
     select(-length_seconds) |>
     add_column(method = task_method, .after = "recording_date_time") |>
-    add_column(recording_sample_frequency = sample_freq) |>
+    relocate(recording_sample_frequency, .after = "method") |>
     relocate(task_duration, .after = "recording_sample_frequency") |>
+    rename(task_method = method) |>
     add_column(task_is_complete = FALSE, .after = "task_duration") |>
     add_column(observer = "", .after = "task_is_complete") |>
     add_column(task_comments = "", .after = "observer") |>
-    add_column(internal_task_id = "", .after = "task_comments")
+    add_column(internal_task_id = "", .after = "task_comments") |>
+    mutate(recording_date_time = as.character(recording_date_time))
 
   no_length <- tasks |>
-    filter(is.na(taskLength))
+    filter(is.na(task_duration))
 
   if ((nrow(no_length)) > 0) {
     message(nrow(no_length), ' rows are shorter than the desired task length')
@@ -692,7 +689,7 @@ wt_make_aru_tasks <- function(input, output=NULL, task_method = c("1SPM","1SPT",
   if (is.null(output)) {
     return(tasks)
   } else {
-    return(write_csv(tasks, output, row.names = F))
+    return(write_csv(tasks, output))
   }
 }
 
