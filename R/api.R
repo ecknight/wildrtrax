@@ -210,24 +210,20 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
 
   download_report_params <- list(
     sensorId = sensor_id,
-    projectIds = paste(projectIds, collapse = ","),
+    projectIds = paste(project_id, collapse = ","),
     locationReport = "location" %in% reports,
     projectReport = "project" %in% reports,
     tagReport = "tag" %in% reports,
     recordingReport = "recording" %in% reports,
     mainReport = "main" %in% reports,
     aiReport = "ai" %in% reports,
-    includeMetaData = TRUE
+    max_time = max_seconds
   )
 
   r <- .wt_api_pr(
     path = "/bis/download-report",
-    projectIds = project_id,
-    !!!download_report_params,
-    max_time = max_seconds
+    download_report_params
   )
-
-  print(r)
 
   writeBin(httr2::resp_body_raw(r), tmp)
 
@@ -755,7 +751,8 @@ wt_location_photos <- function(organization, output = NULL) {
 #' @param project The project id
 #' @param organization The organization id
 #'
-#' @import httr2 tibble dplyr tidyr
+#' @import httr2 tibble dplyr
+#' @importFrom tidyr unnest
 #'
 #' @export
 #'
@@ -946,8 +943,7 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
         mutate(recording_date_time = as.POSIXct(recording_date_time, format = "%Y-%m-%dT%H:%M:%S")) |>
         rename(length_seconds = recordingAudioLength) |>
         rename(birdnet_species = birdNetSpeciesIds) |>
-        rename(hawkears_species = hawkEarSpeciesIds) |>
-        rename(recording_sample_frequency = recordingSampleAudio)
+        rename(hawkears_species = hawkEarSpeciesIds)
 
       return(recording_summary)
 
@@ -970,11 +966,17 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
 
   } else if (content_type == "application/csv") {
 
-    tmp_file <- tempfile(fileext = ".csv")
-    writeBin(resp_body_raw(response), tmp_file)
-    data <- read_csv(tmp_file, show_col_types = FALSE)
+    if(api_match == "project_locations") {
 
-    print(data)
+      tmp_file <- tempfile(fileext = ".csv")
+      writeBin(resp_body_raw(response), tmp_file)
+      data <- read_csv(tmp_file, show_col_types = FALSE)
+
+      project_location_summary <- data
+
+      return(project_location_summary)
+
+    }
 
   } else if (content_type == "application/zip") {
 

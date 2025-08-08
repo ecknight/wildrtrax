@@ -168,18 +168,20 @@
   } else if(path == "/bis/download-report") {
 
     project_ids_str <- query_params$projectIds
-
     body_json <- list(projectIds = projectIds)
+    print(body_json)
 
-    req <- request("https://dev-api.wildtrax.ca") |>
-      req_url_path_append(path) |>
-      req_url_query(query_params) |>
-      req_headers(Authorization = paste("Bearer", ._wt_auth_env_$access_token),`Content-Type` = "application/json") |>
-      req_user_agent(u) |>
-      req_method("POST") |>
-      req_body_json(body_json) |>
-      req_timeout(300) |>
-      req_perform()
+    # req <- request("https://dev-api.wildtrax.ca") |>
+    #   req_url_path_append(path) |>
+    #   req_url_query(query_params) |>
+    #   req_headers(Authorization = paste("Bearer", ._wt_auth_env_$access_token),`Content-Type` = "application/json") |>
+    #   req_user_agent(u) |>
+    #   req_method("POST") |>
+    #   req_body_json(body_json) |>
+    #   req_timeout(max_time)
+    #   #req_perform()
+    #
+    # print(req)
 
   if(resp_status(req) >= 400) {
   stop(sprintf("API request failed [%s]", resp_status(req)), call. = FALSE)
