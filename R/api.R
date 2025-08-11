@@ -788,7 +788,7 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
 
   api_pseudonyms <- list(
     organization_locations = "get-location-summary",
-    organization_visits = "get-location-visits", #500 - POST
+    organization_visits = "get-location-visits",
     organization_equipment = "get-equipment-summary", #TEXT - POST
     organization_deployments = "get-location-visit-equipment-summary", #JSON - POST
     organization_recording_summary = "recording-task-creator-results", #JSON - POST
@@ -827,9 +827,6 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
   api_params <- api_defaults[[api]]
   api_params$limit <- 1e6
   api_path <- paste0("/bis/", api)
-
-  print(api_params)
-
   print(paste('Calling...', api_path))
 
   response <- do.call(.wt_api_pr, c(list(path = api_path), api_params))
@@ -868,7 +865,16 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
 
       return(location_summary)
 
-    } else if (api_match == "organization_deployments") {
+    }
+
+    else if(api_match == "organization_visits") {
+
+        results <- json_data$results
+        if (length(results) == 0) stop("No data returned")
+
+    }
+
+    else if (api_match == "organization_deployments") {
 
       results <- json_data$results
       if (length(results) == 0) stop("No data returned")
@@ -987,7 +993,13 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
 
   } else if (content_type == "text/plain") {
 
-    message("Do a text thing")
+    if(api_match == "organization_equipment") {
+
+      json_data <- resp_body_string(response)
+
+      print(json_data)
+
+    }
 
   } else {
 
