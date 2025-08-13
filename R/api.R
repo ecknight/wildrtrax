@@ -204,20 +204,20 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
   projectIds <- project_id
 
   query_params <- list(
-    projectIds = paste(projectIds, collapse = ","),
     locationReport = "true",
     projectReport = "true",
     tagReport = "true",
     recordingReport = "true",
     mainReport = "true",
-    aiReport = "true",
+    birdnetReport = "true",
     includeMetaData = "true",
     sensorId = sensor_id
   )
 
-  body_json <- list(projectIds = projectIds)
+  body_json <- list(projectIds = list(project_id))
   tmp <- tempfile(fileext = ".zip")
   td <- tempdir()
+  u <- .gen_ua()
 
   req <- request("https://dev-api.wildtrax.ca") |>
     req_url_path_append("bis/download-report") |>
@@ -227,12 +227,13 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
       `Content-Type` = "application/json"
     ) |>
     req_user_agent(u) |>
-    req_method("POST") |>
+    req_method("POST") |>      # Use POST instead of GET here
     req_body_json(body_json) |>
-    req_timeout(300) |>
-    req_perform()
+    req_timeout(300)
 
-  writeBin(httr2::resp_body_raw(req), tmp)
+  resp <- req_perform(req)
+  print(httr2::resp_content_type(resp))
+  writeBin(httr2::resp_body_raw(resp), tmp)
   unzip(tmp, exdir = td)
   abstract <- list.files(td, pattern = "*_abstract.csv", full.names = TRUE, recursive = TRUE)
   file.remove(abstract)

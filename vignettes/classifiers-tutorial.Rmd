@@ -15,7 +15,7 @@ library(ggplot2)
 library(stringr)
 library(gridExtra)
 
-load("classifiers.RData")
+load("package.RData")
 #save.image("classifiers.RData")
 ```
 

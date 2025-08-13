@@ -1,10 +1,10 @@
 #' Evaluate a classifier
 #'
-#' @description Calculates precision, recall, and F-score of BirdNET for a requested sequence of thresholds. You can request the metrics at the minute level for recordings that are processed with the species per minute method (1SPM). You can also exclude species that are not allowed in the project from the BirdNET results before evaluation.
+#' @description Calculates precision, recall, and F-score of BirdNET and/or HawkEars for a requested sequence of thresholds. You can request the metrics at the minute level for recordings that are processed with the species per minute method (1SPM).
 #'
 #' @param data Output from the `wt_download_report()` function when you request the `main` and `birdnet` reports
 #' @param resolution Character; either "recording" to summarize at the entire recording level or "minute" to summarize the minute level if the `task_method` is "1SPM", or "task"
-#' @param remove_species Logical; indicates whether species that are not allowed in the WildTrax project should be removed from the BirdNET report
+#' @param remove_species Logical; indicates whether species that are not allowed in the WildTrax project should be removed from the AI report
 #' @param species Character; optional subset of species to calculate metrics for (e.g., species = c("OVEN", "OSFL", "BOCH"))
 #' @param thresholds Numeric; start and end of sequence of score thresholds at which to calculate performance metrics
 #'
@@ -25,8 +25,8 @@
 wt_evaluate_classifier <- function(data, resolution = "recording", remove_species = TRUE,  species = NULL, thresholds = c(10, 99)){
 
   # Check if the data object is in the right format
-  if (!inherits(data, "list") && !grepl("birdnet", names(data)[[2]]) && !grepl("main", names(data))[[1]]) {
-    stop("The input should be the output of the `wt_download_report()` function with the argument `reports=c('main', 'birdnet')`")
+  if (!inherits(data, "list") && !grepl("ai", names(data)[[2]]) && !grepl("main", names(data))[[1]]) {
+    stop("The input should be the output of the `wt_download_report()` function with the argument `reports=c('main', 'ai')`")
   }
 
   #Check if the project has the correct transcription method for evaluation method chosen
@@ -41,7 +41,7 @@ wt_evaluate_classifier <- function(data, resolution = "recording", remove_specie
   #Get the classifier report and filter species as requested
   if(remove_species==TRUE){
     class <- data[[1]] |>
-      dplyr::filter(is_species_allowed_in_project==TRUE)
+      filter(is_species_allowed_in_project==TRUE)
   } else {
     class <- data[[1]]
   }
@@ -49,10 +49,11 @@ wt_evaluate_classifier <- function(data, resolution = "recording", remove_specie
   #Summarize the classifier report to the requested resolution
   if(resolution=="task"){
     detections <- class |>
-      dplyr::inner_join(data[[2]] |> dplyr::select(recording_id, task_id, task_duration), by = c("recording_id" = "recording_id")) |>
-      dplyr::filter(!start_s > task_duration) |>
-      group_by(project_id, location_id, recording_id, species_code) |>
-      summarize(confidence = max(confidence), .groups="keep") |>
+      rename(start_s = startTime) |>
+      inner_join(data[[2]] |> select(project_id, recording_id, task_id, task_duration), by = c("recording_id" = "recording_id")) |>
+      filter(!start_s > task_duration) |>
+      group_by(project_id, location_id, recording_id, species_common_name) |>
+      summarise(confidence = max(confidence), .groups="keep") |>
       ungroup() |>
       mutate(classifier = 1)
   }
@@ -60,7 +61,7 @@ wt_evaluate_classifier <- function(data, resolution = "recording", remove_specie
   if(resolution=="minute"){
     detections <- class |>
       mutate(minute = ifelse(start_s==0, 1, ceiling(start_s/60))) |>
-      group_by(project_id, location_id, recording_id, species_code, minute) |>
+      group_by(project_id, location_id, recording_id, species_common_name, minute) |>
       summarize(confidence = max(confidence), .groups="keep") |>
       ungroup() |>
       mutate(classifier = 1)
@@ -68,7 +69,7 @@ wt_evaluate_classifier <- function(data, resolution = "recording", remove_specie
 
   if(resolution=="recording"){
     detections <- class |>
-      group_by(project_id, location_id, recording_id, species_code) |>
+      group_by(project_id, location_id, recording_id, species_common_name) |>
       summarize(confidence = max(confidence),  .groups="keep") |>
       ungroup() |>
       mutate(classifier = 1)
@@ -77,7 +78,7 @@ wt_evaluate_classifier <- function(data, resolution = "recording", remove_specie
   #Tidy up the main report
   if(resolution=="task"){
     main <- wt_tidy_species(data[[2]], remove=c("mammal", "amphibian", "abiotic", "insect", "human", "unknown")) |>
-      dplyr::select(project_id, location_id, recording_id, task_id, species_code) |>
+      select(project_id, location_id, recording_id, task_id, species_common_name) |>
       unique() |>
       mutate(human = 1)
   }
@@ -85,20 +86,20 @@ wt_evaluate_classifier <- function(data, resolution = "recording", remove_specie
   if(resolution=="minute"){
     main <- wt_tidy_species(data[[2]], remove=c("mammal", "amphibian", "abiotic", "insect", "human", "unknown")) |>
       mutate(minute = ifelse(start_s==0, 1, ceiling(start_s/60))) |>
-      dplyr::select(project_id, location_id, recording_id, species_code, minute) |>
+      dplyr::select(project_id, location_id, recording_id, species_common_name, minute) |>
       unique() |>
       mutate(human = 1)
   }
 
   if(resolution=="recording"){
     main <- wt_tidy_species(data[[2]], remove=c("mammal", "amphibian", "abiotic", "insect", "human", "unknown")) |>
-      dplyr::select(project_id, location_id, recording_id, species_code) |>
+      dplyr::select(project_id, location_id, recording_id, species_common_name) |>
       unique() |>
       mutate(human = 1)
   }
 
   #Join together
-  both <- full_join(detections, main, by=c("project_id", "location_id", "recording_id", "species_code")) |>
+  both <- full_join(detections, main, by=c("project_id", "location_id", "recording_id", "species_common_name")) |>
     mutate(human = ifelse(is.na(human), 0, 1),
            classifier = ifelse(is.na(classifier), 0, 1),
            tp = ifelse(classifier==1 & human==1, 1, 0),
@@ -107,7 +108,7 @@ wt_evaluate_classifier <- function(data, resolution = "recording", remove_specie
 
   #Filter to just species of interest if requested
   if(!is.null(species)){
-    both <- dplyr::filter(both, species_code %in% species)
+    both <- dplyr::filter(both, species_common_name %in% species)
   }
 
   #Total number of human detections
@@ -136,7 +137,7 @@ wt_evaluate_classifier <- function(data, resolution = "recording", remove_specie
 #' @examples
 #' \dontrun{
 #' data <- wt_download_report(project_id = 1144, sensor_id = "ARU",
-#' reports = c("main", "birdnet"), weather_cols = FALSE)
+#' reports = c("main", "ai"), weather_cols = FALSE)
 #'
 #' eval <- wt_evaluate_classifier(data, resolution = "recording",
 #' remove_species = TRUE, thresholds = c(10, 99))
@@ -160,10 +161,10 @@ wt_classifier_threshold <- function(data){
 
 #' Find additional species
 #'
-#' @description Check for species reported by BirdNET that the human listeners did not detect in our project.
+#' @description Check for species reported by BirdNET and HawkEars that the human listeners did not detect in our project.
 #'
 #' @param data Output from the `wt_download_report()` function when you request the `main` and `birdnet` reports
-#' @param remove_species Logical; indicates whether species that are not allowed in the WildTrax project should be removed from the BirdNET report
+#' @param remove_species Logical; indicates whether species that are not allowed in the WildTrax project should be removed from the AI report
 #' @param threshold Numeric; the desired score threshold
 #' @param resolution Character; either "recording" to identify any new species for each recording or "location" to identify new species for each location
 #' @param format_to_tags Logical; when TRUE, creates a formatted output to turn detections into tags for uploading to WildTrax
@@ -176,7 +177,7 @@ wt_classifier_threshold <- function(data){
 #' @examples
 #' \dontrun{
 #' data <- wt_download_report(project_id = 1144, sensor_id = "ARU",
-#' reports = c("main", "birdnet"), weather_cols = FALSE)
+#' reports = c("main", "ai"), weather_cols = FALSE)
 #'
 #' new <- wt_additional_species(data, remove_species = TRUE,
 #' threshold = 80, resolution="location")
@@ -187,7 +188,7 @@ wt_classifier_threshold <- function(data){
 wt_additional_species <- function(data, remove_species = TRUE, threshold = 50, resolution="task", format_to_tags = FALSE, output = NULL){
 
   # Check if the data object is in the right format
-  if (!inherits(data, "list") && !grepl("birdnet", names(data)[[2]]) && !grepl("main", names(data))[[1]]) {
+  if (!inherits(data, "list") && !grepl("ai", names(data)[[2]]) && !grepl("main", names(data))[[1]]) {
     stop("The input should be the output of the `wt_download_report()` function with the argument `reports=c('main', 'birdnet')`")
   }
 
@@ -323,7 +324,7 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 50, r
       dplyr::rename("method" = 3) |>
       dplyr::relocate(task_duration, .after = method) |>
       dplyr::rename("taskLength" = 4) |>
-      dplyr::mutate(transcriber = "birdnet") |>
+      dplyr::mutate(transcriber = "ai") |>
       dplyr::relocate(transcriber, .after = taskLength) |>
       dplyr::relocate(species_code, .after = transcriber) |>
       dplyr::rename("species" = 6) |>
@@ -347,6 +348,6 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 50, r
       dplyr::relocate(minFreq:internal_tag_id, .after = tagLength) |>
       dplyr::filter(!startTime > taskLength) |>
       dplyr::select(1:internal_tag_id) |>
-      readr::write_csv(paste0(output,"/birdnet_tags.csv"))
+      readr::write_csv(paste0(output,"/ai_tags.csv"))
   }
 }
