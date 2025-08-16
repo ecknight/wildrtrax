@@ -13,7 +13,7 @@ wt_download_report(
 )
 }
 \arguments{
-\item{project_id}{Numeric; the project ID number that you would like to download data for. Use \code{wt_get_download_summary()} to retrieve these IDs.}
+\item{project_id}{Numeric; the project ID number that you would like to download data for. Use \code{wt_get_projects()} to retrieve these IDs.}
 
 \item{sensor_id}{Character; Can either be "ARU", "CAM", or "PC".}
 

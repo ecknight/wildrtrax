@@ -610,8 +610,40 @@ wt_chop <- function(input = NULL, segment_length = NULL, output_folder = NULL) {
                     message("Error processing file: ", file_path, " - ", e$message)})
                 }
     )
-  }
+}
 
+#' Standardize Audiomoth Filenames
+#'
+#' Recursively scans a directory for `.wav` files produced by Audiomoth devices and renames them by prepending the parent folder name to each filename. For example, a file named `20240407_062500.wav` inside a folder `ML-20-10H` becomes `ML-20-10H_20240407_062500.wav`.
+#'
+#' @param input_dir Character string. The path to the top-level directory containing Audiomoth folders and audio files.
+#'
+#' @return A tibble with the original filepaths and the corresponding new filepaths. Files are renamed in place.
+#'
+#' @examples
+#' \dontrun{
+#' wt_format_audiomoth_filenames("/path/to/my_dir")
+#' }
+#'
+#' @export
+
+wt_format_audiomoth_filenames <- function(input_dir) {
+
+  if(dir.exists(input_dir) == FALSE) {stop(message("This directory does not exist."))}
+
+  files <- list.files(input_dir, pattern = "\\.wav$", recursive = TRUE, full.names = TRUE) |>
+      as_tibble() |>
+      rename(filepath = value) |>
+      mutate(parentfolder = basename(dirname(filepath)),
+             filename = basename(filepath),
+             dirpath = dirname(filepath),
+             newpath = file.path(dirpath, paste0(parentfolder, "_", filename)))
+
+    pwalk(list(files$filepath, files$newpath), file.rename)
+
+    return(files)
+
+}
 
 #' Linking media to WildTrax
 #'
