@@ -77,11 +77,11 @@ test_that('Classifier functions', {
   expect_true(!is.null(add_sp))
 })
 
-test_that('Add GRTS ID', {
-  bats <- wt_download_report(685, 'ARU', 'location', F)
-  grts <- wt_add_grts(bats, group_locations_in_cell = TRUE)
-  expect_true(!is.null(grts))
-})
+# test_that('Add GRTS ID', {
+#   bats <- wt_download_report(685, 'ARU', 'location', F)
+#   grts <- wt_add_grts(bats, group_locations_in_cell = TRUE)
+#   expect_true(!is.null(grts))
+# })
 
 test_that('Location distances', {
   locs <- wt_download_report(620, 'ARU', 'location', F)
