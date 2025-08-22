@@ -976,15 +976,23 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
 
   } else if (content_type == "application/csv") {
 
-    if(api_match == "project_locations") {
+    if (api_match == "project_locations") {
 
+      process_csv <- function(csv_path) {
+          data <- read_csv(csv_path, show_col_types = FALSE)
+          if (option == "columns") {
+            return(data |> colnames() |> as_tibble_col())
+          } else if (option == "data") {
+            return(data)
+          }
+        }
+
+      # generic CSV parsing
       tmp_file <- tempfile(fileext = ".csv")
-      writeBin(resp_body_raw(response), tmp_file)
-      data <- read_csv(tmp_file, show_col_types = FALSE)
 
-      project_location_summary <- data
-
-      return(project_location_summary)
+      print('This is a response.')
+      writeLines(resp_body_raw(response), tmp_file)
+      data <- process_csv(tmp_file)
 
     }
 
