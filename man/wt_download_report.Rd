@@ -13,7 +13,7 @@ wt_download_report(
 )
 }
 \arguments{
-\item{project_id}{Numeric; the project ID number that you would like to download data for. Use \code{wt_get_download_summary()} to retrieve these IDs.}
+\item{project_id}{Numeric; the project ID number that you would like to download data for. Use \code{wt_get_projects()} to retrieve these IDs.}
 
 \item{sensor_id}{Character; Can either be "ARU", "CAM", or "PC".}
 
@@ -39,7 +39,6 @@ Valid values for argument \code{report} when \code{sensor_id} = "CAM" currently 
 \item image_set_report
 \item tag
 \item megadetector
-\item megaclassifier
 \item definitions
 }
 
@@ -50,7 +49,7 @@ Valid values for argument \code{report} when \code{sensor_id} = "ARU" currently 
 \item location
 \item recording
 \item tag
-\item birdnet
+\item ai
 \item definitions
 }
 
@@ -72,7 +71,7 @@ project_id = 397, sensor_id = "CAM", reports = c("tag", "image_set_report"),
 weather_cols = TRUE)
 
 an_aru_project <- wt_download_report(
-project_id = 47, sensor_id = "ARU", reports = c("main", "birdnet"),
+project_id = 47, sensor_id = "ARU", reports = c("main", "ai"),
 weather_cols = TRUE)
 }
 

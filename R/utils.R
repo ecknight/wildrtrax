@@ -121,13 +121,13 @@
 }
 
 
-#' An internal function to handle generic POST requests to WildTrax API
+#' An internal function to handle generic POST requests to WildTrax
 #'
 #' @description Generic function to handle certain POST requests
 #'
 #' @param path The path to the API
 #' @param ... Argument to pass along into POST query
-#' @param max_time The maximum number of seconds an API request can take. By default 300.
+#' @param max_time The maximum number of seconds the API request can take. By default 300.
 #'
 #' @keywords internal
 #'
@@ -150,40 +150,43 @@
     query_params <- as.list(query_params)
   }
 
-  r <- request("https://www-api.wildtrax.ca") |>
-    req_url_path_append(path) |>
-    req_url_query(!!!query_params) |>  # Unpack the list of query parameters
-    req_headers(Authorization = paste("Bearer", ._wt_auth_env_$access_token)) |>
-    req_user_agent(u) |>
-    req_method("POST") |>
-    req_timeout(max_time) |>
-    req_perform()
+  if (path != "/bis/download-report") {
+    req <- request("https://dev-api.wildtrax.ca") |>
+      req_url_path_append(path) |>
+      req_body_json(query_params) |>
+      req_headers(Authorization = paste("Bearer", ._wt_auth_env_$access_token)) |>
+      req_user_agent(u) |>
+      req_method("POST") |>
+      req_timeout(max_time) |>
+      req_perform()
 
-  # Handle errors
-  if (resp_status(r) >= 400) {
-    stop(sprintf(
-      "Authentication failed [%s]\n%s",
-      resp_status(r),
-      message),
-      call. = FALSE)
+    if (resp_status(req) >= 400) {
+      stop(sprintf("API request failed [%s]", resp_status(req)), call. = FALSE)
+    }
+    return(req)
+
   } else {
-    return(r)
-  }
 
+    stop("The API you provided is not yet supported by this function")
+
+  }
 }
 
-#' An internal function to handle generic GET requests to WildTrax API
+
+
+#' An internal function to handle generic GET requests to WildTrax
 #'
 #' @description Generic function to handle certain GET requests
 #'
 #' @param path The path to the API
 #' @param ... Argument to pass along into GET query
+#' @param max_time The maximum number of seconds the API request can take. By default 300.
 #'
 #' @keywords internal
 #'
 #' @import httr2
 
-.wt_api_gr <- function(path, ...) {
+.wt_api_gr <- function(path, ..., max_time=300) {
 
   # Check if authentication has expired:
   if (.wt_auth_expired()) {stop("Please authenticate with wt_auth().", call. = FALSE)}
@@ -203,19 +206,64 @@
     query_params <- as.list(query_params)
   }
 
-  r <- request("https://www-api.wildtrax.ca") |>
+  r <- request("https://dev-api.wildtrax.ca") |>
     req_url_path_append(path) |>
-    req_url_query(!!!query_params) |>  # Unpack the list of query parameters
-    #req_url_path_append(`Accept-Language` = accept_language) |>
+    req_body_json(query_params) |>
     req_headers(Authorization = paste("Bearer", ._wt_auth_env_$access_token)) |>
     req_user_agent(u) |>
     req_method("GET") |>
+    req_timeout(max_time) |>
     req_perform()
 
   # Handle errors
   if (resp_status(r) >= 400) {
     stop(sprintf(
       "Authentication failed [%s]\n%s",
+      resp_status(r),
+      message),
+      call. = FALSE)
+  } else {
+    return(r)
+  }
+
+}
+
+#' An internal function to handle generic PUT requests to WildTrax
+#'
+#' @description Generic function to handle certain PUT requests
+#'
+#' @param path The path to the API
+#' @param body A named list to include in the request body (JSON)
+#' @param max_time The maximum number of seconds an API request can take. By default 300.
+#'
+#' @keywords internal
+#'
+#' @import httr2
+
+.wt_api_put <- function(path, body = list(), max_time = 300) {
+
+  # Check if authentication has expired:
+  if (.wt_auth_expired()) {stop("Please authenticate with wt_auth().", call. = FALSE)}
+
+  ## User agent
+  u <- .gen_ua()
+
+  r <- request("https://dev-api.wildtrax.ca") |>
+    req_url_path_append(path) |>
+    req_headers(
+      Authorization = paste("Bearer", ._wt_auth_env_$access_token),
+      `Content-Type` = "application/json"
+    ) |>
+    req_user_agent(u) |>
+    req_body_json(body) |>
+    req_method("PUT") |>
+    req_timeout(max_time) |>
+    req_perform()
+
+  # Handle errors
+  if (resp_status(r) >= 400) {
+    stop(sprintf(
+      "PUT request failed [%s]\n%s",
       resp_status(r),
       message),
       call. = FALSE)
@@ -580,6 +628,8 @@
   project_id = readr::col_integer(),
   project_results = readr::col_character(),
   project_status = readr::col_character(),
+  project_creation_date = readr::col_date(),
+  project_due_date = readr::col_date(),
   recording_date_time = readr::col_datetime(),
   recording_id = readr::col_double(),
   recording_length = readr::col_double(),
