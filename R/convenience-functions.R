@@ -285,7 +285,7 @@ wt_make_wide <- function(data, sound="all"){
 
     #Filter to first detection per individual
     summed <- data |>
-      dplyr::group_by(organization, project_id, location, recording_date_time, task_method, aru_task_status, observer_id, species_code, species_common_name, individual_order) |>
+      dplyr::group_by(organization, project_id, location, recording_date_time, task_method, is_complete, observer_id, species_code, species_common_name, individual_order) |>
       dplyr::mutate(first = max(detection_time)) |>
       dplyr::ungroup() |>
       dplyr::filter(detection_time==first)

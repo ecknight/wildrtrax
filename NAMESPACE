@@ -40,10 +40,6 @@ import(sf)
 import(tibble)
 import(unmarked)
 importFrom(dplyr,across)
-<<<<<<< HEAD
-importFrom(dplyr,everything)
-importFrom(dplyr,select)
-=======
 importFrom(dplyr,arrange)
 importFrom(dplyr,bind_rows)
 importFrom(dplyr,case_when)
@@ -68,7 +64,6 @@ importFrom(dplyr,ungroup)
 importFrom(fs,dir_info)
 importFrom(fs,dir_ls)
 importFrom(fs,file_size)
->>>>>>> dev-wildtrax-2.0
 importFrom(httr2,req_perform)
 importFrom(httr2,request)
 importFrom(httr2,resp_body_json)

@@ -51,7 +51,7 @@ Once authenticated, you can now use various functions that call upon the WildTra
 
 ```{r echo=TRUE, eval=TRUE, wanring=F, message=F}
 # Download the project summary you have access to
-my_projects <- wt_get_projects(sensor_id = 'ARU')
+my_projects <- wt_get_projects(sensor = 'ARU')
 
 head(my_projects)
 ```

@@ -1,5 +1,15 @@
 # wildrtrax 
 
+# wildrtrax 1.5
+
+## Major changes
+
+* Support for WildTrax 2.0 included
+
+## Minor changes
+
+* 
+
 # wildrtrax 1.4
 
 ## Major changes
