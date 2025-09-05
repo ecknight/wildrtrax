@@ -738,12 +738,12 @@ wt_format_data <- function(input, format = c('FWMIS','NABAT')){
   #)
   #spp_fwmis <- resp_body_json(spp)
 
-  spp_fwmis <- request("https://dev-api.wildtrax.ca") |>
+  spp_fwmis <- request("https://www-api.wildtrax.ca") |>
     req_url_path_append("/bis/get-species-fwmis-map") |>
     req_headers(
       Authorization = paste("Bearer", ._wt_auth_env_$access_token),
       Pragma = "no-cache",
-      Referer = "https://dev.wildtrax.ca/"
+      Referer = "https://www.wildtrax.ca/"
     ) |>
     req_user_agent(u) |>
     req_perform() |>
@@ -763,12 +763,12 @@ wt_format_data <- function(input, format = c('FWMIS','NABAT')){
     organizationId = org_id,
     page = 1)
 
-  location_equipment <- request("https://dev-api.wildtrax.ca") |>
+  location_equipment <- request("https://www-api.wildtrax.ca") |>
     req_url_path_append("/bis/get-location-visit-equipment-summary") |>
     req_headers(
       Authorization = paste("Bearer", ._wt_auth_env_$access_token),
       Pragma = "no-cache",
-      Referer = "https://dev.wildtrax.ca/"
+      Referer = "https://www.wildtrax.ca/"
     ) |>
     req_user_agent(u) |>
     req_body_json(loceq_payload) |>
@@ -797,12 +797,12 @@ wt_format_data <- function(input, format = c('FWMIS','NABAT')){
     organizationId = org_id,
     page = 1)
 
-   visits <- request("https://dev-api.wildtrax.ca") |>
+   visits <- request("https://www-api.wildtrax.ca") |>
      req_url_path_append("/bis/get-location-visits") |>
      req_headers(
        Authorization = paste("Bearer", ._wt_auth_env_$access_token),
        Pragma = "no-cache",
-       Referer = "https://dev.wildtrax.ca/"
+       Referer = "https://www.wildtrax.ca/"
      ) |>
      req_user_agent(u) |>
      req_body_json(visit_payload) |>

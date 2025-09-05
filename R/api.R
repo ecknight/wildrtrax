@@ -219,7 +219,7 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
   td <- tempdir()
   u <- .gen_ua()
 
-  req <- request("https://dev-api.wildtrax.ca") |>
+  req <- request("https://www-api.wildtrax.ca") |>
     req_url_path_append("bis/download-report") |>
     req_url_query(!!!query_params) |>
     req_headers(
@@ -465,13 +465,13 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
 
   if(is.null(tok_used)) {
     #Provide non-login user a way to search species - limited by dd-get-species however
-    ddspp <- request("https://dev-api.wildtrax.ca") |>
+    ddspp <- request("https://www-api.wildtrax.ca") |>
       req_url_path_append("/bis/dd-get-species") |>
       req_headers(
         Authorization = tok_used,
-        Origin = "https://dev.wildtrax.ca/discover",
+        Origin = "https://www.wildtrax.ca/discover",
         Pragma = "no-cache",
-        Referer = "https://dev.wildtrax.ca/discover"
+        Referer = "https://www.wildtrax.ca/discover"
       ) |>
       req_user_agent(u) |>
       req_body_json(list(sensorId = sensor)) |>
@@ -586,13 +586,13 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
 
     if(is.null(boundary)) {payload_ll$polygonBoundary <- NULL}
 
-    rr <- request("https://dev-api.wildtrax.ca") |>
+    rr <- request("https://www-api.wildtrax.ca") |>
       req_url_path_append("/bis/get-data-discoverer-long-lat-summary") |>
       req_headers(
         Authorization = tok_used,
-        Origin = "https://dev.wildtrax.ca/discover",
+        Origin = "https://www.wildtrax.ca/discover",
         Pragma = "no-cache",
-        Referer = "https://dev.wildtrax.ca/discover"
+        Referer = "https://www.wildtrax.ca/discover"
       ) |>
       req_user_agent(u) |>
       req_body_json(payload_ll) |>
@@ -608,13 +608,13 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
       zoomLevel = 20
     )
 
-    rr2 <- request("https://dev-api.wildtrax.ca") |>
+    rr2 <- request("https://www-api.wildtrax.ca") |>
       req_url_path_append("/bis/get-data-discoverer-map-and-projects") |>
       req_headers(
         Authorization = tok_used,
-        Origin = "https://dev.wildtrax.ca/discover",
+        Origin = "https://www.wildtrax.ca/discover",
         Pragma = "no-cache",
-        Referer = "https://dev.wildtrax.ca/discover"
+        Referer = "https://www.wildtrax.ca/discover"
       ) |>
       req_user_agent(u) |>
       req_body_json(payload_mp) |>
