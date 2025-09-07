@@ -51,7 +51,7 @@ ABMI has evaluated BirdNET with a dataset of 623 3-minute recordings. All specie
 
 Precision ranged from 0.36 at a score threshold of 0.10 to 0.94 at a score threshold of 0.99 (Figure 1). Recall ranged from 0.01 at a score threshold of 0.99 to 0.36 of 0.1  F-score was similarly low, ranging from 0.03 at a score threshold of 0.01 to 0.36 at a score threshold of 0.99. Neither the precision-recall curve nor the plot of F-score relative to score threshold showed a typical concave down curve shape, suggesting that a low score threshold of 0.10 would be best to optimize trade-offs between precision and recall.
 
-```{r, eval=F, include=T, echo=F, message=F, warning=F}
+```{r, eval=T, include=T, echo=F, message=F, warning=F}
 
 dat <- curl::curl_download('https://raw.githubusercontent.com/ABbiodiversity/wildRtrax-assets/main/ExpertData_PR_Total.csv','ExpertData_PR_Total.csv') |> 
   readr::read_csv() |>
