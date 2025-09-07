@@ -2,7 +2,7 @@
 #'
 #' @description Calculates precision, recall, and F-score of BirdNET and/or HawkEars for a requested sequence of thresholds. You can request the metrics at the minute level for recordings that are processed with the species per minute method (1SPM).
 #'
-#' @param data Output from the `wt_download_report()` function when you request the `main` and `birdnet` reports
+#' @param data Output from the `wt_download_report()` function when you request the `main` and `ai` reports
 #' @param resolution Character; either "recording" to summarize at the entire recording level or "minute" to summarize the minute level if the `task_method` is "1SPM", or "task"
 #' @param remove_species Logical; indicates whether species that are not allowed in the WildTrax project should be removed from the AI report
 #' @param species Character; optional subset of species to calculate metrics for (e.g., species = c("OVEN", "OSFL", "BOCH"))
@@ -14,7 +14,7 @@
 #' @examples
 #' \dontrun{
 #' data <- wt_download_report(project_id = 1144, sensor_id = "ARU",
-#' reports = c("main", "birdnet"), weather_cols = FALSE)
+#' reports = c("main", "ai"), weather_cols = FALSE)
 #'
 #' eval <- wt_evaluate_classifier(data, resolution = "recording",
 #' remove_species = TRUE, thresholds = c(10, 99))
@@ -50,56 +50,48 @@ wt_evaluate_classifier <- function(data, resolution = "recording", remove_specie
   if(resolution=="task"){
     detections <- class |>
       rename(start_s = startTime) |>
-      inner_join(data[[2]] |> select(project_id, recording_id, task_id, task_duration), by = c("recording_id" = "recording_id")) |>
+      inner_join(data[[2]] |> dplyr::select(recording_id, task_id, task_duration) |> distinct(), by = c("recording_id" = "recording_id")) |>
       filter(!start_s > task_duration) |>
-      group_by(project_id, location_id, recording_id, species_common_name) |>
+      group_by(location_id, recording_id, version, species_common_name) |>
       summarise(confidence = max(confidence), .groups="keep") |>
       ungroup() |>
       mutate(classifier = 1)
-  }
-
-  if(resolution=="minute"){
+  } else if(resolution=="minute"){
     detections <- class |>
       mutate(minute = ifelse(start_s==0, 1, ceiling(start_s/60))) |>
-      group_by(project_id, location_id, recording_id, species_common_name, minute) |>
+      group_by(location_id, recording_id, version, species_common_name, minute) |>
       summarize(confidence = max(confidence), .groups="keep") |>
       ungroup() |>
       mutate(classifier = 1)
-  }
-
-  if(resolution=="recording"){
+  } else if(resolution=="recording"){
     detections <- class |>
-      group_by(project_id, location_id, recording_id, species_common_name) |>
+      group_by(location_id, recording_id, version, species_common_name) |>
       summarize(confidence = max(confidence),  .groups="keep") |>
       ungroup() |>
       mutate(classifier = 1)
-  }
+  } else { stop("A resolution was not specified.")}
 
   #Tidy up the main report
   if(resolution=="task"){
     main <- wt_tidy_species(data[[2]], remove=c("mammal", "amphibian", "abiotic", "insect", "human", "unknown")) |>
-      select(project_id, location_id, recording_id, task_id, species_common_name) |>
+      select(location_id, recording_id, task_id, species_common_name) |>
       unique() |>
       mutate(human = 1)
-  }
-
-  if(resolution=="minute"){
+  } else if(resolution=="minute"){
     main <- wt_tidy_species(data[[2]], remove=c("mammal", "amphibian", "abiotic", "insect", "human", "unknown")) |>
       mutate(minute = ifelse(start_s==0, 1, ceiling(start_s/60))) |>
-      dplyr::select(project_id, location_id, recording_id, species_common_name, minute) |>
+      select(location_id, recording_id, species_common_name, minute) |>
       unique() |>
       mutate(human = 1)
-  }
-
-  if(resolution=="recording"){
+  } else if(resolution=="recording"){
     main <- wt_tidy_species(data[[2]], remove=c("mammal", "amphibian", "abiotic", "insect", "human", "unknown")) |>
-      dplyr::select(project_id, location_id, recording_id, species_common_name) |>
+      dplyr::select(location_id, recording_id, species_common_name) |>
       unique() |>
       mutate(human = 1)
-  }
+  } else {stop("A resolution was not specified.")}
 
   #Join together
-  both <- full_join(detections, main, by=c("project_id", "location_id", "recording_id", "species_common_name")) |>
+  both <- full_join(detections, main, by=c("location_id", "recording_id", "species_common_name")) |>
     mutate(human = ifelse(is.na(human), 0, 1),
            classifier = ifelse(is.na(classifier), 0, 1),
            tp = ifelse(classifier==1 & human==1, 1, 0),
@@ -112,16 +104,29 @@ wt_evaluate_classifier <- function(data, resolution = "recording", remove_specie
   }
 
   #Total number of human detections
-  human_total <- sum(both$human, na.rm=TRUE)
+  human_totals <- both |>
+    group_by(version) |>
+    summarise(human_total = sum(human, na.rm = TRUE))
 
   #Make threshold vector
   threshold <- seq(thresholds[1], thresholds[2], 1)
 
-  #Calculate metrics
-  prf <- do.call(rbind, lapply(X=threshold, FUN=.wt_calculate_prf, data=both, human_total=human_total))
+  calc_metrics <- function(data, human_total) {
+    do.call(rbind, lapply(threshold, .wt_calculate_prf, data = data, human_total = human_total))
+  }
 
-  #return metrics
-  return(prf)
+  lk <- both |> select(version) |> distinct() |> mutate(row_n = row_number()) |> rename(classifier = version)
+  split_data <- both |> group_split(version)
+  split_totals <- human_totals$human_total
+  prf_results <- map2(split_data, split_totals, calc_metrics)
+  prf_combined <- bind_rows(prf_results, .id = "version")
+  prf_combined <- prf_combined |>
+    mutate(version = as.numeric(version)) |>
+    left_join(lk, by = c("version" = "row_n")) |>
+    select(-version) |>
+    relocate("classifier")
+
+  return(prf_combined)
 
 }
 
@@ -136,11 +141,9 @@ wt_evaluate_classifier <- function(data, resolution = "recording", remove_specie
 #'
 #' @examples
 #' \dontrun{
-#' data <- wt_download_report(project_id = 1144, sensor_id = "ARU",
-#' reports = c("main", "ai"), weather_cols = FALSE)
+#' data <- wt_download_report(project_id = 1144, sensor_id = "ARU", reports = c("main", "ai"), weather_cols = FALSE)
 #'
-#' eval <- wt_evaluate_classifier(data, resolution = "recording",
-#' remove_species = TRUE, thresholds = c(10, 99))
+#' eval <- wt_evaluate_classifier(data, resolution = "recording", remove_species = TRUE, thresholds = c(10, 99))
 #'
 #' threshold_use <- wt_classifier_threshold(eval) |> print()
 #' }
@@ -185,7 +188,7 @@ wt_classifier_threshold <- function(data){
 #'
 #' @return A tibble with the same fields as the `birdnet` report with the highest scoring detection for each new species detection in each recording.
 
-wt_additional_species <- function(data, remove_species = TRUE, threshold = 50, resolution="task", format_to_tags = FALSE, output = NULL){
+wt_additional_species <- function(data, remove_species = TRUE, threshold = 0.5, resolution="task", format_to_tags = FALSE, output = NULL){
 
   # Check if the data object is in the right format
   if (!inherits(data, "list") && !grepl("ai", names(data)[[2]]) && !grepl("main", names(data))[[1]]) {
@@ -204,56 +207,55 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 50, r
 
   #Create a join between task and recording
   classed <- class |>
-    dplyr::inner_join(data[[2]] |> dplyr::select(recording_id, task_id, task_duration), by = c("recording_id" = "recording_id"), relationship = "many-to-many")
+    dplyr::inner_join(data[[2]] |> dplyr::select(project_id, recording_id, task_id, task_duration), by = c("recording_id" = "recording_id"), relationship = "many-to-many")
 
   if(resolution=="task"){
 
     #Classifier report
     detections <- class |>
       dplyr::filter(confidence >= threshold) |>
-      dplyr::inner_join(data[[2]] |> dplyr::select(recording_id, task_id, task_duration), by = c("recording_id" = "recording_id"), relationship = "many-to-many") |>
-      dplyr::filter(!start_s > task_duration) |>
-      dplyr::group_by(project_id, location_id, recording_id, task_id, species_code) |>
-      dplyr::summarize(confidence = max(confidence),  .groups="keep") |>
+      dplyr::inner_join(data[[2]] |> dplyr::select(project_id, recording_id, task_id, task_duration, detection_time), by = c("recording_id" = "recording_id"), relationship = "many-to-many") |>
+      dplyr::filter(!startTime > task_duration) |>
+      dplyr::group_by(project_id, location_id, recording_id, task_id, species_common_name) |>
+      dplyr::summarise(confidence = max(confidence),  .groups="keep") |>
       dplyr::ungroup()
 
     #Main report
     main <- wt_tidy_species(data[[2]], remove=c("mammal", "amphibian", "abiotic", "insect", "human", "unknown")) |>
-      dplyr::select(project_id, location_id, recording_id, task_id, species_code) |>
+      dplyr::select(project_id, location_id, recording_id, task_id, species_common_name) |>
       dplyr::distinct()
 
     #Put together
-    new <- dplyr::anti_join(detections, main, by=c("project_id", "location_id", "recording_id", "task_id", "species_code")) |>
-      dplyr::left_join(classed, by=c("project_id", "location_id", "recording_id", "task_id", "species_code", "confidence"), multiple="all")
+    new <- dplyr::anti_join(detections, main, by=c("project_id", "location_id", "recording_id", "task_id", "species_common_name")) |>
+      dplyr::left_join(classed, by=c("project_id", "location_id", "recording_id", "task_id", "species_common_name", "confidence"), multiple="all")
     if (nrow(new) == 0) {
       stop("There were no additional species detected.")
     } else {
       new <- new |>
-        dplyr::group_by(project_id, location_id, recording_id,task_id, species_code, confidence) |>
+        dplyr::group_by(project_id, location_id, recording_id,task_id, species_common_name, confidence) |>
         dplyr::sample_n(1) |>
         dplyr::ungroup()
     }
   }
-
 
   if(resolution=="recording"){
 
     #Classifier report
     detections <- class |>
       dplyr::filter(confidence >= threshold) |>
-      dplyr::group_by(project_id, location_id, recording_id, species_code) |>
-      dplyr::summarize(confidence = max(confidence),  .groups="keep") |>
+      dplyr::group_by(project_id, location_id, recording_id, species_common_name) |>
+      dplyr::summarise(confidence = max(confidence),  .groups="keep") |>
       dplyr::ungroup()
 
     #Main report
     main <- wt_tidy_species(data[[2]], remove=c("mammal", "amphibian", "abiotic", "insect", "human", "unknown")) |>
-      dplyr::select(project_id, location_id, recording_id, species_code) |>
+      dplyr::select(project_id, location_id, recording_id, species_common_name) |>
       dplyr::distinct()
 
     #Put together
-    new <- dplyr::anti_join(detections, main, by=c("project_id", "location_id", "recording_id", "species_code")) |>
-      dplyr::left_join(class, by=c("project_id", "location_id", "recording_id", "species_code", "confidence"), multiple="all") |>
-      dplyr::group_by(project_id, location_id, recording_id, species_code, confidence) |>
+    new <- dplyr::anti_join(detections, main, by=c("project_id", "location_id", "recording_id", "species_common_name")) |>
+      dplyr::left_join(class, by=c("project_id", "location_id", "recording_id", "species_common_name", "confidence"), multiple="all") |>
+      dplyr::group_by(project_id, location_id, recording_id, species_common_name, confidence) |>
       dplyr::sample_n(1) |>
       dplyr::ungroup()
 
@@ -264,19 +266,19 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 50, r
     #Classifier report
     detections <- class |>
       dplyr::filter(confidence >= threshold) |>
-      dplyr::group_by(project_id, location_id, species_code) |>
-      dplyr::summarize(confidence = max(confidence),  .groups="keep") |>
+      dplyr::group_by(project_id, location_id, species_common_name) |>
+      dplyr::summarise(confidence = max(confidence),  .groups="keep") |>
       dplyr::ungroup()
 
     #Main report
     main <- wt_tidy_species(data[[2]], remove=c("mammal", "amphibian", "abiotic", "insect", "human", "unknown")) |>
-      dplyr::select(project_id, location_id, species_code) |>
+      dplyr::select(project_id, location_id, species_common_name) |>
       dplyr::distinct()
 
     #Put together
-    new <- anti_join(detections, main, by=c("project_id", "location_id", "species_code")) |>
+    new <- anti_join(detections, main, by=c("project_id", "location_id", "species_common_name")) |>
       dplyr::left_join(class, by=c("project_id", "location_id", "species_code", "confidence"), multiple="all") |>
-      dplyr::group_by(project_id, location_id, species_code, confidence) |>
+      dplyr::group_by(project_id, location_id, species_common_name, confidence) |>
       dplyr::sample_n(1) |>
       dplyr::ungroup()
 
@@ -287,19 +289,19 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 50, r
     #Classifier report
     detections <- class |>
       dplyr::filter(confidence >= threshold) |>
-      dplyr::group_by(project_id, species_code) |>
-      dplyr::summarize(confidence = max(confidence),  .groups="keep") |>
+      dplyr::group_by(project_id, species_common_name) |>
+      dplyr::summarise(confidence = max(confidence),  .groups="keep") |>
       dplyr::ungroup()
 
     #Main report
     main <- wt_tidy_species(data[[2]], remove=c("mammal", "amphibian", "abiotic", "insect", "human", "unknown")) |>
-      dplyr::select(project_id, species_code) |>
+      dplyr::select(project_id, species_common_name) |>
       dplyr::distinct()
 
     #Put together
-    new <- anti_join(detections, main, by=c("project_id", "species_code")) |>
-      dplyr::left_join(class, by=c("project_id", "species_code", "confidence"), multiple="all") |>
-      dplyr::group_by(project_id, species_code, confidence) |>
+    new <- anti_join(detections, main, by=c("project_id", "species_common_name")) |>
+      dplyr::left_join(class, by=c("project_id", "species_common_name", "confidence"), multiple="all") |>
+      dplyr::group_by(project_id, species_common_name, confidence) |>
       dplyr::sample_n(1) |>
       dplyr::ungroup()
 
@@ -309,45 +311,44 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 50, r
 
   if(format_to_tags == TRUE & dir.exists(output) & !is.null(output)){
 
-    if(resolution!="task"){
+    if(resolution != "task"){
       message("Currently tag uploads are best supported when you resolve at the task level. You may encounter an error otherwise. If you used `wt_additional_species(resolution='recording')` change the task lengths to the maximum length of the recording in your project")
     }
 
     ### Fields in WildTrax Sync will be updated in Vue3, or in Vue2 if there's high and urgent user demand. ###
 
     new_export <- new |>
-      dplyr::relocate(location) |>
-      dplyr::relocate(recording_date_time, .after = location) |>
-      dplyr::rename("recordingDate" = 2) |>
-      dplyr::inner_join(data[[2]] |> select(task_id, task_method) |> distinct(), by = "task_id") |>
-      dplyr::relocate(task_method, .after = recordingDate) |>
-      dplyr::rename("method" = 3) |>
-      dplyr::relocate(task_duration, .after = method) |>
-      dplyr::rename("taskLength" = 4) |>
-      dplyr::mutate(transcriber = "ai") |>
-      dplyr::relocate(transcriber, .after = taskLength) |>
-      dplyr::relocate(species_code, .after = transcriber) |>
-      dplyr::rename("species" = 6) |>
-      dplyr::arrange(species, start_s) |>
-      dplyr::group_by(location, recordingDate, species) |>
-      dplyr::mutate(speciesIndividualNumber = row_number()) |>
-      dplyr::ungroup() |>
-      dplyr::relocate(speciesIndividualNumber, .after = species) |>
-      dplyr::mutate(vocalization = "SONG") |>
-      dplyr::relocate(vocalization, .after = speciesIndividualNumber) |>
-      dplyr::mutate(abundance = 1) |>
-      dplyr::relocate(abundance, .after = vocalization) |>
-      dplyr::relocate(start_s, .after = abundance) |>
-      dplyr::rename("startTime" = 10) |>
-      dplyr::mutate(tagLength = "") |>
-      dplyr::relocate(tagLength, .after = startTime) |>
-      dplyr::mutate(minFreq = "") |>
-      dplyr::mutate(maxFreq = "") |>
-      dplyr::mutate(speciesIndividualComment = confidence) |>
-      dplyr::mutate(internal_tag_id = "") |>
-      dplyr::relocate(minFreq:internal_tag_id, .after = tagLength) |>
-      dplyr::filter(!startTime > taskLength) |>
-      dplyr::select(1:internal_tag_id) |>
-      readr::write_csv(paste0(output,"/ai_tags.csv"))
+      relocate(location) |>
+      relocate(recording_date_time, .after = location) |>
+      rename("recording_date_time" = 2) |>
+      mutate(recording_date_time = as.character(recording_date_time)) |>
+      inner_join(data[[2]] |> select(task_id, task_method) |> distinct(), by = "task_id") |>
+      relocate(task_method, .after = recording_date_time) |>
+      relocate(task_duration, .after = task_method) |>
+      mutate(observer = "Not Assigned") |>
+      relocate(observer, .after = task_duration) |>
+      tibble::add_column(species_code = NA_character_, .after = "observer") |>
+      arrange(species_common_name, startTime) |>
+      inner_join(wt_get_species() |> select(species_code, species_common_name), by = "species_common_name") |>
+      select(-species_code.x) |>
+      relocate(species_code.y, .after = observer) |>
+      rename(species_code = species_code.y) |>
+      rename(tag_start_time = startTime) |>
+      group_by(location, recording_date_time, species_common_name) |>
+      mutate(individual_number = row_number(), .after = species_code) |>
+      ungroup() |>
+      mutate(vocalization = "SONG", .after = individual_number) |>
+      mutate(abundance = 1, .after = vocalization) |>
+      relocate(tag_start_time, .after = abundance) |>
+      mutate(tag_duration = "", .after = tag_start_time) |>
+      mutate(min_tag_freq = "", .after = tag_duration) |>
+      mutate(max_tag_freq = "", .after = min_tag_freq) |>
+      mutate(species_individual_comments = paste0(version, " Confidence: ", confidence), .after = max_tag_freq) |>
+      mutate(tag_is_hidden_for_verification = FALSE, .after = species_individual_comments) |>
+      mutate(recording_sample_frequency = 44100, .after = tag_is_hidden_for_verification) |>
+      mutate(internal_tag_id = "", .after = recording_sample_frequency) |>
+      select(-c(project_id:is_species_allowed_in_project))
+
+    readr::write_csv(new_export, paste0(output, "/ai_tags.csv"))
   }
 }
