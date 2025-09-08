@@ -10,8 +10,6 @@ wt_location_photos(organization, output = NULL)
 \item{organization}{Character; The Organization acronym from which photos are being downloaded}
 
 \item{output}{Character; Directory where location photos would be stored on your machine}
-
-\item{download_all}{Logical; If \code{TRUE}, defaults to downloading all your location photos}
 }
 \value{
 A folder of photos or an object containing the download information for said photos

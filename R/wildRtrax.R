@@ -194,6 +194,19 @@ utils::globalVariables(
     "start_date","end_date","typ","length_sec",
     "allImages", "endDate", "firstVisit", "first_visit_date", "hasImage",
     "image_set_end_date", "image_set_start_date", "lastVisit", "last_visit_date",
-    "locationId", "locationName", "motionImages", "startDate", "taskCount"
+    "locationId", "locationName", "motionImages", "startDate", "taskCount",
+    "birdNetSpeciesIds", "bufferRadius", "buffer_m", "code", "creationDate",
+    "deploymentDate", "directionDegree", "dirpath", "dueDate", "filename", "filepath",
+    "hawkEarSpeciesIds", "image", "imageCount", "image_crop", "image_info",
+    "individual_number", "isTrueCoordinates", "is_complete", "level", "localAreaName",
+    "make", "max_tag_freq", "min_tag_freq", "model", "my_output_file", "name", "option",
+    "organization_id", "organization_name", "parentEquipment", "parentfolder", "path",
+    "project_creation_date", "project_due_date", "project_sensor", "project_status",
+    "recognizer", "recordingAudioLength", "recordingCount",
+    "recording_sample_frequency", "retrieveDate", "serialNo", "speciesIds",
+    "species_code.x", "species_code.y", "species_individual_number", "species_order",
+    "stakeDistance", "tag_duration", "tag_is_hidden_for_verification",
+    "tag_max_freq", "tag_min_freq", "tag_start_time", "task_count", "task_length",
+    "tasksCompleted", "tasks_completed", "unnest_wider", "visibilityId", "visitCount"
   )
 )

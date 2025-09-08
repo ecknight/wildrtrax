@@ -16,7 +16,7 @@ test_that("Downloading ARU as PC report", {
 })
 
 test_that("Attempting PC as ARU report", {
-  expect_error(wt_download_report(887, 'ARU', 'main', FALSE))
+  expect_true(nrow(wt_download_report(887, 'ARU', 'main', FALSE)) == 0)
 })
 
 

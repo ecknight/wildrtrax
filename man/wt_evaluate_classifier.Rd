@@ -13,7 +13,7 @@ wt_evaluate_classifier(
 )
 }
 \arguments{
-\item{data}{Output from the \code{wt_download_report()} function when you request the \code{main} and \code{birdnet} reports}
+\item{data}{Output from the \code{wt_download_report()} function when you request the \code{main} and \code{ai} reports}
 
 \item{resolution}{Character; either "recording" to summarize at the entire recording level or "minute" to summarize the minute level if the \code{task_method} is "1SPM", or "task"}
 
@@ -32,7 +32,7 @@ Calculates precision, recall, and F-score of BirdNET and/or HawkEars for a reque
 \examples{
 \dontrun{
 data <- wt_download_report(project_id = 1144, sensor_id = "ARU",
-reports = c("main", "birdnet"), weather_cols = FALSE)
+reports = c("main", "ai"), weather_cols = FALSE)
 
 eval <- wt_evaluate_classifier(data, resolution = "recording",
 remove_species = TRUE, thresholds = c(10, 99))

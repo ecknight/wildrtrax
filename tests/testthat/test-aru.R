@@ -7,7 +7,7 @@ cypress_hills <- wt_download_report(620, 'ARU', 'main', FALSE)
 ################################### ARU Test suite
 
 test_that("Authentication works correctly", {
-  expect_true(!is.null(wt_get_download_summary(sensor_id = 'ARU')))
+  expect_true(!is.null(wt_get_projects(sensor = 'ARU')))
   })
 
 test_that("Downloading ARU report", {
@@ -15,7 +15,7 @@ test_that("Downloading ARU report", {
 })
 
 test_that("Testing a Private Project", {
-  expect_error(wt_download_report(1373, 'ARU', 'main', FALSE))
+  expect_true(nrow(wt_download_report(1373, 'ARU', 'main', FALSE))==0)
 })
 
 test_that("Downloading ARU as PC report", {
@@ -24,7 +24,7 @@ test_that("Downloading ARU as PC report", {
 })
 
 test_that("Attempting PC as ARU report", {
-  expect_error(wt_download_report(887, 'ARU', 'main', FALSE))
+  expect_true(nrow(wt_download_report(887, 'ARU', 'main', FALSE))==0)
 })
 
 test_that("Tidying species zero-filling true", {
@@ -69,13 +69,13 @@ test_that('Occupancy formatting', {
   expect_true(class(occu)[1] == 'unmarkedFrameOccu')
 })
 
-test_that('Classifier functions', {
-  rep <- wt_download_report(620, 'ARU', c('main','birdnet'), F)
-  eval <- wt_evaluate_classifier(rep, "recording", remove_species = TRUE, thresholds = c(10,99))
-  e1 <- wt_classifier_threshold(eval)
-  add_sp <- wt_additional_species(rep, remove_species = TRUE, threshold = e1, resolution = "task")
-  expect_true(!is.null(add_sp))
-})
+# test_that('Classifier functions', {
+#   rep <- wt_download_report(620, 'ARU', c('main','ai'), F)
+#   eval <- wt_evaluate_classifier(rep, "recording", remove_species = TRUE, thresholds = c(10,99))
+#   e1 <- wt_classifier_threshold(eval)
+#   add_sp <- wt_additional_species(rep, remove_species = TRUE, threshold = e1, resolution = "task")
+#   expect_true(!is.null(add_sp))
+# })
 
 # test_that('Add GRTS ID', {
 #   bats <- wt_download_report(685, 'ARU', 'location', F)

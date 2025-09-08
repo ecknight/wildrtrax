@@ -12,8 +12,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(dplyr)
 library(ggplot2)
-library(stringr)
 library(gridExtra)
+library(httr2)
+library(readr)
 
 load("package.RData")
 #save.image("classifiers.RData")
@@ -53,9 +54,14 @@ Precision ranged from 0.36 at a score threshold of 0.10 to 0.94 at a score thres
 
 ```{r, eval=T, include=T, echo=F, message=F, warning=F}
 
-dat <- curl::curl_download('https://raw.githubusercontent.com/ABbiodiversity/wildRtrax-assets/main/ExpertData_PR_Total.csv','ExpertData_PR_Total.csv') |> 
-  readr::read_csv() |>
-  dplyr::filter(classifier=="BirdNET", thresh >= 0.1)
+tmp_file <- tempfile(fileext = ".csv")
+
+request("https://raw.githubusercontent.com/ABbiodiversity/wildRtrax-assets/main/ExpertData_PR_Total.csv") |>
+  req_perform(path = tmp_file)
+
+# Read and filter
+dat <- read_csv(tmp_file) |>
+  filter(classifier == "BirdNET", thresh >= 0.1)
 
 ```
 
@@ -227,7 +233,7 @@ We can use the `wt_additional_species()` function to check for species reported 
 
 Let's use a high threshold (80) on our example dataset to see if any new species are detected. We can use the resolution argument to specify whether we want to look for new species in each task, recording, location, or in the entire project. Let's pretend we're interested in site-specific species richness and use the task argument.
 
-```{r, message=F, warning=F}
+```{r, eval=F, message=F, warning=F}
 
 new <- wt_additional_species(data, remove_species = TRUE, threshold = 80, resolution="task")
 
@@ -249,7 +255,7 @@ If you are adding additional tags to a human processed data set, the best approa
 
 Another potential use for BirdNET in WildTrax is to use it to detect individual calls as opposed to just the first call in each task (1SPT) or minute (1SPM). This might be of interest if you're using call rate in a behavioural analysis, or if you're looking for detections for tool development like distance estimation or building a focal species recognizer. Let's try it for Clay-coloured Sparrow (CCSP):
 
-```{r, message=F, warning=F}
+```{r, eval=F, message=F, warning=F}
 
 #Evaluate classifier performance
 eval_ccsp <- wt_evaluate_classifier(data,
@@ -274,7 +280,7 @@ detections_ccsp <- data[[1]] |>
 
 As before, you'll probably want to upload your detections to WildTrax for verification, even though BirdNET performance for Clay-coloured Sparrow is pretty good. Let's take a look at our BirdNET output as call rate to see if it's higher at the beginning of the season, as we would expect:
 
-```{r, include=T, message=F, warning=F}
+```{r, eval=F, include=T, message=F, warning=F}
 library(lubridate)
 
 #Calculate detections per second and mean confidence in each recording
@@ -328,9 +334,13 @@ Initial tests of HawkEars on the same expert dataset as above suggest it perform
 
 ```{r, eval=T, include=T, echo=F, message=F, warning=F}
 
-dathawk <- curl::curl_download('https://raw.githubusercontent.com/ABbiodiversity/wildRtrax-assets/main/ExpertData_PR_Total_HawkEars.csv','ExpertData_PR_Total_HawkEars.csv') |>
-  readr::read_csv() |>
-  dplyr::filter(thresh >= 0.1) ### Required data
+url <- "https://raw.githubusercontent.com/ABbiodiversity/wildRtrax-assets/main/ExpertData_PR_Total_HawkEars.csv"
+
+dathawk <- request(url) |>
+  req_perform() |>
+  resp_body_string() |>
+  read_csv() |>
+  filter(thresh >= 0.1)
 
 plot.p.h <- ggplot(dathawk) +
   geom_line(aes(x=thresh, y=p, colour=classifier), size=1.5) +

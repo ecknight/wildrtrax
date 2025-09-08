@@ -40,10 +40,10 @@ Fetch data for syncs and downloads in WildTrax. You must specify at least one of
 wt_auth()
 
 # Fetch column headers by organization
-wt_get_sync("organization_locations")
+wt_get_sync("organization_locations", organization = "ABMI")
 
 # Fetch column headers by project
-wt_get_sync("project_locations")
+wt_get_sync("project_locations", project = 620)
 }
 
 }

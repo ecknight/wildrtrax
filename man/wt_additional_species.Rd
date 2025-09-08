@@ -7,7 +7,7 @@
 wt_additional_species(
   data,
   remove_species = TRUE,
-  threshold = 50,
+  threshold = 0.5,
   resolution = "task",
   format_to_tags = FALSE,
   output = NULL
