@@ -814,7 +814,7 @@ wt_kaleidoscope_tags <- function (input, output, freq_bump = T) {
     relocate(internal_tag_id, .after = max_tag_freq) |>
     drop_na()
 
-  return(write_csv(in_tbl_wtd, file = output, row_names = F))
+  return(write_csv(in_tbl_wtd, file = output))
 
   print("Converted to WildTrax tags. Go to your WildTrax project > Manage > Upload Tags.")
 
@@ -929,7 +929,7 @@ wt_songscope_tags <- function (input, output = c("env","csv"), output_file=NULL,
     return(in_tbl_wtd)
     print("Converted to WildTrax tags. Review the output, generate a CSV, then go to your WildTrax project > Manage > Upload Tags")
   } else if (output == "csv") {
-    return(list(in_tbl_wtd, write_csv(in_tbl_wtd, file = output_file, row_names = F)))
+    return(list(in_tbl_wtd, write_csv(in_tbl_wtd, file = output_file)))
     print("Converted to WildTrax tags. Review the output CSV then go to your WildTrax project > Manage > Upload Tags")
   }
 
