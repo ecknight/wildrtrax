@@ -232,7 +232,6 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
     req_timeout(300)
 
   resp <- req_perform(req)
-  print(httr2::resp_content_type(resp))
   writeBin(httr2::resp_body_raw(resp), tmp)
   unzip(tmp, exdir = td)
   abstract <- list.files(td, pattern = "*_abstract.csv", full.names = TRUE, recursive = TRUE)
@@ -693,7 +692,6 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
 #'
 #' @param organization Character; The Organization acronym from which photos are being downloaded
 #' @param output Character; Directory where location photos would be stored on your machine
-#' @param download_all Logical; If `TRUE`, defaults to downloading all your location photos
 #'
 #' @import httr2
 #' @import dplyr
@@ -720,15 +718,81 @@ wt_location_photos <- function(organization, output = NULL) {
 
   r <- .wt_api_gr(
     path = "/bis/get-location-image-summary",
-    organizationId = org_numeric,
+    organizationId = 1,
     sort = "locationName",
     order = "asc",
     limit = 1e9
   )
 
   photos <- resp_body_string(r)
+  results_raw <- sub('.*"results"\\s*:\\s*\\[', '[', photos)
+  results_raw <- sub('\\]\\}.*$', ']', results_raw)
+  object_strings <- strsplit(results_raw, "\\},\\s*\\{")[[1]]
+  object_strings <- gsub("^\\[|\\]$|^\\{|\\}$", "", object_strings)
 
-  return(photos)
+  # Prepare vectors
+  location <- direction <- access <- vertical <- urls <- timestamp <- character(length(object_strings))
+
+  for (i in seq_along(object_strings)) {
+    obj <- object_strings[i]
+
+    location[i] <- ifelse(grepl('"locationName":"', obj),
+                          sub('.*"locationName":"([^"]+)".*', '\\1', obj),
+                          NA)
+
+    direction[i] <- ifelse(grepl('"directionId":', obj),
+                           sub('.*"directionId":([0-9]+).*', '\\1', obj),
+                           NA)
+
+    access[i] <- ifelse(grepl('"accessId":', obj),
+                        sub('.*"accessId":([0-9]+).*', '\\1', obj),
+                        NA)
+
+    vertical[i] <- ifelse(grepl('"verticalAngle":', obj),
+                          sub('.*"verticalAngle":([0-9]+|null).*', '\\1', obj),
+                          NA)
+
+    urls[i] <- ifelse(grepl('"largeURL":"', obj),
+                      sub('.*"largeURL":"([^"]+)".*', '\\1', obj),
+                      NA)
+
+    timestamp[i] <- ifelse(grepl('"timestamp":"', obj),
+                           sub('.*"timestamp":"([^"]+)".*', '\\1', obj),
+                           NA)
+  }
+
+  # Convert numeric fields
+  direction <- as.integer(direction)
+  access <- as.integer(access)
+  vertical[vertical == "null"] <- NA
+  vertical <- as.integer(vertical)
+
+  access_lookup <- tibble(
+    accessId = c(1, 2, 3),
+    access_type = c("Private","Project Level Access", "Publicly Viewable")
+  )
+
+  direction_lookup <- tibble(
+    directionId = c(11, 7, 1, 9, 10, 4, 8),
+    direction_type = c("Canopy", "East", "North", "Other", "Representative", "South", "West")
+  )
+
+  # Combine into a tibble
+  photo_tbl <- tibble(
+    location = location,
+    directionId = direction,
+    accessId = access,
+    vertical_angle = vertical,
+    timestamp = timestamp,
+    url = urls
+  ) |>
+    mutate(timestamp = as.POSIXct(timestamp, format = "%Y-%m-%dT%H:%M:%S", tz = "UTC")) |>
+    left_join(access_lookup, by = "accessId") %>%
+    left_join(direction_lookup, by = "directionId")
+
+  photo_tbl
+
+  return(photo_tbl)
 
 }
 
@@ -766,10 +830,10 @@ wt_location_photos <- function(organization, output = NULL) {
 #' wt_auth()
 #'
 #' # Fetch column headers by organization
-#' wt_get_sync("organization_locations")
+#' wt_get_sync("organization_locations", organization = "ABMI")
 #'
 #' # Fetch column headers by project
-#' wt_get_sync("project_locations")
+#' wt_get_sync("project_locations", project = 620)
 #' }
 #'
 #' @return A tibble with column headers for the specified API call.
@@ -777,6 +841,7 @@ wt_location_photos <- function(organization, output = NULL) {
 wt_get_sync <- function(api, project = NULL, organization = NULL) {
 
   api_match <- api
+  organization <- .get_org_id(organization)
 
   # Check authentication
   if (.wt_auth_expired()) {
