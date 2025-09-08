@@ -141,9 +141,11 @@ wt_evaluate_classifier <- function(data, resolution = "recording", remove_specie
 #'
 #' @examples
 #' \dontrun{
-#' data <- wt_download_report(project_id = 1144, sensor_id = "ARU", reports = c("main", "ai"), weather_cols = FALSE)
+#' data <- wt_download_report(project_id = 1144, sensor_id = "ARU",
+#' reports = c("main", "ai"), weather_cols = FALSE)
 #'
-#' eval <- wt_evaluate_classifier(data, resolution = "recording", remove_species = TRUE, thresholds = c(10, 99))
+#' eval <- wt_evaluate_classifier(data, resolution = "recording",
+#' remove_species = TRUE, thresholds = c(10, 99))
 #'
 #' threshold_use <- wt_classifier_threshold(eval) |> print()
 #' }
