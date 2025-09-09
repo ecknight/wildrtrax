@@ -2,7 +2,7 @@
 
 # wildrtrax 1.5
 
-## Major changes
+## Major changes 
 
 * Move to support WildTrax 2.0 including APIs through `wt_get_sync()`, `wt_download_report()` and `wt_download_media()`.
 * Queries benchmarked as 2-3x on new production server at the University of Alberta in Edmonton, Canada
