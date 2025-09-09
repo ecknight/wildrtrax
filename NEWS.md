@@ -5,6 +5,7 @@
 ## Major changes 
 
 * Move to support WildTrax 2.0 including APIs through `wt_get_sync()`, `wt_download_report()` and `wt_download_media()`.
+* `wt_get_download_summary()` is replaced by `wt_get_projects()` to correspond to new WildTrax 2.0 APIs
 * Queries benchmarked as 2-3x on new production server at the University of Alberta in Edmonton, Canada
 * New function `wt_format_audiomoth_filenames()` serves to add location prefixes for [AudioMoth](https://www.openacousticdevices.info/audiomoth) data making it capable to upload to WildTrax
 
