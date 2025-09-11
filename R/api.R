@@ -465,7 +465,7 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
   if(is.null(tok_used)) {
     #Provide non-login user a way to search species - limited by dd-get-species however
     ddspp <- request("https://www-api.wildtrax.ca") |>
-      req_url_path_append("/bis/dd-get-species") |>
+      req_url_path_append("/bis/get-all-species") |>
       req_headers(
         Authorization = tok_used,
         Origin = "https://www.wildtrax.ca/discover",
@@ -478,11 +478,22 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
 
     spp_t <- resp_body_json(ddspp)
 
-    species_tibble <- purrr::map_df(spp_t, ~{
-      commonName <- if ("commonName" %in% names(.x)) .x$commonName else NA
-      speciesId <- if ("speciesId" %in% names(.x)) .x$speciesId else NA
-      sciName <- if ("sciName" %in% names(.x)) .x$sciName else NA
-      tibble(species_common_name = commonName, species_id = speciesId, species_scientific_name = sciName)
+    species_tibble <- map_df(spp_t, ~{
+      tibble(
+        species_id = pluck(.x, "id"),
+        french_code = pluck(.x, "frenchCode", .default = NA),
+        species_code = pluck(.x, "code", .default = NA),
+        species_common_name = pluck(.x, "commonName", .default = NA),
+        french_common_name = pluck(.x, "frenchCommonName", .default = NA),
+        name = pluck(.x, "name", .default = NA),
+        genus = pluck(.x, "genus", .default = NA),
+        class_name = pluck(.x, "className", .default = NA),
+        order = pluck(.x, "order", .default = NA),
+        family = pluck(.x, "family", .default = NA),
+        deprecated = pluck(.x, "deprecated", .default = NA),
+        allow_multiple_individuals_aru = pluck(.x, "allowMultipleIndividualsARU", .default = NA),
+        species_scientific_name = pluck(.x, "scientificName", .default = NA)
+      )
     })
 
     if (is.null(species)) {
