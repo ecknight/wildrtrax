@@ -896,6 +896,7 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
   print(paste('Calling...', api_path))
 
   response <- do.call(.wt_api_pr, c(list(path = api_path), api_params))
+  print(response$status)
   content_type <- resp_content_type(response)
   message("Content-Type returned: ", content_type)
 
