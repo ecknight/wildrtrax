@@ -4,7 +4,7 @@
 \alias{wt_kaleidoscope_tags}
 \title{Convert Kaleidoscope output to tags}
 \usage{
-wt_kaleidoscope_tags(input, output, freq_bump = T)
+wt_kaleidoscope_tags(input, output = NULL, freq_bump = T)
 }
 \arguments{
 \item{input}{Character; The path to the input csv}
