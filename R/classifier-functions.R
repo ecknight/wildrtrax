@@ -209,32 +209,32 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 0.5, 
 
   #Create a join between task and recording
   classed <- class |>
-    dplyr::inner_join(data[[2]] |> dplyr::select(project_id, recording_id, task_id, task_duration), by = c("recording_id" = "recording_id"), relationship = "many-to-many")
+    dplyr::inner_join(data[[2]] |> dplyr::select(recording_id, task_id, task_duration), by = c("recording_id" = "recording_id"), relationship = "many-to-many")
 
   if(resolution=="task"){
 
     #Classifier report
     detections <- class |>
       dplyr::filter(confidence >= threshold) |>
-      dplyr::inner_join(data[[2]] |> dplyr::select(project_id, recording_id, task_id, task_duration, detection_time), by = c("recording_id" = "recording_id"), relationship = "many-to-many") |>
+      dplyr::inner_join(data[[2]] |> dplyr::select(recording_id, task_id, task_duration, detection_time), by = c("recording_id" = "recording_id"), relationship = "many-to-many") |>
       dplyr::filter(!startTime > task_duration) |>
-      dplyr::group_by(project_id, location_id, recording_id, task_id, species_common_name) |>
+      dplyr::group_by(location_id, recording_id, task_id, species_common_name) |>
       dplyr::summarise(confidence = max(confidence),  .groups="keep") |>
       dplyr::ungroup()
 
     #Main report
     main <- wt_tidy_species(data[[2]], remove=c("mammal", "amphibian", "abiotic", "insect", "human", "unknown")) |>
-      dplyr::select(project_id, location_id, recording_id, task_id, species_common_name) |>
+      dplyr::select(location_id, recording_id, task_id, species_common_name) |>
       dplyr::distinct()
 
     #Put together
-    new <- dplyr::anti_join(detections, main, by=c("project_id", "location_id", "recording_id", "task_id", "species_common_name")) |>
-      dplyr::left_join(classed, by=c("project_id", "location_id", "recording_id", "task_id", "species_common_name", "confidence"), multiple="all")
+    new <- dplyr::anti_join(detections, main, by=c("location_id", "recording_id", "task_id", "species_common_name")) |>
+      dplyr::left_join(classed, by=c("location_id", "recording_id", "task_id", "species_common_name", "confidence"), multiple="all")
     if (nrow(new) == 0) {
       stop("There were no additional species detected.")
     } else {
       new <- new |>
-        dplyr::group_by(project_id, location_id, recording_id,task_id, species_common_name, confidence) |>
+        dplyr::group_by(location_id, recording_id,task_id, species_common_name, confidence) |>
         dplyr::sample_n(1) |>
         dplyr::ungroup()
     }
@@ -245,19 +245,19 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 0.5, 
     #Classifier report
     detections <- class |>
       dplyr::filter(confidence >= threshold) |>
-      dplyr::group_by(project_id, location_id, recording_id, species_common_name) |>
+      dplyr::group_by(location_id, recording_id, species_common_name) |>
       dplyr::summarise(confidence = max(confidence),  .groups="keep") |>
       dplyr::ungroup()
 
     #Main report
     main <- wt_tidy_species(data[[2]], remove=c("mammal", "amphibian", "abiotic", "insect", "human", "unknown")) |>
-      dplyr::select(project_id, location_id, recording_id, species_common_name) |>
+      dplyr::select(location_id, recording_id, species_common_name) |>
       dplyr::distinct()
 
     #Put together
-    new <- dplyr::anti_join(detections, main, by=c("project_id", "location_id", "recording_id", "species_common_name")) |>
-      dplyr::left_join(class, by=c("project_id", "location_id", "recording_id", "species_common_name", "confidence"), multiple="all") |>
-      dplyr::group_by(project_id, location_id, recording_id, species_common_name, confidence) |>
+    new <- dplyr::anti_join(detections, main, by=c("location_id", "recording_id", "species_common_name")) |>
+      dplyr::left_join(class, by=c("location_id", "recording_id", "species_common_name", "confidence"), multiple="all") |>
+      dplyr::group_by(location_id, recording_id, species_common_name, confidence) |>
       dplyr::sample_n(1) |>
       dplyr::ungroup()
 
@@ -268,19 +268,19 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 0.5, 
     #Classifier report
     detections <- class |>
       dplyr::filter(confidence >= threshold) |>
-      dplyr::group_by(project_id, location_id, species_common_name) |>
+      dplyr::group_by(location_id, species_common_name) |>
       dplyr::summarise(confidence = max(confidence),  .groups="keep") |>
       dplyr::ungroup()
 
     #Main report
     main <- wt_tidy_species(data[[2]], remove=c("mammal", "amphibian", "abiotic", "insect", "human", "unknown")) |>
-      dplyr::select(project_id, location_id, species_common_name) |>
+      dplyr::select(location_id, species_common_name) |>
       dplyr::distinct()
 
     #Put together
-    new <- anti_join(detections, main, by=c("project_id", "location_id", "species_common_name")) |>
-      dplyr::left_join(class, by=c("project_id", "location_id", "species_code", "confidence"), multiple="all") |>
-      dplyr::group_by(project_id, location_id, species_common_name, confidence) |>
+    new <- anti_join(detections, main, by=c("location_id", "species_common_name")) |>
+      dplyr::left_join(class, by=c("location_id", "species_common_name", "confidence"), multiple="all") |>
+      dplyr::group_by(location_id, species_common_name, confidence) |>
       dplyr::sample_n(1) |>
       dplyr::ungroup()
 
@@ -291,19 +291,19 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 0.5, 
     #Classifier report
     detections <- class |>
       dplyr::filter(confidence >= threshold) |>
-      dplyr::group_by(project_id, species_common_name) |>
+      dplyr::group_by(species_common_name) |>
       dplyr::summarise(confidence = max(confidence),  .groups="keep") |>
       dplyr::ungroup()
 
     #Main report
     main <- wt_tidy_species(data[[2]], remove=c("mammal", "amphibian", "abiotic", "insect", "human", "unknown")) |>
-      dplyr::select(project_id, species_common_name) |>
+      dplyr::select(species_common_name) |>
       dplyr::distinct()
 
     #Put together
-    new <- anti_join(detections, main, by=c("project_id", "species_common_name")) |>
-      dplyr::left_join(class, by=c("project_id", "species_common_name", "confidence"), multiple="all") |>
-      dplyr::group_by(project_id, species_common_name, confidence) |>
+    new <- anti_join(detections, main, by=c("species_common_name")) |>
+      dplyr::left_join(class, by=c("species_common_name", "confidence"), multiple="all") |>
+      dplyr::group_by(species_common_name, confidence) |>
       dplyr::sample_n(1) |>
       dplyr::ungroup()
 
