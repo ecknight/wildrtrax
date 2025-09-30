@@ -747,11 +747,11 @@ wt_make_aru_tasks <- function(input, output=NULL, task_method = c("1SPM","1SPT",
 #'
 #' @return A csv formatted as a WildTrax tag template
 
-wt_kaleidoscope_tags <- function (input, output, freq_bump = T) {
+wt_kaleidoscope_tags <- function (input, output = NULL, freq_bump = T) {
 
   #Check to see if the input exists and reading it in
   if (file.exists(input)) {
-    in_tbl <- read_csv(input, col_names = TRUE, na = c("", "NA"), col_types = cols())
+    in_tbl <- read_csv(input, col_names = TRUE, na = c("", "NA"))
   } else {
     stop ("File cannot be found")
   }
@@ -794,7 +794,7 @@ wt_kaleidoscope_tags <- function (input, output, freq_bump = T) {
     ungroup() |>
     add_column(vocalization = "", .after = "individual_number") |>
     add_column(abundance = 1, .after= "vocalization") |>
-    mutate(vocalization = case_when(species == "Noise" ~ "Non-vocal", TRUE ~ "Call")) |>
+    mutate(vocalization = case_when(species_code == "Noise" ~ "Non-vocal", TRUE ~ "Call")) |>
     add_column(internal_tag_id = "", .after = "max_tag_freq") |>
     mutate(recording_date_time = as.character(recording_date_time)) |>
     rowwise() |>
@@ -809,12 +809,14 @@ wt_kaleidoscope_tags <- function (input, output, freq_bump = T) {
     relocate(task_duration, .after = task_method) |>
     relocate(tag_start_time, .after = abundance) |>
     relocate(tag_duration, .after = tag_start_time) |>
-    relocate(min_tag_freq, .after = tagLength) |>
+    relocate(min_tag_freq, .after = tag_duration) |>
     relocate(max_tag_freq, .after = min_tag_freq) |>
     relocate(internal_tag_id, .after = max_tag_freq) |>
+    mutate(recording_sample_frequency = "", .after = task_method,
+           is_complete = "f", .after = task_duration) |>
     drop_na()
 
-  return(write_csv(in_tbl_wtd, file = output))
+  if(!is.null(output)) { return(write_csv(in_tbl_wtd, file = output)) } else {return(in_tbl_wtd)}
 
   print("Converted to WildTrax tags. Go to your WildTrax project > Manage > Upload Tags.")
 
