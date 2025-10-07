@@ -33,10 +33,6 @@ library(wildrtrax)
 
 `wildrtrax` has been built in parallel with WildTrax to provide additional analytics and functionalities. By outlining a standardized and harmonized procedure for data intake, quality control, processing and verification of environmental sensor data, `wildrtrax` and WildTrax hope to provide open workflows for using ARUs and cameras to answer biological questions in order to inform meaningful conservation and decision-making.
 
-### What R packages does `wildrtrax` depend on?
-
-`wildrtrax` depends on a multitude of packages to provide flexible routines and work flows for data management. [`tidyverse`](https://www.tidyverse.org/) for piping functions, standard grammar and tidy data manipulation, [`furrr`](https://furrr.futureverse.org/) for parallel computing, and acoustic analysis packages: [`bioacoustics`](https://CRAN.R-project.org/package=bioacoustics), [`tuneR`](https://CRAN.R-project.org/package=tuneR), [`seewave`](https://CRAN.R-project.org/package=seewave). The `wt_run_ap` function and associated work flows are indebted to the [QUT Ecoacoustics Audio Analysis Software](https://github.com/QutEcoacoustics/audio-analysis). 
-
 ### How do I report a bug in `wildrtrax`?
 
 If you think you have found a bug in `wildrtrax`, you should report it to developers or maintainers. Please do not send bug reports to R mailing lists, since wildrtrax is not a standard R package. The preferred forum to report bugs is [GitHub](https://github.com/ABbiodiversity/wildrtrax/issues). Here is what is required in order to report a bug - reporting issues is welcomed and encouraged and are the only way to make wildrtrax non-buggy:

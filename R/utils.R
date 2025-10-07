@@ -557,7 +557,6 @@
 .wt_col_types <- list(
   abundance = readr::col_character(),
   age_class = readr::col_character(),
-  aru_task_status = readr::col_character(),
   behaviours = readr::col_character(),
   bounding_box_number = readr::col_double(),
   category = readr::col_character(),
@@ -607,6 +606,7 @@
   image_water_depth_m = readr::col_double(),
   individual_count = readr::col_character(),
   individual_order = readr::col_integer(),
+  is_complete = readr::col_logical(),
   is_enabled_project_species = readr::col_logical(),
   is_species_allowed_in_project = readr::col_logical(),
   latitude = readr::col_double(),

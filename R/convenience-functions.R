@@ -144,7 +144,8 @@ wt_tidy_species <- function(data,
   }
 
   #Remove those codes from the data
-  filtered <- dplyr::filter(data, !species_code %in% species.remove$species_code)
+  filtered <- data |>
+    dplyr::filter(!(species_code %in% species.remove$species_code))
 
   #if you don't need nones, remove other NONEs & return the filtered object
   if(zerofill==FALSE){

@@ -231,7 +231,16 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
     req_body_json(body_json) |>
     req_timeout(300)
 
-  resp <- req_perform(req)
+  resp <- tryCatch(
+    req_perform(req),
+    error = function(e) {
+      if (grepl("HTTP 500", e$message)) {
+        stop("You may not have permission to access this project or report. Please check your WildTrax account permissions.")
+      } else {
+        stop("An unexpected error occurred while downloading the report: ", e$message)
+      }
+    }
+  )
   writeBin(httr2::resp_body_raw(resp), tmp)
   unzip(tmp, exdir = td)
   abstract <- list.files(td, pattern = "*_abstract.csv", full.names = TRUE, recursive = TRUE)

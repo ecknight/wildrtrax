@@ -2,7 +2,7 @@ library(testthat)
 
 Sys.setenv(WT_USERNAME = "guest", WT_PASSWORD = "Apple123")
 wt_auth(force = TRUE)
-cypress_hills <- wt_download_report(620, 'ARU', 'recording', FALSE)
+cypress_hills <- wt_download_report(620, 'ARU', 'main', FALSE)
 
 ################################### ARU Test suite
 
@@ -15,7 +15,7 @@ test_that("Downloading ARU report", {
 })
 
 test_that("Testing a Private Project", {
-  expect_true(nrow(wt_download_report(1373, 'ARU', 'main', FALSE))==0)
+  expect_error(wt_download_report(1373, 'ARU', 'main', FALSE)==0)
 })
 
 test_that("Downloading ARU as PC report", {
@@ -28,7 +28,7 @@ test_that("Attempting PC as ARU report", {
 })
 
 test_that("Tidying species zero-filling true", {
-  cypress_hills_tidy <- wt_tidy_species(cypress_hills, remove = c("mammal", "abiotic", "amphibian","unknown"), zerofill = T)
+  cypress_hills_tidy <- wt_tidy_species(cypress_hills, remove = c("abiotic"), zerofill = T)
   expect_true(nrow(cypress_hills_tidy) < nrow(cypress_hills))
 })
 
