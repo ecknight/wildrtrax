@@ -827,7 +827,7 @@ wt_location_photos <- function(organization, output = NULL) {
 #'   \item `"organization_equipment`"
 #'   \item `"organization_deployments`"
 #'   \item `"organization_recording_summary`"
-#'   \item `"organization_image_summary`"
+#'   \item `"project_image_summary`"
 #'   \item `"project_locations"`
 #'   \item `"project_species"`
 #'   \item `"project_aru_tasks"`
@@ -861,7 +861,7 @@ wt_location_photos <- function(organization, output = NULL) {
 wt_get_sync <- function(api, project = NULL, organization = NULL) {
 
   api_match <- api
-  organization <- .get_org_id(organization)
+  organization <- if(!is.null(organization)) {.get_org_id(organization)}
 
   # Check authentication
   if (.wt_auth_expired()) {
@@ -878,7 +878,7 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
     organization_equipment = "get-equipment-summary", #TEXT - POST
     organization_deployments = "get-location-visit-equipment-summary", #JSON - POST
     organization_recording_summary = "recording-task-creator-results", #JSON - POST
-    organization_image_summary = "get-camera-pud-summary", #JSON - POST
+    project_image_summary = "get-camera-pud-summary", #JSON - POST
     project_locations = "download-location", #CSV - GET
     project_aru_tasks = "download-tasks-by-project-id", #400 - GET
     project_aru_tags = "download-tags-by-project-id", #400 - GET
@@ -896,7 +896,7 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
     "get-equipment-summary" = list(organizationId = organization),
     "get-location-visit-equipment-summary" = list(organizationId = organization),
     "recording-task-creator-results" = list(organizationId = organization),
-    "get-camera-pud-summary" = list(organizationId = organization),
+    "get-camera-pud-summary" = list(projectId = project),
     "download-location" = list(projectId = project),
     "download-tasks-by-project-id" = list(projectId = project),
     "download-tags-by-project-id" = list(projectId = project),
@@ -1043,16 +1043,34 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
 
       return(recording_summary)
 
-    } else if (api_match == "organization_image_summary") {
+    } else if (api_match == "project_image_summary") {
 
       results <- json_data$results
       if (length(results) == 0) stop("No data returned")
 
       data <- as_tibble(do.call(rbind, results)) |>
-        unnest(everything()) |>
-        unnest_longer(speciesIds) |>
-        inner_join(wt_get_species(), by = c("speciesIds" = "species_id")) |>
-        select(-c(species_class,species_order))
+        mutate(across(everything(), simplify)) |>
+        mutate(statusId = case_when(statusId == 2 ~ "Ready for Tagging",
+                                    statusId == 4 ~ "Uploading",
+                                    statusId == 7 ~ "Processing",
+                                    TRUE ~ as.character(statusId)),
+               taggerUserId = case_when(taggerUserId == -1 ~ "Not Assigned", TRUE ~ as.character(taggerUserId))) |>
+        rename(pud_id = pudId,
+               organization_id = organizationId,
+               project_id = project_Id,
+               location = locationName,
+               image_set_status = statusId,
+               observer = taggerUserId,
+               motion_image_count = motionImageCount,
+               total_image_count = totalImageCount,
+               tag_count = tagCount,
+               images_tagged_count = imagesTaggedCount,
+               serial_number = serialNo,
+               equipment_model = model,
+               equipment_make = make,
+               image_set_start_date = startDate,
+               image_set_end_date = endDate,
+               species_common_name = speciesIds)
 
       image_summary <- data
 
