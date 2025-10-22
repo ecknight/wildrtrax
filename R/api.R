@@ -827,12 +827,12 @@ wt_location_photos <- function(organization, output = NULL) {
 #'   \item `"organization_equipment`"
 #'   \item `"organization_deployments`"
 #'   \item `"organization_recording_summary`"
-#'   \item `"project_image_summary`"
+#'   \item `"project_image_set_summary`"
 #'   \item `"project_locations"`
 #'   \item `"project_species"`
 #'   \item `"project_aru_tasks"`
 #'   \item `"project_aru_tags"`
-#'   \item `"project_camera_tasks"`
+#'   \item `"project_image_metadata"`
 #'   \item `"project_camera_tags"`
 #'   \item `"project_point_counts"`
 #' }
@@ -878,11 +878,11 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
     organization_equipment = "get-equipment-summary", #TEXT - POST
     organization_deployments = "get-location-visit-equipment-summary", #JSON - POST
     organization_recording_summary = "recording-task-creator-results", #JSON - POST
-    project_image_summary = "get-camera-pud-summary", #JSON - POST
+    project_image_set_summary = "get-camera-pud-summary",
     project_locations = "download-location", #CSV - GET
     project_aru_tasks = "download-tasks-by-project-id", #400 - GET
     project_aru_tags = "download-tags-by-project-id", #400 - GET
-    project_camera_tasks = "download-camera-tasks-by-project-id", #404 - GET
+    project_image_metadata = "download-camera-tasks-by-project-id", #404 - GET
     project_camera_tags = "download-camera-tags-by-project-id", #CSV - GET
     project_point_counts = "download-point-count-by-project-id", #CSV - MISSING
     project_species = "get-project-species-details" #400 - GET
@@ -1043,7 +1043,7 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
 
       return(recording_summary)
 
-    } else if (api_match == "project_image_summary") {
+    } else if (api_match == "project_image_set_summary") {
 
       results <- json_data$results
       if (length(results) == 0) stop("No data returned")
