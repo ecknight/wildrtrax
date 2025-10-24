@@ -880,7 +880,7 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
     organization_recording_summary = "recording-task-creator-results", #JSON - POST
     project_image_set_summary = "get-camera-pud-summary",
     project_locations = "download-location", #CSV - GET
-    project_aru_tasks = "download-tasks-by-project-id", #400 - GET
+    project_aru_tasks = "get-aru-task-summary",
     project_aru_tags = "download-tags-by-project-id", #400 - GET
     project_image_metadata = "download-camera-tasks-by-project-id", #404 - GET
     project_camera_tags = "download-camera-tags-by-project-id", #CSV - GET
@@ -898,7 +898,7 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
     "recording-task-creator-results" = list(organizationId = organization),
     "get-camera-pud-summary" = list(projectId = project),
     "download-location" = list(projectId = project),
-    "download-tasks-by-project-id" = list(projectId = project),
+    "get-aru-task-summary" = list(projectId = project),
     "download-tags-by-project-id" = list(projectId = project),
     "download-camera-tasks-by-project-id" = list(projectId = project),
     "download-camera-tags-by-project-id" = list(projectId = project),
@@ -1075,6 +1075,38 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
       image_summary <- data
 
       return(image_summary)
+
+    } else if (api_match == "project_aru_tasks") {
+
+      results <- json_data$results
+      if (length(results) == 0) stop("No data returned")
+
+      data <- as_tibble(do.call(rbind, results)) |>
+        unnest(everything()) |>
+        mutate(methodId = case_when(methodId == 2 ~ "1SPM",
+                                    methodId == 3 ~ "1SPT",
+                                    methodId == 4 ~ "None",
+                                    TRUE ~ as.character(methodId)),
+               transcriberUserId = case_when(transcriberUserId == -1 ~ "Not Assigned", TRUE ~ as.character(transcriberUserId))) |>
+        rename(task_id = taskId,
+               project_id = projectId,
+               location = locationName,
+               recording_date_time = recordingDate,
+               task_method = methodId,
+               task_duration = taskLength,
+               is_complete = isComplete,
+               observer = transcriberUserId,
+               recording_sample_frequency = frequency,
+               recording_upload_date = uploadDate,
+               task_creation_date = creationDate,
+               task_tag_count = tagCount,
+               individual_count = individualCount,
+               species_common_name = detectedSpeciesIds,
+               media_url = recordingURL)
+
+      aru_tasks_summary <- data
+
+      return(aru_tasks_summary)
 
     } else {stop('No api matches query.')}
 
