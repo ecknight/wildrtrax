@@ -826,12 +826,12 @@ wt_location_photos <- function(organization, output = NULL) {
 #'   \item `"organization_visits"`
 #'   \item `"organization_equipment`"
 #'   \item `"organization_deployments`"
-#'   \item `"organization_recording_summary`"
-#'   \item `"project_image_set_summary`"
+#'   \item `"organization_recordings`"
 #'   \item `"project_locations"`
 #'   \item `"project_species"`
 #'   \item `"project_aru_tasks"`
 #'   \item `"project_aru_tags"`
+#'   \item `"project_image_sets`"
 #'   \item `"project_image_metadata"`
 #'   \item `"project_camera_tags"`
 #'   \item `"project_point_counts"`
@@ -877,11 +877,11 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
     organization_visits = "get-location-visits",
     organization_equipment = "get-equipment-summary", #TEXT - POST
     organization_deployments = "get-location-visit-equipment-summary", #JSON - POST
-    organization_recording_summary = "recording-task-creator-results", #JSON - POST
-    project_image_set_summary = "get-camera-pud-summary",
+    organization_recordings = "recording-task-creator-results", #JSON - POST
     project_locations = "download-location", #CSV - GET
     project_aru_tasks = "get-aru-task-summary",
     project_aru_tags = "download-tags-by-project-id", #400 - GET
+    project_image_sets = "get-camera-pud-summary",
     project_image_metadata = "download-camera-tasks-by-project-id", #404 - GET
     project_camera_tags = "download-camera-tags-by-project-id", #CSV - GET
     project_point_counts = "download-point-count-by-project-id", #CSV - MISSING
@@ -896,10 +896,10 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
     "get-equipment-summary" = list(organizationId = organization),
     "get-location-visit-equipment-summary" = list(organizationId = organization),
     "recording-task-creator-results" = list(organizationId = organization),
-    "get-camera-pud-summary" = list(projectId = project),
     "download-location" = list(projectId = project),
     "get-aru-task-summary" = list(projectId = project),
     "download-tags-by-project-id" = list(projectId = project),
+    "get-camera-pud-summary" = list(projectId = project),
     "download-camera-tasks-by-project-id" = list(projectId = project),
     "download-camera-tags-by-project-id" = list(projectId = project),
     "download-point-count-by-project-id" = list(projectId = project),
@@ -919,6 +919,22 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
   print(response$status)
   content_type <- resp_content_type(response)
   message("Content-Type returned: ", content_type)
+
+  if(!is.null(project)) {
+    tagger_list <- request("https://www-api.wildtrax.ca") |>
+    req_url_path_append("bis/get-project-taggers") |>
+    req_url_query(projectId = project) |>
+    req_headers(Authorization = paste("Bearer", ._wt_auth_env_$access_token)) |>
+    req_user_agent(u) |>
+    req_method("GET") |>
+    req_perform()
+
+  taggers <- r |>
+    resp_body_json() |>
+    keep(~ !is.null(.x$user)) |>
+    map_dfr(~ tibble(user_id = .x$user$id %||% NA, user_name = .x$user$name %||% NA)) |>
+    mutate(user_id = as.character(user_id))
+  }
 
   if(content_type == "application/json") {
 
@@ -1004,7 +1020,7 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
 
       return(deployment_summary)
 
-    } else if (api_match == "organization_recording_summary") {
+    } else if (api_match == "organization_recordings") {
 
       data <- as_tibble(do.call(rbind, json_data))
 
@@ -1043,7 +1059,7 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
 
       return(recording_summary)
 
-    } else if (api_match == "project_image_set_summary") {
+    } else if (api_match == "project_image_sets") {
 
       results <- json_data$results
       if (length(results) == 0) stop("No data returned")
@@ -1072,7 +1088,18 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
                image_set_end_date = endDate,
                species_common_name = speciesIds)
 
+      # Getting tagger lookup
+      if(!all(data$observer == "Not Assigned")) {
+      image_summary <- data |>
+        inner_join(taggers, by = c("observer" = "user_id")) |>
+        dplyr::select(-observer) |>
+        rename(observer = user_name) |>
+        relocate(observer, .after = image_set_status)
+      return(image_summary)
+    } else {
       image_summary <- data
+      return(image_summary)
+    }
 
       return(image_summary)
 
@@ -1083,9 +1110,9 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
 
       data <- as_tibble(do.call(rbind, results)) |>
         unnest(everything()) |>
-        mutate(methodId = case_when(methodId == 2 ~ "1SPM",
-                                    methodId == 3 ~ "1SPT",
-                                    methodId == 4 ~ "None",
+        mutate(methodId = case_when(methodId == 1 ~ "1SPT",
+                                    methodId == 2 ~ "1SPM",
+                                    methodId == 3 ~ "None",
                                     TRUE ~ as.character(methodId)),
                transcriberUserId = case_when(transcriberUserId == -1 ~ "Not Assigned", TRUE ~ as.character(transcriberUserId))) |>
         rename(task_id = taskId,
@@ -1101,12 +1128,20 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
                task_creation_date = creationDate,
                task_tag_count = tagCount,
                individual_count = individualCount,
-               species_common_name = detectedSpeciesIds,
+               species_id = detectedSpeciesIds,
                media_url = recordingURL)
 
-      aru_tasks_summary <- data
-
-      return(aru_tasks_summary)
+      if(!all(data$observer == "Not Assigned")) {
+        aru_tasks_summary <- data |>
+          inner_join(taggers, by = c("observer" = "user_id")) |>
+          dplyr::select(-observer) |>
+          rename(observer = user_name) |>
+          relocate(observer, .after = is_complete)
+        return(aru_tasks_summary)
+      } else {
+        aru_tasks_summary <- data
+        return(aru_tasks_summary)
+      }
 
     } else {stop('No api matches query.')}
 
