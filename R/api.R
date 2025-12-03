@@ -860,6 +860,8 @@ wt_location_photos <- function(organization, output = NULL) {
 
 wt_get_sync <- function(api, project = NULL, organization = NULL) {
 
+  u <- .gen_ua()
+
   api_match <- api
   organization <- if(!is.null(organization)) {.get_org_id(organization)}
 
@@ -921,7 +923,6 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
   message("Content-Type returned: ", content_type)
 
   if(!is.null(project)) {
-    tagger_list <- request("https://www-api.wildtrax.ca") |>
     req_url_path_append("bis/get-project-taggers") |>
     req_url_query(projectId = project) |>
     req_headers(Authorization = paste("Bearer", ._wt_auth_env_$access_token)) |>
@@ -929,7 +930,7 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
     req_method("GET") |>
     req_perform()
 
-  taggers <- r |>
+  taggers <- tagger_list |>
     resp_body_json() |>
     keep(~ !is.null(.x$user)) |>
     map_dfr(~ tibble(user_id = .x$user$id %||% NA, user_name = .x$user$name %||% NA)) |>

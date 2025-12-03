@@ -99,6 +99,7 @@ test_that("valid time intervals are handled", {
   expect_true(nrow(result_day_w) == 2006)
   expect_true(nrow(result_week_w) == 303)
   expect_true(nrow(result_month_w) == 85)
+
 })
 
 test_that("all specified variables are included in the summarised output", {
