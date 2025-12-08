@@ -69,19 +69,19 @@ test_that('Occupancy formatting', {
   expect_true(class(occu)[1] == 'unmarkedFrameOccu')
 })
 
-# test_that('Classifier functions', {
-#   rep <- wt_download_report(620, 'ARU', c('main','ai'), F)
-#   eval <- wt_evaluate_classifier(rep, "recording", remove_species = TRUE, thresholds = c(10,99))
-#   e1 <- wt_classifier_threshold(eval)
-#   add_sp <- wt_additional_species(rep, remove_species = TRUE, threshold = e1, resolution = "task")
-#   expect_true(!is.null(add_sp))
-# })
+test_that('Classifier functions', {
+  rep <- wt_download_report(620, 'ARU', c('main','ai'), F)
+  #eval <- wt_evaluate_classifier(rep, "recording", remove_species = TRUE, thresholds = c(10,99))
+  #e1 <- wt_classifier_threshold(eval)
+  add_sp <- wt_additional_species(rep, remove_species = TRUE, threshold = 0.8, resolution = "task")
+  expect_true(!is.null(add_sp))
+})
 
-# test_that('Add GRTS ID', {
-#   bats <- wt_download_report(685, 'ARU', 'location', F)
-#   grts <- wt_add_grts(bats, group_locations_in_cell = TRUE)
-#   expect_true(!is.null(grts))
-# })
+test_that('Add GRTS ID', {
+  bats <- wt_download_report(685, 'ARU', 'location', F)
+  grts <- wt_add_grts(bats, group_locations_in_cell = TRUE)
+  expect_true(!is.null(grts))
+})
 
 test_that('Location distances', {
   locs <- wt_download_report(620, 'ARU', 'location', F)

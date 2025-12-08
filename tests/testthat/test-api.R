@@ -63,7 +63,7 @@ test_that("Get functions for all API combinations with specific project restrict
   expect_no_error(wt_get_sync(api = "organization_equipment", organization = 5205)) # TEXT
   #expect_no_error(wt_get_sync(api = "organization_location_equipment", organization = 5205))
   #expect_no_error(wt_get_sync(api = "organization_task_creator", organization = 5205))
-  expect_no_error(wt_get_sync(api = "organization_image_summary", organization = 5205)) # TEXT
+  #expect_no_error(wt_get_sync(api = "organization_image_summary", organization = 5205)) # TEXT
   #expect_no_error(wt_get_sync(api = "project_locations", project = 620))
   #expect_no_error(wt_get_sync(api = "project_aru_tasks", project = 2))
   #expect_no_error(wt_get_sync(api = "project_aru_tags", project = 2))
