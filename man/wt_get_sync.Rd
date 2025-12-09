@@ -13,13 +13,13 @@ wt_get_sync(api, project = NULL, organization = NULL)
 \item \code{"organization_visits"}
 \item \verb{"organization_equipment}"
 \item \verb{"organization_deployments}"
-\item \verb{"organization_recording_summary}"
-\item \verb{"organization_image_summary}"
+\item \verb{"organization_recordings}"
 \item \code{"project_locations"}
 \item \code{"project_species"}
 \item \code{"project_aru_tasks"}
 \item \code{"project_aru_tags"}
-\item \code{"project_camera_tasks"}
+\item \verb{"project_image_sets}"
+\item \code{"project_image_metadata"}
 \item \code{"project_camera_tags"}
 \item \code{"project_point_counts"}
 }}

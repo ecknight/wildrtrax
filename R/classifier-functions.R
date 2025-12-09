@@ -22,7 +22,7 @@
 #'
 #' @return A tibble containing columns for precision, recall, and F-score for each of the requested thresholds.
 
-wt_evaluate_classifier <- function(data, resolution = "recording", remove_species = TRUE,  species = NULL, thresholds = c(10, 99)){
+wt_evaluate_classifier <- function(data, resolution = "recording", remove_species = TRUE,  species = NULL, thresholds = c(0.01, 0.9)){
 
   # Check if the data object is in the right format
   if (!inherits(data, "list") && !grepl("ai", names(data)[[2]]) && !grepl("main", names(data))[[1]]) {
@@ -106,7 +106,8 @@ wt_evaluate_classifier <- function(data, resolution = "recording", remove_specie
   #Total number of human detections
   human_totals <- both |>
     group_by(version) |>
-    summarise(human_total = sum(human, na.rm = TRUE))
+    summarise(human_total = sum(human, na.rm = TRUE)) |>
+    ungroup()
 
   #Make threshold vector
   threshold <- seq(thresholds[1], thresholds[2], 1)
@@ -124,7 +125,8 @@ wt_evaluate_classifier <- function(data, resolution = "recording", remove_specie
     mutate(version = as.numeric(version)) |>
     left_join(lk, by = c("version" = "row_n")) |>
     select(-version) |>
-    relocate("classifier")
+    relocate("classifier") |>
+    na.omit()
 
   return(prf_combined)
 

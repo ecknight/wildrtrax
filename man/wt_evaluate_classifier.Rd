@@ -9,7 +9,7 @@ wt_evaluate_classifier(
   resolution = "recording",
   remove_species = TRUE,
   species = NULL,
-  thresholds = c(10, 99)
+  thresholds = c(0.01, 0.9)
 )
 }
 \arguments{

@@ -685,11 +685,16 @@
 
   function(threshold, data, human_total){
     # Summarize
-    data_thresholded <- dplyr::filter(data, confidence >= threshold) |>
-      summarize(precision = sum(tp)/(sum(tp) + sum(fp)),
-                recall = sum(tp)/human_total) |>
-      mutate(fscore = (2*precision*recall)/(precision + recall),
-             threshold = threshold)
+    data_thresholded <- data |>
+      filter(confidence >= threshold) |>
+      summarize(
+        precision = sum(tp) / (sum(tp) + sum(fp)),
+        recall = sum(tp) / human_total
+      ) |>
+      mutate(
+        fscore = 2 * precision * recall / (precision + recall),
+        threshold = threshold
+      )
 
     if(anyNA(data_thresholded$precision) && !message_shown){
       message('No classifier detections for some higher selected thresholds; results will contain NAs')
