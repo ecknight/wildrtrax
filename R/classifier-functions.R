@@ -106,27 +106,27 @@ wt_evaluate_classifier <- function(data, resolution = "recording", remove_specie
   #Total number of human detections
   human_totals <- both |>
     group_by(version) |>
-    summarise(human_total = sum(human, na.rm = TRUE)) |>
-    ungroup()
+    summarise(human_total = sum(human, na.rm = TRUE), .groups = "drop")
 
   #Make threshold vector
-  threshold <- seq(thresholds[1], thresholds[2], 1)
+  thresholds_vec <- seq(thresholds[1], thresholds[2], 0.01)
 
-  calc_metrics <- function(data, human_total) {
-    do.call(rbind, lapply(threshold, .wt_calculate_prf, data = data, human_total = human_total))
-  }
+  #Calculate metrics
 
-  lk <- both |> select(version) |> distinct() |> mutate(row_n = row_number()) |> rename(classifier = version)
-  split_data <- both |> group_split(version)
-  split_totals <- human_totals$human_total
-  prf_results <- map2(split_data, split_totals, calc_metrics)
-  prf_combined <- bind_rows(prf_results, .id = "version")
-  prf_combined <- prf_combined |>
-    mutate(version = as.numeric(version)) |>
-    left_join(lk, by = c("version" = "row_n")) |>
-    select(-version) |>
-    relocate("classifier") |>
-    na.omit()
+  prf_combined <- both %>%
+    left_join(human_totals, by = "version") %>%
+    filter(!is.na(version)) %>%
+    group_split(version)
+
+  prf1 <- do.call(rbind, lapply(X=thresholds_vec, FUN=.wt_calculate_prf, data=prf_combined[[1]], human_total=unique(prf_combined[[1]]$human_total))) |>
+    mutate(classifier = unique(prf_combined[[1]]$version))
+  prf2 <- do.call(rbind, lapply(X=thresholds_vec, FUN=.wt_calculate_prf, data=prf_combined[[2]], human_total=unique(prf_combined[[2]]$human_total))) |>
+    mutate(classifier = unique(prf_combined[[2]]$version))
+  prf3 <- do.call(rbind, lapply(X=thresholds_vec, FUN=.wt_calculate_prf, data=prf_combined[[3]], human_total=unique(prf_combined[[3]]$human_total))) |>
+    mutate(classifier = unique(prf_combined[[3]]$version))
+
+  prf_combined <- bind_rows(prf1, prf2, prf3) |>
+    distinct()
 
   return(prf_combined)
 
