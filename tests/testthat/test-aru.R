@@ -70,7 +70,7 @@ test_that('Occupancy formatting', {
 })
 
 test_that('Classifier functions', {
-  rep <- wt_download_report(1750, 'ARU', c('main','ai'), F)
+  rep <- wt_download_report(3702, 'ARU', c('main','ai'), F)
   eval <- wt_evaluate_classifier(rep, "task", remove_species = TRUE, thresholds = c(0.01,0.99))
   e1 <- wt_classifier_threshold(eval)
   add_sp <- wt_additional_species(rep, remove_species = TRUE, threshold = 0.8, resolution = "task")

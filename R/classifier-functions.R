@@ -17,7 +17,7 @@
 #' reports = c("main", "ai"), weather_cols = FALSE)
 #'
 #' eval <- wt_evaluate_classifier(data, resolution = "recording",
-#' remove_species = TRUE, thresholds = c(10, 99))
+#' remove_species = TRUE, thresholds = c(0.1, 0.99))
 #' }
 #'
 #' @return A tibble containing columns for precision, recall, and F-score for each of the requested thresholds.
@@ -320,8 +320,6 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 0.5, 
     if(resolution != "task"){
       message("Currently tag uploads are best supported when you resolve at the task level. You may encounter an error otherwise. If you used `wt_additional_species(resolution='recording')` change the task lengths to the maximum length of the recording in your project")
     }
-
-    ### Fields in WildTrax Sync will be updated in Vue3, or in Vue2 if there's high and urgent user demand. ###
 
     new_export <- new |>
       relocate(location) |>
