@@ -158,11 +158,13 @@ wt_classifier_threshold <- function(data){
 
   # Filter to highest F-score
   highest_fscore <- data |>
+    group_by(classifier) |>
     mutate(fscore = round(fscore, 2)) |>
-    dplyr::filter(fscore == max(fscore, na.rm = TRUE))
+    dplyr::filter(fscore == max(fscore, na.rm = TRUE)) |>
+    ungroup()
 
   # Return the highest threshold of highest F-score as a single numeric value
-  return(as.numeric(max(highest_fscore$threshold)))
+  return(highest_fscore |> group_by(classifier) |> summarise(threshold = max(fscore)) |> distinct())
 }
 
 
