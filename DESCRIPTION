@@ -19,7 +19,7 @@ Description: This R package contains functions to help manage and analyze enviro
 Depends: R (>= 4.5.0)
 License: MIT + file LICENSE
 Imports:
-    dplyr (>= 1.0.0),
+    dplyr (>= 1.1.0),
     fs,
     ggplot2,
     httr2,

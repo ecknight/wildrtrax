@@ -466,6 +466,8 @@
     stop("spp argument must be length 1. Use a loop or map for multiple species.")
   spp <- as.character(spp)
 
+  requireNamespace("QPAD", quietly = F)
+
   getBAMspecieslist <- get("getBAMspecieslist", envir = asNamespace("QPAD"))
   coefBAMspecies <- get("coefBAMspecies", envir = asNamespace("QPAD"))
   bestmodelBAMspecies <- get("bestmodelBAMspecies",  envir = asNamespace("QPAD"))
@@ -687,7 +689,7 @@
     # Summarize
     data_thresholded <- data |>
       filter(confidence >= threshold) |>
-      summarize(
+      reframe(
         precision = sum(tp) / (sum(tp) + sum(fp)),
         recall = sum(tp) / human_total
       ) |>
