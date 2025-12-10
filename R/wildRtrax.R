@@ -207,6 +207,27 @@ utils::globalVariables(
     "species_code.x", "species_code.y", "species_individual_number", "species_order",
     "stakeDistance", "tag_duration", "tag_is_hidden_for_verification",
     "tag_max_freq", "tag_min_freq", "tag_start_time", "task_count", "task_length",
-    "tasksCompleted", "tasks_completed", "unnest_wider", "visibilityId", "visitCount"
+    "tasksCompleted", "tasks_completed", "unnest_wider", "visibilityId", "visitCount",
+    "tagger_list",
+    "user_id",
+    "pudId",
+    "project_Id",
+    "statusId",
+    "taggerUserId",
+    "motionImageCount",
+    "totalImageCount",
+    "tagCount",
+    "imagesTaggedCount",
+    "user_name",
+    "image_set_status",
+    "taskId",
+    "methodId",
+    "isComplete",
+    "transcriberUserId",
+    "frequency",
+    "uploadDate",
+    "individualCount",
+    "detectedSpeciesIds",
+    "recordingURL"
   )
 )

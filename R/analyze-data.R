@@ -98,6 +98,7 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
         ungroup()
 
     } else {
+
       x <- raw_data |>
         group_by({{ project_col }}, {{ station_col }}, {{ image_set_id }}) |>
         arrange({{ date_time_col }}) |>

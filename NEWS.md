@@ -7,13 +7,13 @@
 * Move to support WildTrax 2.0 including APIs through `wt_get_sync()`, `wt_download_report()` and `wt_download_media()`.
 * `wt_get_download_summary()` is replaced by `wt_get_projects()` to correspond to new WildTrax 2.0 APIs
 * Queries benchmarked as 2-3x on new production server at the University of Alberta in Edmonton, Canada
-* New function `wt_format_audiomoth_filenames()` serves to add location prefixes for [AudioMoth](https://www.openacousticdevices.info/audiomoth) data making it capable to upload to WildTrax
+* New function `wt_format_audiomoth_filenames()` serves to add location prefixes for [AudioMoth](https://www.openacousticdevices.info/audiomoth) data containing only date times.
 
 # wildrtrax 1.4
 
 ## Major changes
 
-* New function, `wt_get_sync()`, allows users to get all columns and data from syncs (upload / download and table views) across the system. Huge development leap as users can now GET all relevant APIs. Functionally replaces `wt_get_recordings()`, `wt_get_locations()`, `wt_get_visits()`, `wt_get_image_sets()` in one smooth function relevant to the Organization and Project you want.
+* New function, `wt_get_sync()`, allows users to get columns and data from syncs (upload / download and table views) across the system. Functionally replaces `wt_get_recordings()`, `wt_get_locations()`, `wt_get_visits()`, `wt_get_image_sets()` in one smooth function relevant to the Organization or Project needed.
 * Fixed a bug that incorrectly adjusted time zones in `wt_qpad_offsets()`. This bug affected QPAD offsets used for [species with time since sunrise in the top model](https://github.com/borealbirds/QPAD-offsets-correction/blob/main/qpad_tssr_species.csv) and in areas outside the Mountain Time Zone (MST/MDT). For more information, please see the [BAM QPAD correction repository](https://github.com/borealbirds/QPAD-offsets-correction) for further details or email bamp@ualberta.ca for assistance.
 
 ## Minor changes
