@@ -113,21 +113,19 @@ wt_evaluate_classifier <- function(data, resolution = "recording", remove_specie
 
   #Calculate metrics
 
-  prf_combined <- both %>%
-    left_join(human_totals, by = "version") %>%
-    filter(!is.na(version)) %>%
-    group_split(version)
-
-  prf1 <- do.call(rbind, lapply(X=thresholds_vec, FUN=.wt_calculate_prf, data=prf_combined[[1]], human_total=unique(prf_combined[[1]]$human_total))) |>
-    mutate(classifier = unique(prf_combined[[1]]$version))
-  prf2 <- do.call(rbind, lapply(X=thresholds_vec, FUN=.wt_calculate_prf, data=prf_combined[[2]], human_total=unique(prf_combined[[2]]$human_total))) |>
-    mutate(classifier = unique(prf_combined[[2]]$version))
-  prf3 <- do.call(rbind, lapply(X=thresholds_vec, FUN=.wt_calculate_prf, data=prf_combined[[3]], human_total=unique(prf_combined[[3]]$human_total))) |>
-    mutate(classifier = unique(prf_combined[[3]]$version))
-
-  prf_combined <- bind_rows(prf1, prf2, prf3) |>
+  prf_combined <- both |>
+    left_join(human_totals, by = "version") |>
+    filter(!is.na(version)) |>
+    group_split(version) |>
+    map_dfr(function(df) {
+      map_dfr(thresholds_vec, ~ .wt_calculate_prf(
+        threshold = .x,
+        data = df,
+        human_total = unique(df$human_total)
+      )) |>
+        mutate(classifier = unique(df$version))
+    }) |>
     distinct()
-
   return(prf_combined)
 
 }
