@@ -8,7 +8,7 @@
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
-This R package contains functions to help manage and analyze environmental sensor data to and from WildTrax
+This R package contains functions to help manage and analyze environmental sensor data to and from WildTrax.
 }
 \seealso{
 Useful links:
