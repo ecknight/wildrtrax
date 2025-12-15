@@ -14,8 +14,9 @@ library(dplyr)
 library(ggplot2)
 library(httr2)
 library(readr)
+library(wildrtrax)
 
-load("package.RData")
+load("classifiers.RData")
 #save.image("package.RData")
 #save.image("classifiers.RData")
 ```
@@ -81,7 +82,7 @@ plot.f
 
 ```{r, eval=T, include=T, echo=F, message=F, warning=F}
 
-eval <- wt_evaluate_classifier(data, resolution = "task", remove_species = T, species = NULL, thresholds = c(0.01,0.99))
+eval <- wt_evaluate_classifier(data, resolution = "task", remove_species = T, species = NULL, thresholds = c(0.25,0.99))
 
 plot.pr.e <- ggplot(eval) +
   geom_line(aes(x=recall, y=precision, colour=classifier), linewidth=1.5) +
