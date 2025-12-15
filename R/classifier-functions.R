@@ -49,7 +49,7 @@ wt_evaluate_classifier <- function(data, resolution = "recording", remove_specie
   #Summarize the classifier report to the requested resolution
   if(resolution=="task"){
     detections <- class |>
-      rename(start_s = startTime) |>
+      rename(start_s = detection_time) |>
       inner_join(data[[2]] |> dplyr::select(recording_id, task_id, task_duration) |> distinct(), by = c("recording_id" = "recording_id")) |>
       filter(!start_s > task_duration) |>
       group_by(location_id, recording_id, version, species_common_name) |>
@@ -202,26 +202,27 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 0.5, 
   #Get the classifier report and filter species as requested
   if(remove_species==TRUE){
     class <- data[[1]] |>
-      dplyr::filter(is_species_allowed_in_project==TRUE)
+      dplyr::filter(is_species_allowed_in_project==TRUE) |>
+      dplyr::filter(confidence >= threshold)
   } else {
     class <- data[[1]]
   }
 
-  #Summarize the reports and put together at the desired resolution
+  #Clean things up
+  class <- class |>
+    dplyr::rename(ai_detection_time = detection_time) |>
+    dplyr::left_join(data[[2]] |> dplyr::select(task_id, recording_id) |> distinct(), by = "recording_id")
 
-  #Create a join between task and recording
-  classed <- class |>
-    dplyr::inner_join(data[[2]] |> dplyr::select(recording_id, task_id, task_duration), by = c("recording_id" = "recording_id"), relationship = "many-to-many")
+  #Summarize the reports and put together at the desired resolution
 
   if(resolution=="task"){
 
     #Classifier report
     detections <- class |>
-      dplyr::filter(confidence >= threshold) |>
-      dplyr::inner_join(data[[2]] |> dplyr::select(recording_id, task_id, task_duration, detection_time), by = c("recording_id" = "recording_id"), relationship = "many-to-many") |>
-      dplyr::filter(!startTime > task_duration) |>
+      dplyr::inner_join(data[[2]] |> dplyr::select(recording_id, task_duration, detection_time), by = c("recording_id" = "recording_id")) |>
+      dplyr::filter(!ai_detection_time > task_duration) |>
       dplyr::group_by(location_id, recording_id, task_id, species_common_name) |>
-      dplyr::summarise(confidence = max(confidence),  .groups="keep") |>
+      dplyr::summarise(confidence = max(confidence)) |>
       dplyr::ungroup()
 
     #Main report
@@ -231,7 +232,7 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 0.5, 
 
     #Put together
     new <- dplyr::anti_join(detections, main, by=c("location_id", "recording_id", "task_id", "species_common_name")) |>
-      dplyr::left_join(classed, by=c("location_id", "recording_id", "task_id", "species_common_name", "confidence"), multiple="all")
+      dplyr::left_join(class, by=c("location_id", "recording_id", "task_id", "species_common_name", "confidence"), multiple="all")
     if (nrow(new) == 0) {
       stop("There were no additional species detected.")
     } else {
@@ -246,7 +247,6 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 0.5, 
 
     #Classifier report
     detections <- class |>
-      dplyr::filter(confidence >= threshold) |>
       dplyr::group_by(location_id, recording_id, species_common_name) |>
       dplyr::summarise(confidence = max(confidence),  .groups="keep") |>
       dplyr::ungroup()
@@ -258,7 +258,7 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 0.5, 
 
     #Put together
     new <- dplyr::anti_join(detections, main, by=c("location_id", "recording_id", "species_common_name")) |>
-      dplyr::left_join(class, by=c("location_id", "recording_id", "species_common_name", "confidence"), multiple="all") |>
+      dplyr::left_join(class, by=c("location_id", "recording_id", "species_common_name", "confidence")) |>
       dplyr::group_by(location_id, recording_id, species_common_name, confidence) |>
       dplyr::sample_n(1) |>
       dplyr::ungroup()
@@ -330,12 +330,12 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 0.5, 
       mutate(observer = "Not Assigned") |>
       relocate(observer, .after = task_duration) |>
       tibble::add_column(species_code = NA_character_, .after = "observer") |>
-      arrange(species_common_name, startTime) |>
+      arrange(species_common_name, detection_time) |>
       inner_join(wt_get_species() |> select(species_code, species_common_name), by = "species_common_name") |>
       select(-species_code.x) |>
       relocate(species_code.y, .after = observer) |>
       rename(species_code = species_code.y) |>
-      rename(tag_start_time = startTime) |>
+      rename(tag_start_time = detection_time) |>
       group_by(location, recording_date_time, species_common_name) |>
       mutate(individual_number = row_number(), .after = species_code) |>
       ungroup() |>

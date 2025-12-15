@@ -127,8 +127,6 @@ WildTrax uses both BirdNET and HawkEars to automatically classify species in all
 Use `wt_download_report(reports = c('main','ai'))` to download the classifier reports and the main report for further analysis. We'll use the OSM 2023 dataset as an example.
 
 ```{r, include=F, message=F, warning=F, echo=F, eval=T}
-library(wildrtrax)
-
 Sys.setenv(WT_USERNAME = 'guest', WT_PASSWORD = 'Apple123')
 wt_auth()
 
@@ -141,7 +139,6 @@ data <- wt_download_report(project_id = 2088,
 ```
 
 ```{r, include=T, eval=F}
-library(wildrtrax)
 
 Sys.setenv(WT_USERNAME = 'guest', WT_PASSWORD = 'Apple123')
 wt_auth()
