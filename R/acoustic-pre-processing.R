@@ -11,7 +11,6 @@
 #' @importFrom dplyr mutate select filter case_when arrange group_by row_number ungroup bind_rows
 #' @importFrom tuneR readWave
 #' @importFrom purrr map map_dbl pluck
-#' @importFrom rlang env_has current_env
 #' @importFrom tidyr separate pivot_longer unnest_longer
 #' @export
 #'
@@ -106,22 +105,14 @@ wt_audio_scanner <- function(path, file_type, extra_cols = F) {
     }
   }
   # Stitch together
-  if (env_has(current_env(), "df_final_simple")) {
+  if (exists("df_final_simple", inherits = FALSE)) {
     df_final <- df_final_simple
-  } else if (exists("df_wav") & !exists("df_wac") & !exists("df_flac")) {
-    df_final <- bind_rows(df_wav)
-  } else if (exists("df_wav") & exists("df_wac") & !exists("df_flac")) {
-    df_final <- bind_rows(df_wav, df_wac)
-  } else if (exists("df_wav") & !exists("df_wac") & exists("df_flac")) {
-    df_final <- bind_rows(df_wav, df_flac)
-  } else if (!exists("df_wav") & exists("df_wac") & !exists("df_flac")) {
-    df_final <- bind_rows(df_wac)
-  } else if (!exists("df_wav") & !exists("df_wac") & exists("df_flac")) {
-    df_final <- bind_rows(df_flac)
-  } else if (!exists("df_wav") & exists("df_wac") & exists("df_flac")) {
-    df_final <- bind_rows(df_wac, df_flac)
-  } else if (exists("df_wav") & exists("df_wac") & exists("df_flac")) {
-    df_final <- bind_rows(df_wac, df_wav, df_flac)
+  } else {
+    dfs <- c("df_wav", "df_wac", "df_flac")
+    dfs <- dfs[dfs %in% ls()]
+    if (length(dfs)) {
+      df_final <- dplyr::bind_rows(mget(dfs))
+    }
   }
   # Return final data frame
   return(df_final)

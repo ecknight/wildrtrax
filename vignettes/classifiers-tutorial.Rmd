@@ -12,7 +12,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(dplyr)
 library(ggplot2)
-library(gridExtra)
 library(httr2)
 library(readr)
 
@@ -67,21 +66,6 @@ dat <- read_csv(tmp_file) |>
 ```
 
 ```{r, eval=T, include=T, echo=F, message=F, warning=F}
-plot.p <- ggplot(dat) +
-  geom_line(aes(x=thresh, y=p), size=1.5) +
-  xlab("Score threshold") +
-  ylab("Precision") +
-  xlim(c(0.1, 1)) +
-  ylim(c(0, 1)) +
-  theme_bw()
-
-plot.r <- ggplot(dat) +
-  geom_line(aes(x=thresh, y=r), size=1.5) +
-  xlab("Score threshold") +
-  ylab("Recall") +
-  xlim(c(0.1, 1)) +
-  ylim(c(0, 1)) +
-  theme_bw()
 
 plot.f <- ggplot(dat) +
   geom_line(aes(x=thresh, y=f), size=1.5) +
@@ -91,22 +75,13 @@ plot.f <- ggplot(dat) +
   ylim(c(0, 1)) +
   theme_bw()
 
-plot.pr <- ggplot(dat) +
-  geom_line(aes(x=r, y=p), size=1.5) +
-  xlab("Recall") +
-  ylab("Precision") +
-  xlim(c(0.1, 1)) +
-  ylim(c(0, 1)) +
-  theme_bw()
-
-gridExtra::grid.arrange(plot.p, plot.r, plot.f, plot.pr, ncol=2,
-                        bottom = "Figure 1. Precision, recall, and F-score of BirdNET  per minute of recording\ncompared to expert human listeners")
+plot.f
 
 ```
 
 ```{r, eval=T, include=T, echo=F, message=F, warning=F}
 
-eval <- wt_evaluate_classifier(data, resolution = "task", remove_species = T, species = NULL, thresholds = c(0.25,0.99))
+eval <- wt_evaluate_classifier(data, resolution = "task", remove_species = T, species = NULL, thresholds = c(0.01,0.99))
 
 plot.pr.e <- ggplot(eval) +
   geom_line(aes(x=recall, y=precision, colour=classifier), linewidth=1.5) +

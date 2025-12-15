@@ -26,7 +26,6 @@ Imports:
     magick,
     purrr,
     readr,
-    rlang,
     seewave,
     sf,
     suntools,
@@ -39,8 +38,7 @@ Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
-    usethis,
-    gridExtra
+    usethis
 VignetteBuilder: knitr, rmarkdown
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
