@@ -926,4 +926,84 @@ wt_songscope_tags <- function (input, output = c("env","csv"), output_file=NULL,
     print("Converted to WildTrax tags. Review the output CSV then go to your WildTrax project > Manage > Upload Tags")
   }
 
+}
+
+#' Convert GUANO embeded metadata to tags and metadata output for a Project
+#'
+#' @description `wt_guano_tags` Takes the embeded classifier output and converts them into a WildTrax tag template for upload
+#'
+#' @param path Character; The path to the input csv
+#' @param output Character; Path where the output file will be stored
+#' @param output_file Character; Path of the output file
+
+#' @import dplyr
+#' @import tibble
+#' @import readr
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' wt_guano_tags(path = my_audio_file.csv, output = NULL, output_file = NULL)
+#' }
+#'
+#' @return A csv formatted as a WildTrax tag template
+
+wt_guano_tags <- function(path, output = NULL, output_file = NULL) {
+
+  wav_path <- path
+  con <- file(wav_path, "rb")
+  on.exit(close(con), add = TRUE)
+
+  read_chunk <- function(con) {
+    id <- tryCatch(
+      rawToChar(readBin(con, "raw", 4)),
+      error   = function(e) NA_character_,
+      warning = function(w) NA_character_
+    )
+    size <- readBin(con, "integer", 1, size = 4, endian = "little", signed = FALSE)
+    data <- readBin(con, "raw", size)
+
+    list(id = id, size = size, data = data)
   }
+
+  # Skip RIFF header (RIFF + size + WAVE)
+  readBin(con, "raw", 12)
+
+  chunks <- list()
+
+  while (TRUE) {
+    peek <- tryCatch(readBin(con, "raw", 1), error = function(e) NULL, warning = function(w) NULL)
+    if (is.null(peek) || length(peek) == 0) break
+    seek(con, -1, origin = "current")
+    chunks[[length(chunks) + 1]] <- read_chunk(con)
+  }
+
+  # Extract GUANO chunk
+  idx <- which(vapply(chunks, function(x) x$id, "") == "guan")
+  guan <- chunks[[idx]]
+
+  # Decode text
+  guan_txt <- rawToChar(guan$data, multiple = TRUE)
+  guan_txt <- paste(guan_txt, collapse = "")
+  lines <- unlist(strsplit(guan_txt, "\n"))
+  kv <- do.call(rbind, lapply(lines, function(x) {
+    parts <- strsplit(x, ":", fixed = TRUE)[[1]]
+    key <- trimws(parts[1])
+    value <- trimws(paste(parts[-1], collapse = ":"))
+    c(key, value)
+  }))
+  guan_tibble <- tibble(key = kv[,1], value = kv[,2])
+
+  guan_tags <- guan_tibble |>
+    pivot_wider(names_from = key, values_from = value) |>
+    rename(location = `Loc Position`)
+
+  guan_extra <- guan_tibble |>
+    pivot_wider(names_from = key, values_from = value) |>
+    rename(guano_version = `GUANO|Version`)
+
+  return(list(guan_tags, guan_extra))
+
+}
+
