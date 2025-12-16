@@ -735,12 +735,6 @@ wt_format_data <- function(input, format = c('FWMIS','NABAT')){
   ## User agent
   u <- .gen_ua()
 
-  # Enabled functionalized api
-  #spp <- .wt_api_pr(
-    #path = "/bis/get-species-fwmis-map"
-  #)
-  #spp_fwmis <- resp_body_json(spp)
-
   spp_fwmis <- request("https://www-api.wildtrax.ca") |>
     req_url_path_append("/bis/get-species-fwmis-map") |>
     req_headers(
@@ -755,111 +749,6 @@ wt_format_data <- function(input, format = c('FWMIS','NABAT')){
   # spps <- httr::content(spp_fwmis)
   spps_tibble <- map_dfr(spp_fwmis, ~ tibble(species_id = .x$sfw_species_id, sfw_name = .x$sfw_name, sfw_name_cam = .x$sfw_name_cam)) |>
     inner_join(wt_get_species() |> select(species_id, species_common_name), by = ("species_id"))
-
-  org_id = 5
-  #DO THIS INSTEAD org_id <- input %>% select(organization) %>% distinct() %>% pull()
-
-  loceq_payload <- list(
-    limit = 2e9,
-    orderBy = "deploymentDate",
-    orderDirection = "DESC",
-    organizationId = org_id,
-    page = 1)
-
-  location_equipment <- request("https://www-api.wildtrax.ca") |>
-    req_url_path_append("/bis/get-location-visit-equipment-summary") |>
-    req_headers(
-      Authorization = paste("Bearer", ._wt_auth_env_$access_token),
-      Pragma = "no-cache",
-      Referer = "https://www.wildtrax.ca/"
-    ) |>
-    req_user_agent(u) |>
-    req_body_json(loceq_payload) |>
-    req_perform() |>
-    resp_body_json()
-
-  location_equipment <- map_dfr(location_equipment[[2]], ~ tibble(location = .x$locationName,
-                                   deployment_date = .x$deploymentDate,
-                                   retrieval_date = .x$retrieveDate,
-                                   equipment_type = .x$typeId,
-                                   equipment_code = .x$code,
-                                   serial_number = .x$serialNo,
-                                   equipment_make = .x$make,
-                                   equipment_model = .x$model,
-                                   equipment_condition = .x$conditionId,
-                                   equipment_direction = .x$directionDegree,
-                                   equipment_mount = .x$mountId,
-                                   equipment_target = .x$targetId,
-                                   stake_distance = .x$stakeDistance,
-                                   parent_equipment = .x$parentEquipment))
-
-   visit_payload <- list(
-    limit = 2e9,
-    orderBy = "locationName",
-    orderDirection = "ASC",
-    organizationId = org_id,
-    page = 1)
-
-   visits <- request("https://www-api.wildtrax.ca") |>
-     req_url_path_append("/bis/get-location-visits") |>
-     req_headers(
-       Authorization = paste("Bearer", ._wt_auth_env_$access_token),
-       Pragma = "no-cache",
-       Referer = "https://www.wildtrax.ca/"
-     ) |>
-     req_user_agent(u) |>
-     req_body_json(visit_payload) |>
-     req_perform() |>
-     resp_body_json()
-
-   visits <- map_dfr(visits[[2]], ~ tibble(location = .x$locationName,
-                                          latitude = .x$latitude,
-                                          longitude = .x$longitude,
-                                          visit_date = .x$date,
-                                          snow_depth_m = .x$snowDepth,
-                                          water_depth_cm = .x$waterDepth,
-                                          bait = .x$baitId,
-                                          crew = .x$crewName,
-                                          access_method = .x$accessMethodId,
-                                          distance_to_clutter = .x$distanceToClutter,
-                                          distance_to_water = .x$distanceToWater,
-                                          clutter_percent = .x$clutterPercent,
-                                          sunrise = .x$sunRise,
-                                          sunset = .x$sunSet,
-                                          timezone = .x$timeZone,
-                                          land_features = .x$landFeatureIds))
-
-  output <- input |>
-    inner_join(spps_tibble, by = c("species_common_name"))
-
-  output <- output |>
-    inner_join(visits |> select(location, visit_date, crew, land_features), by = c("location" = "location"))
-
-  if (nrow(output) == 0) {stop('There were no visits to join for this project. Enter visits in your Organization.')}
-
-  output <- output |>
-    inner_join(location_equipment |> select(location, deployment_date, retrieval_date, equipment_condition, equipment_direction, equipment_mount, stake_distance), by = c("location" = "location"))
-
-  if (nrow(output) == 0) {stop('There was no location equipment for this project. Enter your equipment and visits in your Organization.')}
-
-  if (any(grepl("image", names(output), ignore.case = TRUE))) {
-    # DO CAMERA STUFF
-    output <- output |>
-      select(location, latitude, longitude, location_buffer_m, visit_date, deployment_date, retrieval_date, image_date_time, sfw_name, individual_count, age_class, sex_class) |>
-      distinct()
-    return(output)
-    # FORMAT AND OUTPUT
-  } else {
-    # DO ARU STUFF
-    output <- output |>
-      select(organization, location, latitude, longitude, location_buffer_m, recording_date_time, deployment_date, retrieval_date, visit_date, sfw_name, individual_order, individual_count) |>
-      distinct() |>
-      mutate(`sc_SURVEYTYPE.domainCodeIdSurveyType` = "Breeding -BREEDING", .before = organization) |>
-      rename("wi_stakeholderInSurveyCrew" = organization,
-             "sd_effectiveDate" = deployment_date,
-             "sd_terminationDate" = retrieval_date) |>
-      relocate(sd_effectiveDate, .after = `sc_SURVEYTYPE.domainCodeIdSurveyType`) |>
-      relocate(sd_terminationDate, .after = sd_effectiveDate)
 
     new_columns <- list(
       sc_TAXONOMIC.targetSpecies = NA,
@@ -1046,6 +935,5 @@ wt_format_data <- function(input, format = c('FWMIS','NABAT')){
 
     return(output)
   }
-}
 
 

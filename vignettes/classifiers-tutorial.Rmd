@@ -81,11 +81,15 @@ plot.f
 ```
 
 ```{r, eval=T, include=T, echo=F, message=F, warning=F}
+Sys.setenv(WT_USERNAME = 'guest', WT_PASSWORD = 'Apple123')
+wt_auth()
+
+data <- wt_download_report(620, 'ARU', c('main','ai'))
 
 eval <- wt_evaluate_classifier(data, resolution = "task", remove_species = T, species = NULL, thresholds = c(0.25,0.99))
 
 plot.pr.e <- ggplot(eval) +
-  geom_line(aes(x=recall, y=precision, colour=classifier), linewidth=1.5) +
+  geom_smooth(aes(x=recall, y=precision, colour=classifier), linewidth=1.5) +
   xlab("Recall") +
   ylab("Precision") +
   xlim(0,1) +
@@ -176,8 +180,14 @@ plot.pr.e <- ggplot(eval) +
   ylim(0,1) +
   theme_bw()
 
-library(gridExtra)
-grid.arrange(plot.p.e, plot.r.e, plot.f.e, plot.pr.e, ncol=2)
+par(mfrow = c(2, 2))
+
+print(plot.p.e)
+print(plot.r.e)
+print(plot.f.e)
+print(plot.pr.e)
+
+par(mfrow = c(1, 1))  # reset
 ```
 
 ## Selecting and filtering a threshold

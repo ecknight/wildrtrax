@@ -23,7 +23,6 @@
 #'
 #' @import dplyr
 #' @importFrom tidyr pivot_longer pivot_wider unnest crossing replace_na drop_na
-#' @importFrom rlang is_missing
 #' @export
 #'
 #' @examples
@@ -47,7 +46,7 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
                              image_set_id = image_set_id) {
 
   # Check that only one is supplied
-  if (!rlang::is_missing(raw_data) & !is.null(effort_data)) {
+  if (!missing(raw_data) && !is.null(effort_data)) {
     stop("Please only supply a value for one of `raw_data` or `effort_data`.")
   }
 
@@ -74,7 +73,7 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
   #station_col <- deparse(substitute(station_col))
 
   # Parse the raw or effort data to get time ranges for each camera deployment.
-  if (!rlang::is_missing(raw_data)) {
+  if (!missing(raw_data)) {
 
     if (exclude_out_of_range == FALSE) {
       x <- raw_data |>
@@ -230,7 +229,6 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
 #' @param remove_domestic Logical; Should domestic animal tags (e.g. cows) be removed? Defaults to TRUE.
 #'
 #' @import dplyr
-#' @importFrom rlang is_missing
 #' @export
 #'
 #' @examples
