@@ -35,6 +35,7 @@ reference:
   - wt_get_species
   - wt_get_sync
   - wt_glean_ap
+  - wt_guano_tags
   - wt_ind_detect
   - wt_kaleidoscope_tags
   - wt_location_distances

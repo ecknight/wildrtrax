@@ -2,7 +2,8 @@
 % Please edit documentation in R/utils.R
 \name{.wt_api_put}
 \alias{.wt_api_put}
-\title{An internal function to handle generic PUT requests to WildTrax}
+\title{An internal function to handle generic PUT requests to WildTrax
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}}
 \usage{
 .wt_api_put(path, body = list(), max_time = 300)
 }

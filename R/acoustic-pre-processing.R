@@ -956,14 +956,9 @@ wt_guano_tags <- function(path, output = NULL, output_file = NULL) {
   on.exit(close(con), add = TRUE)
 
   read_chunk <- function(con) {
-    id <- tryCatch(
-      rawToChar(readBin(con, "raw", 4)),
-      error   = function(e) NA_character_,
-      warning = function(w) NA_character_
-    )
+    id <- tryCatch(rawToChar(readBin(con, "raw", 4)), error   = function(e) NA_character_, warning = function(w) NA_character_)
     size <- readBin(con, "integer", 1, size = 4, endian = "little", signed = FALSE)
     data <- readBin(con, "raw", size)
-
     list(id = id, size = size, data = data)
   }
 
@@ -995,6 +990,7 @@ wt_guano_tags <- function(path, output = NULL, output_file = NULL) {
   }))
   guan_tibble <- tibble(key = kv[,1], value = kv[,2])
 
+  # Convert to WildTrax tags and metadata
   guan_tags <- guan_tibble |>
     pivot_wider(names_from = key, values_from = value) |>
     rename(location = `Loc Position`)

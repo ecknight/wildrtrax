@@ -483,7 +483,7 @@ wt_format_occupancy <- function(data,
 #'
 #' @references Solymos et al. 2013. Calibrating indices of avian density from non-standardized survey data: making the most of a messy situation. Methods in Ecology and Evolution, 4, 1047-1058.
 #'
-#' @import dplyr
+#' @import dplyr QPAD
 #' @export
 #'
 #' @examples
@@ -525,8 +525,6 @@ wt_qpad_offsets <- function(data, species = c("all"), version = 3, together=FALS
 
   #Load QPAD estimates
   cat("\nLoading QPAD estimates... ")
-  load_BAM_QPAD <- get("load_BAM_QPAD", envir = asNamespace("QPAD"))
-  getBAMspecieslist <- get("getBAMspecieslist", envir = asNamespace("QPAD"))
   load_BAM_QPAD(version)
 
   #Make prediction object
@@ -936,4 +934,52 @@ wt_format_data <- function(input, format = c('FWMIS','NABAT')){
     return(output)
   }
 
+#' Get EXIF metadata from images in WildTrax
+#'
+#' @description This function gets all relevant EXIF metadata from images in Projects in WildTrax
+#'
+#' @param data `wt_download_report(reports = c(image_report))` object containing
+#'
+#' @import dplyr httr2 tidyr
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#'
+#' dat <- wt_download_report(reports = c("image_report")
+#' exif.data <- wt_get_exif(dat)
+#' }
+#' @return A dataframe with the EXIF metadata for each image
 
+wt_get_exif <- function(data) {
+
+  # Check if authentication has expired:
+  if (.wt_auth_expired())
+    stop("Please authenticate with wt_auth().", call. = FALSE)
+
+  input_data <- data
+
+  all_images <- input_data |>
+    select(image_id) |>
+    distinct() |>
+    slice(1:10) |>
+    mutate(
+      exif = map(
+        image_id,
+        ~ request("https://www-api.wildtrax.ca") |>
+          req_url_path_append("bis", "camera", "get-image-exif") |> # Use camera specific schema
+          req_url_query(imageId = .x) |>
+          req_headers(
+            Authorization = paste("Bearer", ._wt_auth_env_$access_token)
+          ) |>
+          req_user_agent(.gen_ua()) |>
+          req_timeout(300) |>
+          req_perform() |>
+          resp_body_json()
+      )
+    ) |>
+    tidyr::unnest_wider(exif)
+
+  return(all_images)
+
+}
