@@ -934,13 +934,15 @@ wt_format_data <- function(input, format = c('FWMIS','NABAT')){
     return(output)
   }
 
-#' Get EXIF metadata from images in WildTrax
+#' Get EXIF metadata from images
 #'
-#' @description This function gets all relevant EXIF metadata from images in Projects in WildTrax
+#' @description This function gets all relevant EXIF metadata from images in Projects
 #'
 #' @param data `wt_download_report(reports = c(image_report))` object containing
 #'
-#' @import dplyr httr2 tidyr
+#' @import dplyr httr2
+#' @importFrom tidyr unnest_wider
+#' @importFrom purrr map
 #' @export
 #'
 #' @examples
@@ -966,19 +968,22 @@ wt_get_exif <- function(data) {
     mutate(
       exif = map(
         image_id,
-        ~ request("https://www-api.wildtrax.ca") |>
-          req_url_path_append("bis", "camera", "get-image-exif") |> # Use camera specific schema
-          req_url_query(imageId = .x) |>
-          req_headers(
-            Authorization = paste("Bearer", ._wt_auth_env_$access_token)
-          ) |>
-          req_user_agent(.gen_ua()) |>
-          req_timeout(300) |>
-          req_perform() |>
-          resp_body_json()
-      )
-    ) |>
+        ~ tryCatch(
+          {
+            request("https://www-api.wildtrax.ca") |>
+              req_url_path_append("bis", "camera", "get-image-exif") |>
+              req_url_query(imageId = .x) |>
+              req_headers(
+                Authorization = paste("Bearer", ._wt_auth_env_$access_token)
+              ) |>
+              req_user_agent(.gen_ua()) |>
+              req_timeout(300) |>
+              req_perform() |>
+              resp_body_json()
+          },
+          error = function(e) {"Failed to retrieve EXIF for image_id { .x }"}))) |>
     tidyr::unnest_wider(exif)
+
 
   return(all_images)
 

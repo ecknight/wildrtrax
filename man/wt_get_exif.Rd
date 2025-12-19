@@ -2,7 +2,7 @@
 % Please edit documentation in R/convenience-functions.R
 \name{wt_get_exif}
 \alias{wt_get_exif}
-\title{Get EXIF metadata from images in WildTrax}
+\title{Get EXIF metadata from images}
 \usage{
 wt_get_exif(data)
 }
@@ -13,7 +13,7 @@ wt_get_exif(data)
 A dataframe with the EXIF metadata for each image
 }
 \description{
-This function gets all relevant EXIF metadata from images in Projects in WildTrax
+This function gets all relevant EXIF metadata from images in Projects
 }
 \examples{
 \dontrun{
