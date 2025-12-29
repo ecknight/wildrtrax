@@ -19,8 +19,6 @@ wt_download_report(
 
 \item{reports}{Character; The report type to be returned. Multiple values are accepted as a concatenated string.}
 
-\item{weather_cols}{Logical; Do you want to include weather information for your stations? Defaults to TRUE.}
-
 \item{max_seconds}{Numeric; Number of seconds to force to wait for downloads.}
 }
 \value{
@@ -67,12 +65,10 @@ Valid values for argument \code{report} when \code{sensor_id} = "PC" currently a
 # Authenticate first:
 wt_auth()
 a_camera_project <- wt_download_report(
-project_id = 397, sensor_id = "CAM", reports = c("tag", "image_set_report"),
-weather_cols = TRUE)
+project_id = 397, sensor_id = "CAM", reports = c("tag", "image_set_report"))
 
 an_aru_project <- wt_download_report(
-project_id = 47, sensor_id = "ARU", reports = c("main", "ai"),
-weather_cols = TRUE)
+project_id = 47, sensor_id = "ARU", reports = c("main", "ai"))
 }
 
 }

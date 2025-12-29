@@ -984,7 +984,6 @@ wt_get_exif <- function(data) {
           error = function(e) {"Failed to retrieve EXIF for image_id { .x }"}))) |>
     tidyr::unnest_wider(exif)
 
-
   return(all_images)
 
 }

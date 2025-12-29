@@ -120,7 +120,6 @@
   return(language)
 }
 
-
 #' An internal function to handle generic POST requests to WildTrax
 #'
 #' @description Generic function to handle certain POST requests
@@ -171,8 +170,6 @@
 
   }
 }
-
-
 
 #' An internal function to handle generic GET requests to WildTrax
 #'

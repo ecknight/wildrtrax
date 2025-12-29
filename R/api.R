@@ -836,7 +836,7 @@ wt_location_photos <- function(organization, output = NULL) {
 #' wt_auth()
 #'
 #' # Fetch locations by organization
-#' wt_get_sync("organization_locations", organization = "ABMI")
+#' wt_get_sync("organization_locations", organization = 5)
 #'
 #' # Fetch locations by project
 #' wt_get_sync("project_locations", project = 620)
@@ -972,7 +972,7 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
 #' wt_auth()
 #'
 #' # Fetch locations by organization
-#' wt_get_views("organization_locations", organization = "ABMI")
+#' wt_get_views("organization_locations", organization = 5)
 #'
 #' # Fetch locations by project
 #' wt_get_views("project_locations", project = 620)

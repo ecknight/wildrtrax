@@ -4,10 +4,13 @@
 
 ## Major changes 
 
-* Move to support WildTrax 2.0 including APIs through `wt_get_sync()`, `wt_download_report()` and `wt_download_media()`.
-* `wt_get_download_summary()` is replaced by `wt_get_projects()` to correspond to new WildTrax 2.0 APIs
+* Move to support WildTrax 2.0 APIs; `wt_get_download_summary()` is replaced by `wt_get_projects()`
+* New function `wt_format_audiomoth_filenames()` serves to add location prefixes for [AudioMoth](https://www.openacousticdevices.info/audiomoth) data containing only date times
+* New function `wt_get_exif()` extracts all EXIF information from desired image files in Projects
+* New function `wt_guano_tags()`
+* New function `wt_get_views()`
+* `wt_download_report()` no longer explicitly removes weather columns
 * Queries benchmarked as 2-3x on new production server at the University of Alberta in Edmonton, Canada
-* New function `wt_format_audiomoth_filenames()` serves to add location prefixes for [AudioMoth](https://www.openacousticdevices.info/audiomoth) data containing only date times.
 
 # wildrtrax 1.4
 
