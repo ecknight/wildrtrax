@@ -153,7 +153,7 @@ wt_get_projects <- function(sensor) {
 #' @return If multiple report types are requested, a list object is returned; if only one, a dataframe.
 #'
 
-wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TRUE, max_seconds=300) {
+wt_download_report <- function(project_id, sensor_id, reports, max_seconds=300) {
 
   # Check if authentication has expired:
   if (.wt_auth_expired())
