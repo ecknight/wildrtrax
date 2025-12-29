@@ -31,9 +31,12 @@ reference:
   - wt_format_data
   - wt_format_occupancy
   - wt_format_audiomoth_filenames
+  - wt_get_exif
   - wt_get_projects
+  - wt_get_project_species
   - wt_get_species
   - wt_get_sync
+  - wt_get_views
   - wt_glean_ap
   - wt_guano_tags
   - wt_ind_detect

@@ -43,15 +43,15 @@ wt_audio_scanner(path = ".", file_type = "wav", extra_cols = T)
 You might want to select recordings between certain times of day or year, or filter recordings based on some criteria.
 
 ```{r, echo=TRUE, include=TRUE, eval=T, warning = F, message = F}
-files %>%
+files |>
   dplyr::select(-file_path)
 
 ```
 
 ```{r, echo=TRUE, include=TRUE, eval=T, warning = F, message = F}
 
-files %>%
-  dplyr::mutate(hour = as.numeric(format(recording_date_time, "%H"))) %>%
+files |>
+  dplyr::mutate(hour = as.numeric(format(recording_date_time, "%H"))) |>
   dplyr::filter(julian == 176, 
          hour %in% c(4:8))
 
@@ -75,8 +75,8 @@ Then use `wt_glean_ap()` to plot the acoustic index and long-duration false-colo
 
 my_files <- wt_audio_scanner(".../ABMI-986-SE", file_type = "wav", extra_cols = )
 
-wt_glean_ap(my_files %>% 
-               dplyr::mutate(hour = as.numeric(format(recording_date_time, "%H"))) %>%
+wt_glean_ap(my_files |>
+               dplyr::mutate(hour = as.numeric(format(recording_date_time, "%H"))) |>
                filter(between(julian,110,220),
                       hour %in% c(0:3,22:23)), input_dir = ".../ap_outputs", purpose = "biotic")
 
@@ -122,7 +122,8 @@ s['output']
 Make tasks at any time using a `wt_*` standard data set with `wt_make_aru_tasks()`.
 
 ```{r eval=F, message=FALSE, warning=FALSE, include=T}
-wt_make_aru_tasks(input = files %>% select(-file_path), task_method = "1SPT", task_length = 180)
+wt_make_aru_tasks(input = files |>
+                    select(-file_path), task_method = "1SPT", task_length = 180)
 
 ```
 
@@ -160,10 +161,10 @@ my_files <- wt_audio_scanner(path = '/my/BigGrid/files', file_type = 'all', extr
 And then download the project data you wish to compare it to:
 
 ```{r eval=F, message=FALSE, warning=FALSE, include=T}
-my_projects <- wt_get_projects(sensor_id = 'ARU') %>%
-  tibble::as_tibble() %>%
-  filter(grepl('Big Grids',project)) %>% # Customized as needed
-  mutate(data = purrr::map(.x = project_id, .f = ~wt_download_report(project_id = .x, sensor_id = 'ARU', weather_cols = F, reports = 'main')))
+my_projects <- wt_get_projects(sensor_id = 'ARU') |>
+  tibble::as_tibble() |>
+  filter(grepl('Big Grids',project)) |> # Customized as needed
+  mutate(data = purrr::map(\(project_id), wt_download_report(project_id = project_id, sensor_id = 'ARU', reports = 'main')))
 ```
 
 Alternatively, go to WildTrax to Organization > Recordings > Manage > Download Recordings to get a list of all recordings. Then either filter out or do an anti-join on `location` and `recording_date_time`. That should give you the remaining list of media that has not been processed or uploaded to WildTrax yet.

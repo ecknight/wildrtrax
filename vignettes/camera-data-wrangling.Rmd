@@ -21,8 +21,7 @@ Use the `wt_download_report()` function to retrieve the main report for the CAM 
 eh14_raw <- wt_download_report(
   project_id = 205, 
   sensor_id = "CAM",
-  report = "main", 
-  weather_cols = FALSE
+  report = "main"
 )
 
 ```
@@ -96,8 +95,8 @@ projects <- wt_get_projects("CAM") |>
   select(project_id) |>
   pull()
 
-raw_data <- map_dfr(.x = projects, 
-                    .f = ~wt_download_report(.x, "CAM", weather_cols = F, reports = "main"))
+raw_data <- map_dfr(\(projects), 
+                    .f = ~wt_download_report(projects, "CAM", reports = "main"))
 
 summarised <- wt_ind_detect(raw_data, 30, "minutes") |>
   wt_summarise_cam(raw_data, "day", "detections", "long")
