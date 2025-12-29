@@ -2,9 +2,9 @@ library(testthat)
 
 Sys.setenv(WT_USERNAME = "guest", WT_PASSWORD = "Apple123")
 wt_auth(force = TRUE)
-test_data_set <- wt_download_report(project_id = 625, sensor_id = 'CAM', reports = 'main', weather_cols = F)
+test_data_set <- wt_download_report(project_id = 625, sensor_id = 'CAM', reports = 'main')
 ind_detections <- wt_ind_detect(test_data_set, threshold = 60, units = "minutes", datetime_col = image_date_time, remove_human = TRUE, remove_domestic = TRUE)
-md_test <- wt_download_report(project_id = 625, sensor_id = 'CAM', reports = 'megadetector', weather_cols = F)
+md_test <- wt_download_report(project_id = 625, sensor_id = 'CAM', reports = 'megadetector')
 
 eff_data <- tibble(
   project_col = c(625),

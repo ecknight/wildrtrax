@@ -113,8 +113,7 @@ wt_auth()
 # Download the project. Here's a recent ABMI project accessible as Map + Report Only.
 data <- wt_download_report(project_id = 2088,
                            sensor_id = "ARU",
-                           reports = c("main", "ai"), 
-                           weather_cols = FALSE)
+                           reports = c("main", "ai"))
 
 ```
 
@@ -126,8 +125,7 @@ wt_auth()
 #This line will take a minute to run while it downloads the data
 data <- wt_download_report(project_id = 2088,
                            sensor_id = "ARU",
-                           reports = c("main", "ai"), 
-                           weather_cols = FALSE)
+                           reports = c("main", "ai"))
 
 ```
 

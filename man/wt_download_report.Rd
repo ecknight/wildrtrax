@@ -4,13 +4,7 @@
 \alias{wt_download_report}
 \title{Download formatted reports from WildTrax}
 \usage{
-wt_download_report(
-  project_id,
-  sensor_id,
-  reports,
-  weather_cols = TRUE,
-  max_seconds = 300
-)
+wt_download_report(project_id, sensor_id, reports, max_seconds = 300)
 }
 \arguments{
 \item{project_id}{Numeric; the project ID number that you would like to download data for. Use \code{wt_get_projects()} to retrieve these IDs.}

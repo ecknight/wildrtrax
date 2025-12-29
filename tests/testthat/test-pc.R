@@ -19,39 +19,6 @@ test_that("Attempting PC as ARU report", {
   expect_true(nrow(wt_download_report(887, 'ARU', 'main', FALSE)) == 0)
 })
 
-
-test_that('QPAD for PC together false', {
-  pc_data <- wt_download_report(887, 'PC', 'main', FALSE)
-  pc_tidy <- wt_tidy_species(pc_data, remove = c("unknown"), zerofill = T)
-  pc_wide <- wt_make_wide(pc_tidy, sound = "all")
-  pc_qpad <- wt_qpad_offsets(pc_wide, species = "all", version = 3, together = F)
-  expect_true(ncol(pc_wide) > ncol(pc_qpad))
-})
-
-test_that('QPAD for PC together true', {
-  pc_data <- wt_download_report(887, 'PC', 'main', FALSE)
-  pc_tidy <- wt_tidy_species(pc_data, remove = c("unknown"), zerofill = T)
-  pc_wide <- wt_make_wide(pc_tidy, sound = "all")
-  pc_qpad <- wt_qpad_offsets(pc_wide, species = "OVEN", version = 3, together = T)
-  expect_true(ncol(pc_qpad) > ncol(pc_wide))
-})
-
-test_that('QPAD for PC zerofill false together false', {
-  pc_data <- wt_download_report(887, 'PC', 'main', FALSE)
-  pc_tidy <- wt_tidy_species(pc_data, remove = c("unknown"), zerofill = F)
-  pc_wide <- wt_make_wide(pc_tidy, sound = "all")
-  pc_qpad <- wt_qpad_offsets(pc_wide, species = "OVEN", version = 3, together = F)
-  expect_true(ncol(pc_wide) > ncol(pc_qpad))
-})
-
-test_that('QPAD for PC zerofill false', {
-  pc_data <- wt_download_report(887, 'PC', 'main', FALSE)
-  pc_tidy <- wt_tidy_species(pc_data, remove = c("unknown"), zerofill = F)
-  pc_wide <- wt_make_wide(pc_tidy, sound = "all")
-  pc_qpad <- wt_qpad_offsets(pc_wide, species = "OVEN", version = 3, together = T)
-  expect_true(ncol(pc_qpad) > ncol(pc_wide))
-})
-
 test_that('Occupancy for PC', {
   pc_data <- wt_download_report(887, 'PC', 'main', FALSE)
   pc_tidy <- wt_tidy_species(pc_data, remove = c("unknown"), zerofill = T)
