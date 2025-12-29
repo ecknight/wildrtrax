@@ -84,10 +84,7 @@ wt_get_projects <- function(sensor) {
     rename(organization_name = name) |>
     rename(project_creation_date = creationDate) |>
     rename(project_due_date = dueDate) |>
-    # rowwise() |>
-    # mutate(project_creation_date = case_when(!is.null(project_creation_date) ~ as.POSIXct(project_creation_date), TRUE ~ project_creation_date)) |>
-    # mutate(project_due_date = case_when(!is.null(project_due_date) ~ as.POSIXct(project_due_date), TRUE ~ project_due_date)) |>
-    # ungroup() |>
+    mutate(project_creation_date = as.Date(project_creation_date), project_due_date = as.Date(project_due_date)) |>
     rename(task_count = tasks) |>
     rename(tasks_completed = tasksCompleted) |>
     select(organization_id, organization_name, project_sensor, project_id, project, project_status, project_creation_date, project_due_date, task_count, tasks_completed) |>
@@ -104,7 +101,6 @@ wt_get_projects <- function(sensor) {
 #' @param project_id Numeric; the project ID number that you would like to download data for. Use `wt_get_projects()` to retrieve these IDs.
 #' @param sensor_id Character; Can either be "ARU", "CAM", or "PC".
 #' @param reports Character; The report type to be returned. Multiple values are accepted as a concatenated string.
-#' @param weather_cols Logical; Do you want to include weather information for your stations? Defaults to TRUE.
 #' @param max_seconds Numeric; Number of seconds to force to wait for downloads.
 #' @details Valid values for argument \code{report} when \code{sensor_id} = "CAM" currently are:
 #' \itemize{
@@ -148,12 +144,10 @@ wt_get_projects <- function(sensor) {
 #' # Authenticate first:
 #' wt_auth()
 #' a_camera_project <- wt_download_report(
-#' project_id = 397, sensor_id = "CAM", reports = c("tag", "image_set_report"),
-#' weather_cols = TRUE)
+#' project_id = 397, sensor_id = "CAM", reports = c("tag", "image_set_report"))
 #'
 #' an_aru_project <- wt_download_report(
-#' project_id = 47, sensor_id = "ARU", reports = c("main", "ai"),
-#' weather_cols = TRUE)
+#' project_id = 47, sensor_id = "ARU", reports = c("main", "ai"))
 #' }
 #'
 #' @return If multiple report types are requested, a list object is returned; if only one, a dataframe.
@@ -184,9 +178,9 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
   }
 
   # Allowable reports for each sensor
-  cam <- c("main", "project", "location", "image_set_report", "image_report", "tag", "megadetector", "daylight_report", "definitions")
+  cam <- c("main", "project", "location", "image_set_report", "image_report", "tag", "megadetector", "definitions")
   aru <- c("main", "project", "location", "ai", "recording", "tag", "definitions")
-  pc <- c("main", "project", "location", "point_count", "daylight_report", "definitions")
+  pc <- c("main", "project", "location", "point_count", "definitions")
 
   # Check that the user supplied a valid report type depending on the sensor
   if(sensor_id == "CAM" & !all(reports %in% cam)) {
@@ -209,7 +203,7 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
     tagReport = "true",
     recordingReport = "true",
     mainReport = "true",
-    birdnetReport = "true",
+    aiReport = "true",
     includeMetaData = "true",
     sensorId = sensor_id
   )
@@ -235,9 +229,9 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
     req_perform(req),
     error = function(e) {
       if (grepl("HTTP 500", e$message)) {
-        stop("You may not have permission to access this project or report. Please check your WildTrax account permissions.")
-      } else {
-        stop("An unexpected error occurred while downloading the report: ", e$message)
+        stop("An unexpected server error occurred while downloading the report.")
+      } else if (grepl("HTTP 400", e$message)){
+        stop("You may not have permission to access this project or report. Please check your WildTrax account permissions.", e$message)
       }
     }
   )
@@ -259,13 +253,6 @@ wt_download_report <- function(project_id, sensor_id, reports, weather_cols = TR
   files.less <- basename(files.full)
   x <- purrr::map(.x = files.full, .f = ~ suppressWarnings(readr::read_csv(., show_col_types = FALSE, skip_empty_rows = TRUE, col_types = .wt_col_types, progress = FALSE))) %>%
     purrr::set_names(files.less)
-
-  # Remove weather columns, if desired
-  if(weather_cols) {
-    x
-  } else {
-    x <- purrr::map(.x = x, .f = ~ (.x[, !grepl("^daily|^hourly", colnames(.x))]))
-  }
 
   # Return the requested report(s)
   report <- paste(paste0("_",reports), collapse = "|")
