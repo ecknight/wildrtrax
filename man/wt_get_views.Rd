@@ -39,7 +39,7 @@ Fetch data for tables and views in WildTrax. You must specify at least one of \c
 wt_auth()
 
 # Fetch locations by organization
-wt_get_views("organization_locations", organization = "ABMI")
+wt_get_views("organization_locations", organization = 5)
 
 # Fetch locations by project
 wt_get_views("project_locations", project = 620)

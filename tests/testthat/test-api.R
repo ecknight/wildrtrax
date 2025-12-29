@@ -69,8 +69,8 @@ test_that("Get functions for all API combinations with specific project restrict
   expect_no_error(wt_get_sync(api = "project_image_metadata", project = 251))
   expect_no_error(wt_get_sync(api = "project_camera_tags", project = 251))
   expect_no_error(wt_get_sync(api = "project_point_counts", project = 804))
-  expect_no_error(wt_get_sync(api = "project_species", project = 620))
 })
 
-
+#wt_get_views()
+#wt_get_project_species()
 

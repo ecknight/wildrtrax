@@ -114,8 +114,7 @@ test_that("all specified variables are included in the summarised output", {
 #   expect_true(nrow(result_out) > nrow(result))
 # })
 
-
-
+#wt_get_exif()
 
 
 

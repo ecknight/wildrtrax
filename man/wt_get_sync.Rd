@@ -15,7 +15,6 @@ wt_get_sync(api, project = NULL, organization = NULL)
 \item \verb{"organization_deployments}"
 \item \verb{"organization_recordings}"
 \item \code{"project_locations"}
-\item \code{"project_species"}
 \item \code{"project_aru_tasks"}
 \item \code{"project_aru_tags"}
 \item \code{"project_image_metadata"}
@@ -39,7 +38,7 @@ Fetch data for syncs and downloads in WildTrax. You must specify at least one of
 wt_auth()
 
 # Fetch locations by organization
-wt_get_sync("organization_locations", organization = "ABMI")
+wt_get_sync("organization_locations", organization = 5)
 
 # Fetch locations by project
 wt_get_sync("project_locations", project = 620)

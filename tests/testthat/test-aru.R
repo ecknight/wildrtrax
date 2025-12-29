@@ -88,3 +88,5 @@ test_that('Location distances', {
   locs_dist <- wt_location_distances(locs)
   expect_true(!is.null(locs_dist))
 })
+
+#wt_guano_tags()

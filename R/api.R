@@ -312,6 +312,47 @@ wt_get_species <- function(){
 
 }
 
+#' Get the WildTrax species list for a specific project
+#'
+#' @description Request for the WildTrax species list for a project
+#'
+#'
+#' @import purrr
+#' @export
+#'
+#' @examples
+#'  \dontrun{
+#'  my_project_species <- wt_get_project_species()
+#'  }
+#' @return A tibble of the WildTrax species list for a specific project
+#'
+
+wt_get_project_species <- function(project = NULL) {
+
+  if(is.null(project)) {
+    stop("You need to supply a project ID to create the")
+  }
+
+  response <- .wt_api_gr(path = "bis/get-project-species-details",
+                         projectId = project,
+                         limit = 1e9)
+
+  if (response$status_code == 403) {
+      stop("Permission denied: You do not have access to request this data.", call. = FALSE)
+  }
+
+  x <- resp_body_json(response)
+
+  df <- map_dfr(x$Included, ~ tibble(
+      speciesId = as.integer(.x$speciesId),
+      included  = as.logical(.x$exists)
+  ))
+
+    return(df)
+
+  }
+
+
 #' Download media
 #'
 #' @description Download acoustic and image media in batch. Includes the download of tag clips and spectrograms for the ARU sensor.
@@ -815,7 +856,6 @@ wt_location_photos <- function(organization, output = NULL) {
 #'   \item `"organization_deployments`"
 #'   \item `"organization_recordings`"
 #'   \item `"project_locations"`
-#'   \item `"project_species"`
 #'   \item `"project_aru_tasks"`
 #'   \item `"project_aru_tags"`
 #'   \item `"project_image_metadata"`
@@ -869,8 +909,7 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
     project_aru_tags = "download-tags-by-project-id",
     project_image_metadata = "download-camera-tasks-by-project-id",
     project_camera_tags = "download-camera-tags-by-project-id",
-    project_point_counts = "download-point-count-by-project-id",
-    project_species = "get-project-species-details"
+    project_point_counts = "download-point-count-by-project-id"
   )
 
   api <- api_pseudonyms[[api]] %||% api
@@ -886,8 +925,7 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
     "download-tags-by-project-id" = list(projectId = project),
     "download-camera-tasks-by-project-id" = list(projectId = project),
     "download-camera-tags-by-project-id" = list(projectId = project),
-    "download-point-count-by-project-id" = list(projectId = project),
-    "get-project-species-details" = list(projectId = project)
+    "download-point-count-by-project-id" = list(projectId = project)
   )
 
   if (!api %in% names(api_defaults)) {
