@@ -316,6 +316,8 @@ wt_get_species <- function(){
 #'
 #' @description Request for the WildTrax species list for a project
 #'
+#' @param project The project id associated with the desired species list
+#'
 #'
 #' @import purrr
 #' @export
@@ -887,7 +889,11 @@ wt_location_photos <- function(organization, output = NULL) {
 wt_get_sync <- function(api, project = NULL, organization = NULL) {
 
   api_match <- api
-  organization <- if(!is.null(organization)) {.get_org_id(organization)}
+  organization <- if (!is.null(organization)) {
+    .get_org_id(organization)
+  } else {
+    NULL
+  }
 
   # Check authentication
   if (.wt_auth_expired()) {
@@ -900,9 +906,9 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
 
   api_pseudonyms <- list(
     organization_locations = "download-location-by-org-id",
-    organization_visits = "download-visits-by-org-id",
+    organization_visits = "download-location-visits-by-org-id",
     organization_equipment = "download-equipment-by-org-id",
-    organization_deployments = "download-location-equipment-by-org-id",
+    organization_deployments = "download-location-equipment-by-organization-id",
     organization_recordings = "download-recordings-by-org-id",
     project_locations = "download-location",
     project_aru_tasks = "download-tasks-by-project-id",
@@ -916,9 +922,9 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
 
   api_defaults <- list(
     "download-location-by-org-id" = list(orgId = organization),
-    "download-visits-by-org-id" = list(orgId = organization),
+    "download-location-visits-by-org-id" = list(orgId = organization),
     "download-equipment-by-org-id" = list(orgId = organization),
-    "download-location-equipment-by-org-id" = list(orgId = organization),
+    "download-location-equipment-by-organization-id" = list(orgId = organization),
     "download-recordings-by-org-id" = list(orgId = organization),
     "download-location" = list(projectId = project),
     "download-tasks-by-project-id" = list(projectId = project),
@@ -935,11 +941,28 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
   api_params <- api_defaults[[api]]
   api_path <- paste0("/bis/", api)
 
-  print(api_path)
-  print(api_params)
   print(paste('Calling...', api_path))
 
   if(!is.null(organization)) {
+
+    if(api_match == "organization_deployments") {
+
+      tmp <- tempfile(fileext = ".csv")
+
+      req <- httr2::request("https://www-api.wildtrax.ca") |>
+        httr2::req_url_path_append(api_path) |>
+        httr2::req_url_query(organizationId = organization) |>
+        httr2::req_headers(Authorization = paste("Bearer", ._wt_auth_env_$access_token)) |>
+        req_user_agent(.gen_ua()) |>
+        httr2::req_method("GET")
+
+      httr2::req_perform(req, path = tmp)
+
+      org_df <- readr::read_csv(tmp)
+
+      return(org_df)
+
+    } else {
 
     tmp <- tempfile(fileext = ".csv")
 
@@ -956,7 +979,28 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
 
     return(org_df)
 
+    }
+
   } else if (!is.null(project)) {
+
+    if(api_match == "project_image_metadata") {
+
+      tmp <- tempfile(fileext = ".csv")
+
+      req <- httr2::request("https://www-api.wildtrax.ca") |>
+        httr2::req_url_path_append(api_path) |>
+        httr2::req_url_query(projectId = project) |>
+        httr2::req_headers(Authorization = paste("Bearer", ._wt_auth_env_$access_token)) |>
+        req_user_agent(.gen_ua()) |>
+        httr2::req_method("GET")
+
+      httr2::req_perform(req, path = tmp)
+
+      proj_df <- readr::read_csv(tmp)
+
+      return(proj_df)
+
+    } else {
 
     tmp <- tempfile(fileext = ".csv")
 
@@ -972,6 +1016,8 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
     proj_df <- readr::read_csv(tmp)
 
     return(proj_df)
+
+    }
 
   }
 
