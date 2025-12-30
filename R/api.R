@@ -329,30 +329,34 @@ wt_get_species <- function(){
 #' @return A tibble of the WildTrax species list for a specific project
 #'
 
-wt_get_project_species <- function(project = NULL) {
+wt_get_project_species <- function(project) {
 
-  if(is.null(project)) {
-    stop("You need to supply a project ID to create the")
+  if (is.null(project)) {
+    stop("You need to supply a project ID.", call. = FALSE)
   }
 
-  response <- .wt_api_gr(path = "bis/get-project-species-details",
-                         projectId = project,
-                         limit = 1e9)
+  resp <- httr2::request("https://www-api.wildtrax.ca") |>
+    httr2::req_url_path_append("bis/get-project-species-details") |>
+    httr2::req_url_query(projectId = project) |>
+    httr2::req_headers(
+      Authorization = paste("Bearer", ._wt_auth_env_$access_token)
+    ) |>
+    req_user_agent(.gen_ua()) |>
+    httr2::req_method("GET") |>
+    httr2::req_perform()
 
-  if (response$status_code == 403) {
-      stop("Permission denied: You do not have access to request this data.", call. = FALSE)
-  }
+  json <- httr2::resp_body_json(resp, simplifyVector = TRUE)
 
-  x <- resp_body_json(response)
+  project_species <- tibble::as_tibble(json$Included) |>
+    dplyr::transmute(
+      speciesId = as.integer(speciesId),
+      included  = as.logical(exists)
+    ) |>
+    inner_join(wt_get_species() |> select(species_id, species_code, species_common_name), by = c("speciesId" = "species_id")) |>
+    rename(species_id = speciesId)
 
-  df <- map_dfr(x$Included, ~ tibble(
-      speciesId = as.integer(.x$speciesId),
-      included  = as.logical(.x$exists)
-  ))
-
-    return(df)
-
-  }
+  return(project_species)
+}
 
 
 #' Download media
@@ -985,6 +989,8 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
 
     if(api_match == "project_image_metadata") {
 
+      print("This is project image metadata")
+
       tmp <- tempfile(fileext = ".csv")
 
       req <- httr2::request("https://www-api.wildtrax.ca") |>
@@ -1034,12 +1040,10 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
 #'   \item `"organization_equipment`"
 #'   \item `"organization_deployments`"
 #'   \item `"organization_recordings`"
-#'   \item `"project_locations"`
-#'   \item `"project_species"`
+#'   \item `"organization_image_sets`"
+#'   \item `"organization_usage_report`
 #'   \item `"project_aru_tasks"`
-#'   \item `"project_aru_tags"`
-#'   \item `"project_image_metadata"`
-#'   \item `"project_camera_tags"`
+#'   \item `"project_camera_tasks"`
 #'   \item `"project_point_counts"`
 #' }
 #' @param project The project id
@@ -1056,15 +1060,183 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
 #' wt_auth()
 #'
 #' # Fetch locations by organization
-#' wt_get_views("organization_locations", organization = 5)
+#' wt_get_view("organization_locations", organization = 5)
 #'
 #' # Fetch locations by project
-#' wt_get_views("project_locations", project = 620)
+#' wt_get_view("project_locations", project = 620)
 #' }
 #'
 #' @return A tibble with column headers for the specified API call.
 
-wt_get_views <- function(api, project = NULL, organization = NULL) {
+wt_get_view <- function(api, project = NULL, organization = NULL) {
 
+  api_match <- api
+  organization <- if (!is.null(organization)) {
+    .get_org_id(organization)
+  } else {
+    NULL
+  }
+
+  # Check authentication
+  if (.wt_auth_expired()) {
+    stop("Please authenticate with wt_auth().", call. = FALSE)
+  }
+
+  if (is.null(api) || api == "") {
+    stop("The 'api' field is required.", call. = FALSE)
+  }
+
+  api_pseudonyms <- list(
+    organization_locations = "get-location-summary",
+    organization_visits = "get-location-visits",
+    organization_equipment = "get-equipment-summary",
+    organization_deployments = "get-location-visit-equipment-summary",
+    organization_recordings = "recording-task-creator-results",
+    organization_image_sets = "get-camera-pud-summary",
+    organization_usage_report = "get-organization-usage-report",
+    project_aru_tasks = "get-aru-task-summary",
+    project_camera_tasks = "get-camera-pud-summary",
+    project_point_counts = "get-surveys-for-project"
+  )
+
+  api <- api_pseudonyms[[api]] %||% api
+
+  api_defaults <- list(
+    "get-location-summary" = list(orgId = organization),
+    "get-location-visits" = list(orgId = organization),
+    "get-equipment-summary" = list(orgId = organization),
+    "get-location-visit-equipment-summary" = list(orgId = organization),
+    "recording-task-creator-results" = list(orgId = organization),
+    "get-camera-pud-summary" = list(orgId = organization),
+    "get-organization-usage-report" = list(orgId = organization),
+    "get-aru-task-summary" = list(projectId = project),
+    "get-camera-pud-summary" = list(projectId = project),
+    "get-surveys-for-project" = list(projectId = project)
+  )
+
+  if (!api %in% names(api_defaults)) {
+    stop("API not recognized or defaults not defined for the provided API.", call. = FALSE)
+  }
+
+  api_params <- api_defaults[[api]]
+  api_path <- paste0("/bis/", api)
+
+  print(paste('Calling...', api_path))
+
+  if(!is.null(organization)) {
+
+    if(!(api_match %in% c("organization_equipment","organization_recordings","organization_usage_report"))) {
+
+    resp <- httr2::request("https://www-api.wildtrax.ca") |>
+      httr2::req_url_path_append(api_path) |>
+      httr2::req_headers(
+        Authorization = paste("Bearer", ._wt_auth_env_$access_token),
+        "Content-Type" = "application/json"
+      ) |>
+      req_user_agent(.gen_ua()) |>
+      httr2::req_body_json(list(
+        organizationId = organization,
+        limit          = 1e9,
+        orderBy        = "locationName",
+        orderDirection = "asc"
+      )) |>
+      httr2::req_method("POST") |>
+      httr2::req_perform()
+
+    json <- httr2::resp_body_json(resp, simplifyVector = TRUE)
+    org_df <- tibble::as_tibble(json$results)
+
+    return(org_df)
+
+    } else if (api_match == "organization_equipment") {
+
+      resp <- httr2::request("https://www-api.wildtrax.ca") |>
+        httr2::req_url_path_append(api_path) |>
+        httr2::req_headers(
+          Authorization = paste("Bearer", ._wt_auth_env_$access_token),
+          "Content-Type" = "application/json"
+        ) |>
+        req_user_agent(.gen_ua()) |>
+        httr2::req_body_json(list(
+          organizationId = organization,
+          limit          = 1e9,
+          orderBy        = "code",
+          orderDirection = "asc"
+        )) |>
+        httr2::req_method("POST") |>
+        httr2::req_perform()
+
+      json <- httr2::resp_body_string(resp)
+      org_df_equip <- tibble::as_tibble(json)
+
+      return(org_df_equip)
+
+    } else if (api_match == "organization_recordings") {
+
+      resp <- httr2::request("https://www-api.wildtrax.ca") |>
+        httr2::req_url_path_append(api_path) |>
+        httr2::req_headers(
+          Authorization = paste("Bearer", ._wt_auth_env_$access_token),
+          "Content-Type" = "application/json"
+        ) |>
+        req_user_agent(.gen_ua()) |>
+        httr2::req_body_json(list(
+          organizationId = organization,
+          limit          = 1e9
+        )) |>
+        httr2::req_method("POST") |>
+        httr2::req_perform()
+
+      json <- httr2::resp_body_json(resp, simplifyVector = TRUE)
+      org_df_recs <- tibble::as_tibble(json$results)
+
+      return(org_df_recs)
+
+    } else if (api_match == "organization_usage_report") {
+
+      resp <- httr2::request("https://www-api.wildtrax.ca") |>
+        httr2::req_url_path_append(api_path) |>
+        httr2::req_headers(
+          Authorization = paste("Bearer", ._wt_auth_env_$access_token),
+          "Content-Type" = "application/json"
+        ) |>
+        req_user_agent(.gen_ua()) |>
+        httr2::req_body_json(list(
+          organizationId = organization
+        )) |>
+        httr2::req_method("GET") |>
+        httr2::req_perform()
+
+      json <- httr2::resp_body_json(resp, simplifyVector = TRUE)
+      org_df_usage <- tibble::as_tibble(json$results)
+
+      return(org_df_usage)
+
+    }
+
+  } else if (!is.null(project)) {
+
+    resp <- httr2::request("https://www-api.wildtrax.ca") |>
+      httr2::req_url_path_append(api_path) |>
+      httr2::req_headers(
+        Authorization = paste("Bearer", ._wt_auth_env_$access_token),
+        "Content-Type" = "application/json"
+      ) |>
+      req_user_agent(.gen_ua()) |>
+      httr2::req_body_json(list(
+        projectId = project,
+        limit          = 1e9,
+        orderBy        = "locationName",
+        orderDirection = "asc"
+      )) |>
+      httr2::req_method("POST") |>
+      httr2::req_perform()
+
+    json <- httr2::resp_body_json(resp, simplifyVector = TRUE)
+    project_df <- tibble::as_tibble(json$results)
+
+    return(project_df)
+
+  }
 
 }

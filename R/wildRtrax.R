@@ -178,6 +178,8 @@ utils::globalVariables(
     "recording_id",
     "human",
     "classifier",
+    "exif",
+    "project",
     "fscore",
     "visit_date", "crew", "land_features", "deployment_date", "retrieval_date",
     "equipment_condition", "equipment_direction", "equipment_mount", "stake_distance",
