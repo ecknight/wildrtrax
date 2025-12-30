@@ -223,7 +223,7 @@ wt_download_report <- function(project_id, sensor_id, reports, max_seconds=300) 
     req_user_agent(u) |>
     req_method("POST") |>      # Use POST instead of GET here
     req_body_json(body_json) |>
-    req_timeout(300)
+    req_timeout(max_seconds)
 
   resp <- tryCatch(
     req_perform(req),
@@ -356,6 +356,7 @@ wt_get_project_species <- function(project) {
     rename(species_id = speciesId)
 
   return(project_species)
+
 }
 
 

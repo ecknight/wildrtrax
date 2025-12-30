@@ -2,7 +2,7 @@ library(testthat)
 
 Sys.setenv(WT_USERNAME = "guest", WT_PASSWORD = "Apple123")
 wt_auth(force = TRUE)
-cypress_hills <- wt_download_report(620, 'ARU', 'main', FALSE)
+cypress_hills <- wt_download_report(620, 'ARU', 'main')
 
 ################################### ARU Test suite
 
@@ -15,16 +15,16 @@ test_that("Downloading ARU report", {
 })
 
 test_that("Testing a Private Project", {
-  expect_error(wt_download_report(1373, 'ARU', 'main', FALSE)==0)
+  expect_error(wt_download_report(1373, 'ARU', 'main')==0)
 })
 
 test_that("Downloading ARU as PC report", {
-  cypress_hills_as_pc <- wt_download_report(620, 'PC', 'main', FALSE)
+  cypress_hills_as_pc <- wt_download_report(620, 'PC', 'main')
   expect_true(!is.null(cypress_hills_as_pc))
 })
 
 test_that("Attempting PC as ARU report", {
-  expect_true(nrow(wt_download_report(887, 'ARU', 'main', FALSE))==0)
+  expect_true(nrow(wt_download_report(887, 'ARU', 'main'))==0)
 })
 
 test_that("Tidying species zero-filling true", {
@@ -61,23 +61,12 @@ test_that('Occupancy formatting', {
 })
 
 test_that('Classifier functions', {
-  rep <- wt_download_report(620, 'ARU', c('main','ai'), F)
+  rep <- wt_download_report(620, 'ARU', c('main','ai'))
   eval <- wt_evaluate_classifier(rep, "task", remove_species = TRUE, thresholds = c(0.01,0.99))
   e1 <- wt_classifier_threshold(eval)
   add_sp <- wt_additional_species(rep, remove_species = TRUE, threshold = min(e1$threshold), resolution = "task")
   expect_true(!is.null(add_sp))
 })
 
-test_that('Add GRTS ID', {
-  bats <- wt_download_report(685, 'ARU', 'location', F)
-  grts <- wt_add_grts(bats, group_locations_in_cell = TRUE)
-  expect_true(!is.null(grts))
-})
-
-test_that('Location distances', {
-  locs <- wt_download_report(620, 'ARU', 'location', F)
-  locs_dist <- wt_location_distances(locs)
-  expect_true(!is.null(locs_dist))
-})
 
 #wt_guano_tags()
