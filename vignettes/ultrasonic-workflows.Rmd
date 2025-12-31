@@ -7,7 +7,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-from [Songscope](https://www.wildlifeacoustics.com/resources/faqs/song-scope-is-no-longer-supported) and [Kaleidoscope](https://www.wildlifeacoustics.com/products/kaleidoscope-pro) , \code`wt_songscope_tags()` and \code`wt_kaleidoscope_tags()`
+from [Songscope](https://answers.wildlifeacoustics.com/) and [Kaleidoscope](https://www.wildlifeacoustics.com/products/kaleidoscope-pro) , \code`wt_songscope_tags()` and \code`wt_kaleidoscope_tags()`
 
 ```{r, include = FALSE}
 
