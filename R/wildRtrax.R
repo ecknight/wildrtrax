@@ -180,6 +180,7 @@ utils::globalVariables(
     "classifier",
     "exif",
     "project",
+    "speciesId",
     "fscore",
     "visit_date", "crew", "land_features", "deployment_date", "retrieval_date",
     "equipment_condition", "equipment_direction", "equipment_mount", "stake_distance",

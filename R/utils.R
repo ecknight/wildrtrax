@@ -343,6 +343,7 @@
   media_url = readr::col_character(),
   min_tag_freq = readr::col_double(),
   max_tag_freq = readr::col_double(),
+  `name/region/country` = readr::col_character(),
   needs_review = readr::col_logical(),
   observer = readr::col_character(),
   observer_id = readr::col_integer(),

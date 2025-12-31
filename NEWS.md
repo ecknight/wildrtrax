@@ -8,8 +8,12 @@
 * New function `wt_format_audiomoth_filenames()` serves to add location prefixes for [AudioMoth](https://www.openacousticdevices.info/audiomoth) data containing only date times
 * New function `wt_get_exif()` extracts all EXIF information from desired image files in Projects
 * New function `wt_guano_tags()`
-* New function `wt_get_views()`
+* New function `wt_get_view()`
 * New function `wt_get_project_species()` to extract species lists from a specific Project
+
+## Major changes 
+
+* Vignette constructed for ultrasonic workflows
 * `wt_download_report()` no longer explicitly removes weather columns
 * Queries benchmarked as 2-3x on new production server at the University of Alberta in Edmonton, Canada
 

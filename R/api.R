@@ -318,7 +318,6 @@ wt_get_species <- function(){
 #'
 #' @param project The project id associated with the desired species list
 #'
-#'
 #' @import purrr
 #' @export
 #'
@@ -358,7 +357,6 @@ wt_get_project_species <- function(project) {
   return(project_species)
 
 }
-
 
 #' Download media
 #'

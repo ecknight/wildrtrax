@@ -311,9 +311,7 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 0.5, 
 
   }
 
-  return(new)
-
-  if(format_to_tags == TRUE & dir.exists(output) & !is.null(output)){
+  if(format_to_tags == TRUE){
 
     if(resolution != "task"){
       message("Currently tag uploads are best supported when you resolve at the task level. You may encounter an error otherwise. If you used `wt_additional_species(resolution='recording')` change the task lengths to the maximum length of the recording in your project")
@@ -322,25 +320,17 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 0.5, 
     new_export <- new |>
       relocate(location) |>
       relocate(recording_date_time, .after = location) |>
-      rename("recording_date_time" = 2) |>
-      mutate(recording_date_time = as.character(recording_date_time)) |>
-      inner_join(data[[2]] |> select(task_id, task_method) |> distinct(), by = "task_id") |>
-      relocate(task_method, .after = recording_date_time) |>
-      relocate(task_duration, .after = task_method) |>
-      mutate(observer = "Not Assigned") |>
-      relocate(observer, .after = task_duration) |>
-      tibble::add_column(species_code = NA_character_, .after = "observer") |>
-      arrange(species_common_name, detection_time) |>
-      inner_join(wt_get_species() |> select(species_code, species_common_name), by = "species_common_name") |>
-      select(-species_code.x) |>
-      relocate(species_code.y, .after = observer) |>
-      rename(species_code = species_code.y) |>
-      rename(tag_start_time = detection_time) |>
-      group_by(location, recording_date_time, species_common_name) |>
+      inner_join(data[[2]] |> select(task_id, task_method, task_duration, task_is_complete) |> distinct(), by = "task_id") |>
+      relocate(task_duration, .after = recording_date_time) |>
+      relocate(task_method, .after = task_duration) |>
+      mutate(observer = "Not Assigned", .after = task_method) |>
+      relocate(species_code, .after = observer) |>
+      group_by(task_id, species_code) |>
       mutate(individual_number = row_number(), .after = species_code) |>
       ungroup() |>
       mutate(vocalization = "SONG", .after = individual_number) |>
       mutate(abundance = 1, .after = vocalization) |>
+      rename(tag_start_time = ai_detection_time) |>
       relocate(tag_start_time, .after = abundance) |>
       mutate(tag_duration = "", .after = tag_start_time) |>
       mutate(min_tag_freq = "", .after = tag_duration) |>
@@ -349,8 +339,15 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 0.5, 
       mutate(tag_is_hidden_for_verification = FALSE, .after = species_individual_comments) |>
       mutate(recording_sample_frequency = 44100, .after = tag_is_hidden_for_verification) |>
       mutate(internal_tag_id = "", .after = recording_sample_frequency) |>
-      select(-c(project_id:is_species_allowed_in_project))
+      select(-c(location_id:task_is_complete))
 
-    readr::write_csv(new_export, paste0(output, "/ai_tags.csv"))
+    return(new_export)
+
+    #readr::write_csv(new_export, paste0(output, "/ai_tags.csv"))
+
+  } else {
+
+    return(new)
+
   }
 }

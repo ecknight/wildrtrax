@@ -480,8 +480,10 @@ wt_format_occupancy <- function(data,
 #' @param group_locations_in_cell Option to provide distinct location names if points are found in the same cell. Sequentially provides a number for each GRTS ID e.g. 3-1, 3-2, etc.
 #'
 #' @import dplyr sf
+#' @importFrom tibble as_tibble
 #' @importFrom tidyr separate
 #' @importFrom readr read_csv
+#' @importFrom purrr map_dbl
 #' @export
 #'
 #' @examples
@@ -512,8 +514,8 @@ wt_add_grts <- function(data, group_locations_in_cell = FALSE) {
   bbox_sf <- st_sf(geometry = points_bbox)
   # Define bounding boxes for each region
   bbox_canada <- st_set_crs(st_sf(st_as_sfc(st_bbox(c(xmin = -173.179, ymin = 34.43, xmax = -16.35, ymax = 85.17)), crs = 4326)), 4326)
-  bbox_alaska <-  st_set_crs(st_sf(st_as_sfc(st_bbox(c(xmin = -179.99863, ymin = 51.214183, xmax = -129.9795, ymax = 71.538800)), crs = 4326)),4326)
-  bbox_contig <- st_set_crs(st_sf(st_as_sfc(st_bbox(c(xmin = -127.94485, ymin = 22.91700, xmax = -65.26265, ymax = 51.54421)), crs = 4326)),4326)
+  bbox_alaska <-  st_set_crs(st_sf(st_as_sfc(st_bbox(c(xmin = -179.99863, ymin = 51.214183, xmax = -129.9795, ymax = 71.538800)), crs = 4326)), 4326)
+  bbox_contig <- st_set_crs(st_sf(st_as_sfc(st_bbox(c(xmin = -127.94485, ymin = 22.91700, xmax = -65.26265, ymax = 51.54421)), crs = 4326)), 4326)
 
   # Initialize an empty list to collect the datasets
   grts_list <- list()
@@ -534,7 +536,7 @@ wt_add_grts <- function(data, group_locations_in_cell = FALSE) {
 
   # If any datasets were downloaded, bind them together
   if (length(grts_list) > 0) {
-    grts_chosen <- dplyr::bind_rows(grts_list)
+    grts_chosen <- bind_rows(grts_list)
   } else {
     stop('No overlaps could be found with this data.')
     grts_chosen <- NULL
@@ -547,28 +549,16 @@ wt_add_grts <- function(data, group_locations_in_cell = FALSE) {
 
   # Convert grid cells to sf polygons
   grid_cells_sf <- grts_chosen |>
-    tidyr::separate(lowerleft, into = c("lowerleft_lat", "lowerleft_lon"), sep = ",", convert = TRUE) %>%
-    tidyr::separate(upperleft, into = c("upperleft_lat", "upperleft_lon"), sep = ",", convert = TRUE) %>%
-    tidyr::separate(upperright, into = c("upperright_lat", "upperright_lon"), sep = ",", convert = TRUE) %>%
-    tidyr::separate(lowerright, into = c("lowerright_lat", "lowerright_lon"), sep = ",", convert = TRUE) %>%
-    tidyr::separate(center, into = c("center_lat", "center_lon"), sep = ",", convert = TRUE) %>%
-    dplyr::rowwise() %>%
-    dplyr::mutate(
-      geometry = list(st_polygon(list(matrix(
-        c(
-          lowerleft_lon, lowerleft_lat,
-          upperleft_lon, upperleft_lat,
-          upperright_lon, upperright_lat,
-          lowerright_lon, lowerright_lat,
-          lowerleft_lon, lowerleft_lat
-        ),
-        ncol = 2,
-        byrow = TRUE
-      ))))
-    ) |>
-    dplyr::ungroup() |>
+    separate(lowerleft, into = c("lowerleft_lat", "lowerleft_lon"), sep = ",", convert = TRUE) |>
+    separate(upperleft, into = c("upperleft_lat", "upperleft_lon"), sep = ",", convert = TRUE) |>
+    separate(upperright, into = c("upperright_lat", "upperright_lon"), sep = ",", convert = TRUE) |>
+    separate(lowerright, into = c("lowerright_lat", "lowerright_lon"), sep = ",", convert = TRUE) |>
+    separate(center, into = c("center_lat", "center_lon"), sep = ",", convert = TRUE) |>
+    rowwise() |>
+    mutate(geometry = list(st_polygon(list(matrix(c(lowerleft_lon, lowerleft_lat, upperleft_lon, upperleft_lat, upperright_lon, upperright_lat, lowerright_lon, lowerright_lat, lowerleft_lon, lowerleft_lat), ncol = 2, byrow = TRUE))))) |>
+    ungroup() |>
     st_as_sf(crs = 4326) |>
-    dplyr::select(GRTS_ID, geometry)
+    select(GRTS_ID, geometry)
 
   # If CRS are different, transform bbox_sf to match the CRS of grid_cells_sf
   if (!identical(st_crs(grid_cells_sf), st_crs(bbox_sf))) {
@@ -586,21 +576,21 @@ wt_add_grts <- function(data, group_locations_in_cell = FALSE) {
 
   # Convert back to tibble and select relevant columns
   new_data <- result |>
-    tibble::as_tibble() |>
-    dplyr::relocate(GRTS_ID, .after = location) %>%
-    st_drop_geometry() %>%
-    dplyr::mutate(longitude = unlist(purrr::map(.$geometry, 1)),
-                  latitude = unlist(purrr::map(.$geometry, 2))) %>%
-    dplyr::relocate(latitude, .after = GRTS_ID) |>
-    dplyr::relocate(longitude, .after = latitude) |>
-    dplyr::select(-geometry)
+    as_tibble() |>
+    relocate(GRTS_ID, .after = location) |>
+    st_drop_geometry() |>
+    mutate(longitude = map_dbl(geometry, 1),
+           latitude  = map_dbl(geometry, 2)) |>
+    relocate(latitude, .after = GRTS_ID) |>
+    relocate(longitude, .after = latitude) |>
+    select(-geometry)
 
   if (group_locations_in_cell == TRUE) {
     new_data2 <- new_data |>
-      dplyr::group_by(GRTS_ID) |>
-      dplyr::mutate(GRTS_suffix = paste0(GRTS_ID, "-", row_number())) |>
-      dplyr::ungroup() |>
-      dplyr::relocate(GRTS_suffix, .after = GRTS_ID)
+      group_by(GRTS_ID) |>
+      mutate(GRTS_suffix = paste0(GRTS_ID, "-", row_number())) |>
+      ungroup() |>
+      relocate(GRTS_suffix, .after = GRTS_ID)
 
     return(new_data2)
   } else {

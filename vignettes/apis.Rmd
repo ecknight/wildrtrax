@@ -127,13 +127,13 @@ spp_table |> arrange(species_code)
 
 ```
 
-You can also determine which species are allowed in and out of projects via the `wt_get_project_species()` function. 
+You can also determine which species are allowed in and out of projects via the `wt_get_project_species()` function. The `included` column will expose which species have been currently tagged in the Project. 
 
 ```{r, echo=T, include=T, eval=F, warning=F, message = FALSE}
 my_project_species <- wt_get_project_species(620)
 
 my_project_species |>
-  filter(species_allowed_in_project == TRUE)
+  filter(included == TRUE)
 ```
 
 ## Data Discover
@@ -182,17 +182,26 @@ head(discover)
 
 ```
 
-## Opening up the world with `wt_get_sync()` and `wt_get_views()`
+## Accessing WildTrax data with `wt_get_sync()` and `wt_get_view()`
 
-`wt_get_sync()` is the primary function used to access WildTrax **sync** APIs, such as getting locations, visits, equipment, project tasks and tags and more. 
+`wt_get_sync()` and `wt_get_view()` provide programmatic access to WildTrax data through various APIs. `wt_get_sync()` interfaces with the synchronization (sync) endpoints, which expose data associated with Organizations and Projects. These endpoints return data objects related to locations, visits, deployments, equipment, project tasks, and tags. The sync APIs are primarily intended for workflows that require advanced or batch manipulation. `wt_get_view()` provides access to the user interface views and tables that present structured representations of WildTrax data. These views are optimized for reporting and analysis and may aggregate or normalize information. Used together, `wt_get_sync()` and `wt_get_view()` allow users to retrieve operational data from the WildTrax system and work with analysis-ready representations of those data within R.
+
+![How `wt_get_sync()` and `wt_get_view()` relate to Organization locations](syncs.png)
+
 ```{r, echo=T, include=T, eval=F, warning=F, message = FALSE}
-my_project_tasks <- wt_get_projects('ARU') |>
-  filter(grepl('Cypress', project)) |>
-  select(project_id) |>
-  pull() |>
-  (\(proj_id) wt_get_sync("download-tasks-by-project-id", option = "data", project = proj_id))()
+# Extracting location information from all API functions
 
-my_project_tasks
+# All location information from Organization location sync
+wt_get_sync(api = "organization_locations", organization = 5205)
+
+# All location information from Locations tab
+wt_get_view(api = "organization_locations", organization = 5205)
+
+# All location information from Project location sync
+wt_get_sync(api = "project_locations", project = 326)
+
+wt_download_report(project_id = 326, sensor_id = 'ARU', reports = 'location')
 
 ```
   
+![How wildrtrax functions relate to various parts of the Project dashboard](api-compare.png)
