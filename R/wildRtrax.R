@@ -19,6 +19,7 @@ utils::globalVariables(
     "Fmin",
     "IN FILE",
     "INDIR",
+    "sample_rate",
     "OFFSET",
     "max_seconds",
     "max_time",

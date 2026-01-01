@@ -605,7 +605,7 @@ wt_chop <- function(input = NULL, segment_length = NULL, output_folder = NULL) {
 
 #' Standardize Audiomoth Filenames
 #'
-#' Recursively scans a directory for `.wav` files produced by Audiomoth devices and renames them by prepending the parent folder name to each filename. For example, a file named `20240407_062500.wav` inside a folder `ML-20-10H` becomes `ML-20-10H_20240407_062500.wav`.
+#' Recursively scans a directory for `.wav` files produced by Audiomoth devices and renames them by prepending the parent folder name to each filename. For example, a file named `20240407_062500.wav` inside a folder `LOCATION-ABC` becomes `LOCATION-ABC_20240407_062500.wav`.
 #'
 #' @param input_dir Character string. The path to the top-level directory containing Audiomoth folders and audio files.
 #'
@@ -684,6 +684,7 @@ wt_make_aru_tasks <- function(input, output=NULL, task_method = c("1SPM","1SPT",
   }
 
   tasks <- task_prep |>
+    rename(recording_sample_frequency = sample_rate) |>
     select(location, recording_date_time, length_seconds, recording_sample_frequency) |>
     distinct() |>
     mutate(task_duration = case_when(length_seconds < task_length ~ NA_real_, TRUE ~ task_length)) |> #Make sure recording length is long enough

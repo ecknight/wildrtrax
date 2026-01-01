@@ -4,7 +4,7 @@
 \alias{wt_get_view}
 \title{Get data from WildTrax views}
 \usage{
-wt_get_view(api, project = NULL, organization = NULL)
+wt_get_view(api, project = NULL, organization = NULL, max_seconds = 300)
 }
 \arguments{
 \item{api}{A string specifying the API to query. Must be one of:
@@ -21,9 +21,11 @@ wt_get_view(api, project = NULL, organization = NULL)
 \item \code{"project_point_counts"}
 }}
 
-\item{project}{The project id}
+\item{project}{Numeric; The project id}
 
-\item{organization}{The organization id}
+\item{organization}{Numeric; The organization id}
+
+\item{max_seconds}{Numeric; Number of seconds to force to wait for downloads.}
 }
 \value{
 A tibble with column headers for the specified API call.
@@ -37,7 +39,7 @@ Fetch data for tables and views in WildTrax. You must specify at least one of \c
 wt_auth()
 
 # Fetch locations by organization
-wt_get_view("organization_locations", organization = 5)
+wt_get_view("organization_locations", organization = 5205)
 
 # Fetch locations by project
 wt_get_view("project_locations", project = 620)

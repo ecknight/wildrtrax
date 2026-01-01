@@ -35,7 +35,6 @@ load("package.RData")
 The `wt_audio_scanner()` function reads in audio files (either wac, wav or flac format) from a local directory and outputs useful metadata.
 
 ```{r, echo=TRUE, include=TRUE, eval=F, warning = F, message = F}
-
 wt_audio_scanner(path = ".", file_type = "wav", extra_cols = T)
 
 ```
@@ -49,7 +48,6 @@ files |>
 ```
 
 ```{r, echo=TRUE, include=TRUE, eval=T, warning = F, message = F}
-
 files |>
   dplyr::mutate(hour = as.numeric(format(recording_date_time, "%H"))) |>
   dplyr::filter(julian == 176, 

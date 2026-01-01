@@ -13,7 +13,7 @@ wt_format_audiomoth_filenames(input_dir)
 A tibble with the original filepaths and the corresponding new filepaths. Files are renamed in place.
 }
 \description{
-Recursively scans a directory for \code{.wav} files produced by Audiomoth devices and renames them by prepending the parent folder name to each filename. For example, a file named \verb{20240407_062500.wav} inside a folder \verb{ML-20-10H} becomes \verb{ML-20-10H_20240407_062500.wav}.
+Recursively scans a directory for \code{.wav} files produced by Audiomoth devices and renames them by prepending the parent folder name to each filename. For example, a file named \verb{20240407_062500.wav} inside a folder \code{LOCATION-ABC} becomes \code{LOCATION-ABC_20240407_062500.wav}.
 }
 \examples{
 \dontrun{

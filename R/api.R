@@ -867,11 +867,14 @@ wt_location_photos <- function(organization, output = NULL) {
 #'   \item `"project_camera_tags"`
 #'   \item `"project_point_counts"`
 #' }
-#' @param project The project id
-#' @param organization The organization id
+#' @param project Numeric; The project id
+#' @param organization Numeric; The organization id
+#' @param max_seconds Numeric; Number of seconds to force to wait for downloads.
 #'
-#' @import httr2 tibble dplyr
+#' @import httr2 dplyr
 #' @importFrom tidyr unnest
+#' @importFrom readr read_csv
+#' @importFrom tibble as_tibble
 #'
 #' @export
 #'
@@ -889,7 +892,7 @@ wt_location_photos <- function(organization, output = NULL) {
 #'
 #' @return A tibble with column headers for the specified API call.
 
-wt_get_sync <- function(api, project = NULL, organization = NULL) {
+wt_get_sync <- function(api, project = NULL, organization = NULL, max_seconds = 300) {
 
   api_match <- api
   organization <- if (!is.null(organization)) {
@@ -952,16 +955,17 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
 
       tmp <- tempfile(fileext = ".csv")
 
-      req <- httr2::request("https://www-api.wildtrax.ca") |>
-        httr2::req_url_path_append(api_path) |>
-        httr2::req_url_query(organizationId = organization) |>
-        httr2::req_headers(Authorization = paste("Bearer", ._wt_auth_env_$access_token)) |>
+      req <- request("https://www-api.wildtrax.ca") |>
+        req_url_path_append(api_path) |>
+        req_url_query(organizationId = organization) |>
+        req_headers(Authorization = paste("Bearer", ._wt_auth_env_$access_token)) |>
         req_user_agent(.gen_ua()) |>
-        httr2::req_method("GET")
+        req_method("GET") |>
+        req_timeout(max_seconds)
 
-      httr2::req_perform(req, path = tmp)
+      req_perform(req, path = tmp)
 
-      org_df <- readr::read_csv(tmp)
+      org_df <- read_csv(tmp, show_col_types = F)
 
       return(org_df)
 
@@ -969,16 +973,17 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
 
     tmp <- tempfile(fileext = ".csv")
 
-    req <- httr2::request("https://www-api.wildtrax.ca") |>
-      httr2::req_url_path_append(api_path) |>
-      httr2::req_url_query(orgId = organization) |>
-      httr2::req_headers(Authorization = paste("Bearer", ._wt_auth_env_$access_token)) |>
+    req <- request("https://www-api.wildtrax.ca") |>
+      req_url_path_append(api_path) |>
+      req_url_query(orgId = organization) |>
+      req_headers(Authorization = paste("Bearer", ._wt_auth_env_$access_token)) |>
       req_user_agent(.gen_ua()) |>
-      httr2::req_method("POST")
+      req_method("POST") |>
+      req_timeout(max_seconds)
 
-    httr2::req_perform(req, path = tmp)
+    req_perform(req, path = tmp)
 
-    org_df <- readr::read_csv(tmp)
+    org_df <- read_csv(tmp, show_col_types = F)
 
     return(org_df)
 
@@ -988,20 +993,21 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
 
     if(api_match == "project_image_metadata") {
 
-      print("This is project image metadata")
+      api_path <- "bis/camera/download-camera-tasks-by-project-id"
 
       tmp <- tempfile(fileext = ".csv")
 
-      req <- httr2::request("https://www-api.wildtrax.ca") |>
-        httr2::req_url_path_append(api_path) |>
-        httr2::req_url_query(projectId = project) |>
-        httr2::req_headers(Authorization = paste("Bearer", ._wt_auth_env_$access_token)) |>
+      req <- request("https://www-api.wildtrax.ca") |>
+        req_url_path_append(api_path) |>
+        req_url_query(projectId = project) |>
+        req_headers(Authorization = paste("Bearer", ._wt_auth_env_$access_token)) |>
         req_user_agent(.gen_ua()) |>
-        httr2::req_method("GET")
+        req_method("GET") |>
+        req_timeout(max_seconds)
 
-      httr2::req_perform(req, path = tmp)
+      req_perform(req, path = tmp)
 
-      proj_df <- readr::read_csv(tmp)
+      proj_df <- suppressWarnings(read_csv(tmp, show_col_types = FALSE, progress = FALSE))
 
       return(proj_df)
 
@@ -1009,16 +1015,17 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
 
     tmp <- tempfile(fileext = ".csv")
 
-    req <- httr2::request("https://www-api.wildtrax.ca") |>
-      httr2::req_url_path_append(api_path) |>
-      httr2::req_url_query(projectId = project) |>
-      httr2::req_headers(Authorization = paste("Bearer", ._wt_auth_env_$access_token)) |>
+    req <- request("https://www-api.wildtrax.ca") |>
+      req_url_path_append(api_path) |>
+      req_url_query(projectId = project) |>
+      req_headers(Authorization = paste("Bearer", ._wt_auth_env_$access_token)) |>
       req_user_agent(.gen_ua()) |>
-      httr2::req_method("POST")
+      req_method("POST") |>
+      req_timeout(max_seconds)
 
-    httr2::req_perform(req, path = tmp)
+    req_perform(req, path = tmp)
 
-    proj_df <- readr::read_csv(tmp)
+    proj_df <- read_csv(tmp, show_col_types = F)
 
     return(proj_df)
 
@@ -1045,11 +1052,13 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
 #'   \item `"project_camera_tasks"`
 #'   \item `"project_point_counts"`
 #' }
-#' @param project The project id
-#' @param organization The organization id
+#' @param project Numeric; The project id
+#' @param organization Numeric; The organization id
+#' @param max_seconds Numeric; Number of seconds to force to wait for downloads.
 #'
-#' @import httr2 tibble dplyr
+#' @import httr2 dplyr
 #' @importFrom tidyr unnest
+#' @importFrom tibble as_tibble
 #'
 #' @export
 #'
@@ -1059,7 +1068,7 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
 #' wt_auth()
 #'
 #' # Fetch locations by organization
-#' wt_get_view("organization_locations", organization = 5)
+#' wt_get_view("organization_locations", organization = 5205)
 #'
 #' # Fetch locations by project
 #' wt_get_view("project_locations", project = 620)
@@ -1067,7 +1076,7 @@ wt_get_sync <- function(api, project = NULL, organization = NULL) {
 #'
 #' @return A tibble with column headers for the specified API call.
 
-wt_get_view <- function(api, project = NULL, organization = NULL) {
+wt_get_view <- function(api, project = NULL, organization = NULL, max_seconds = 300) {
 
   api_match <- api
   organization <- if (!is.null(organization)) {
@@ -1126,88 +1135,89 @@ wt_get_view <- function(api, project = NULL, organization = NULL) {
 
     if(!(api_match %in% c("organization_equipment","organization_recordings","organization_usage_report"))) {
 
-    resp <- httr2::request("https://www-api.wildtrax.ca") |>
-      httr2::req_url_path_append(api_path) |>
-      httr2::req_headers(
+    resp <- request("https://www-api.wildtrax.ca") |>
+      req_url_path_append(api_path) |>
+      req_headers(
         Authorization = paste("Bearer", ._wt_auth_env_$access_token),
         "Content-Type" = "application/json"
       ) |>
       req_user_agent(.gen_ua()) |>
-      httr2::req_body_json(list(
+      req_body_json(list(
         organizationId = organization,
         limit          = 1e9,
         orderBy        = "locationName",
         orderDirection = "asc"
       )) |>
-      httr2::req_method("POST") |>
-      httr2::req_perform()
+      req_method("POST") |>
+      req_timeout(max_seconds) |>
+      req_perform()
 
-    json <- httr2::resp_body_json(resp, simplifyVector = TRUE)
-    org_df <- tibble::as_tibble(json$results)
+    json <- resp_body_json(resp, simplifyVector = TRUE)
+    org_df <- as_tibble(json$results)
 
     return(org_df)
 
     } else if (api_match == "organization_equipment") {
 
-      resp <- httr2::request("https://www-api.wildtrax.ca") |>
-        httr2::req_url_path_append(api_path) |>
-        httr2::req_headers(
+      resp <- request("https://www-api.wildtrax.ca") |>
+        req_url_path_append(api_path) |>
+        req_headers(
           Authorization = paste("Bearer", ._wt_auth_env_$access_token),
           "Content-Type" = "application/json"
         ) |>
         req_user_agent(.gen_ua()) |>
-        httr2::req_body_json(list(
+        req_body_json(list(
           organizationId = organization,
           limit          = 1e9,
           orderBy        = "code",
           orderDirection = "asc"
         )) |>
-        httr2::req_method("POST") |>
-        httr2::req_perform()
+        req_method("POST") |>
+        req_timeout(max_seconds) |>
+        req_perform()
 
-      json <- httr2::resp_body_string(resp)
-      org_df_equip <- tibble::as_tibble(json)
+      json <- resp_body_string(resp)
+      org_df_equip <- as_tibble(json)
 
       return(org_df_equip)
 
     } else if (api_match == "organization_recordings") {
 
-      resp <- httr2::request("https://www-api.wildtrax.ca") |>
-        httr2::req_url_path_append(api_path) |>
-        httr2::req_headers(
+      message('Depending on the number of recordings in your Organization, this may take a moment...')
+
+      resp <- request("https://www-api.wildtrax.ca") |>
+        req_url_path_append(api_path) |>
+        req_headers(
           Authorization = paste("Bearer", ._wt_auth_env_$access_token),
           "Content-Type" = "application/json"
         ) |>
         req_user_agent(.gen_ua()) |>
-        httr2::req_body_json(list(
+        req_body_json(list(
           organizationId = organization,
-          limit          = 1e9
+          limit = 1e9
         )) |>
-        httr2::req_method("POST") |>
-        httr2::req_perform()
+        req_method("POST") |>
+        req_timeout(max_seconds) |>
+        req_perform()
 
-      json <- httr2::resp_body_json(resp, simplifyVector = TRUE)
-      org_df_recs <- tibble::as_tibble(json$results)
+      json <- resp_body_json(resp, simplifyVector = TRUE)
+      org_df_recs <- as_tibble(json)
 
       return(org_df_recs)
 
     } else if (api_match == "organization_usage_report") {
 
-      resp <- httr2::request("https://www-api.wildtrax.ca") |>
-        httr2::req_url_path_append(api_path) |>
-        httr2::req_headers(
-          Authorization = paste("Bearer", ._wt_auth_env_$access_token),
-          "Content-Type" = "application/json"
-        ) |>
+      resp <- request("https://www-api.wildtrax.ca") |>
+        req_url_path_append(api_path) |>
+        req_url_query(organizationId = organization) |>
+        req_headers(Authorization = paste("Bearer", ._wt_auth_env_$access_token)) |>
         req_user_agent(.gen_ua()) |>
-        httr2::req_body_json(list(
-          organizationId = organization
-        )) |>
-        httr2::req_method("GET") |>
-        httr2::req_perform()
+        req_method("GET") |>
+        req_timeout(max_seconds) |>
+        req_perform()
 
-      json <- httr2::resp_body_json(resp, simplifyVector = TRUE)
-      org_df_usage <- tibble::as_tibble(json$results)
+      json <- resp_body_json(resp, simplifyVector = TRUE)
+      org_df_usage <- as_tibble(json)
 
       return(org_df_usage)
 
@@ -1215,24 +1225,25 @@ wt_get_view <- function(api, project = NULL, organization = NULL) {
 
   } else if (!is.null(project)) {
 
-    resp <- httr2::request("https://www-api.wildtrax.ca") |>
-      httr2::req_url_path_append(api_path) |>
-      httr2::req_headers(
+    resp <- request("https://www-api.wildtrax.ca") |>
+      req_url_path_append(api_path) |>
+      req_headers(
         Authorization = paste("Bearer", ._wt_auth_env_$access_token),
         "Content-Type" = "application/json"
       ) |>
       req_user_agent(.gen_ua()) |>
-      httr2::req_body_json(list(
+      req_body_json(list(
         projectId = project,
         limit          = 1e9,
         orderBy        = "locationName",
         orderDirection = "asc"
       )) |>
-      httr2::req_method("POST") |>
-      httr2::req_perform()
+      req_method("POST") |>
+      req_timeout(max_seconds) |>
+      req_perform()
 
-    json <- httr2::resp_body_json(resp, simplifyVector = TRUE)
-    project_df <- tibble::as_tibble(json$results)
+    json <- resp_body_json(resp, simplifyVector = TRUE)
+    project_df <- as_tibble(json$results)
 
     return(project_df)
 

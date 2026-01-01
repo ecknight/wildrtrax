@@ -261,27 +261,26 @@ detections_wtsp <- data[[1]] |>
 
 As before, you'll probably want to upload your detections to WildTrax for verification, even though the classifiers performance for White-throated Sparrow is pretty good. Let's take a look at our output as call rate to see if it's higher at the beginning of the season, as we would expect:
 
-```{r, eval=F, include=T, message=F, warning=F}
-library(lubridate)
+```{r, eval=T, include=T, message=F, warning=F}
 
 #Calculate detections per second and mean confidence in each recording
 rate_wtsp <- detections_wtsp |> 
   group_by(location_id, recording_date_time, recording_length, version) |>
-  summarize(calls = n(),
+  summarise(calls = n(),
             confidence = mean(confidence),
             .groups = "keep") |> 
   ungroup() |> 
   mutate(rate = calls/recording_length*60,
-         recording_date_time = ymd_hms(recording_date_time),
-         yday = yday(recording_date_time),
-         hour = hour(recording_date_time))
+         recording_date_time = as.POSIXct(recording_date_time),
+         yday = as.numeric(format(recording_date_time, "%j")),
+         hour = as.numeric(format(recording_date_time, "%H")))
 
 #Filter to the sites with most recordings with detections
 occupied_wtsp <- rate_wtsp |> 
   group_by(location_id) |> 
   mutate(recordings = n()) |> 
   ungroup() |> 
-  dplyr::filter(recordings >= 4)
+  filter(recordings >= 4)
 
 #Plot call rate by day of year
 ggplot(occupied_wtsp) + 

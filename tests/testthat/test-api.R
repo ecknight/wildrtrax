@@ -66,7 +66,7 @@ test_that("Get functions for all API combinations with specific project restrict
   expect_no_error(wt_get_sync(api = "project_locations", project = 620))
   expect_no_error(wt_get_sync(api = "project_aru_tasks", project = 620))
   expect_no_error(wt_get_sync(api = "project_aru_tags", project = 620))
-  #expect_no_error(wt_get_sync(api = "project_image_metadata", project = 251)) # NOT WORKING?
+  expect_no_error(wt_get_sync(api = "project_image_metadata", project = 251))
   expect_no_error(wt_get_sync(api = "project_camera_tags", project = 251))
   expect_no_error(wt_get_sync(api = "project_point_counts", project = 804))
 })
@@ -82,9 +82,9 @@ test_that("Get functions for all API combinations with specific project restrict
   expect_no_error(wt_get_view(api = "organization_visits", organization = 5205))
   expect_no_error(wt_get_view(api = "organization_equipment", organization = 5205)) # TEXT PLAIN
   expect_no_error(wt_get_view(api = "organization_deployments", organization = 5205))
-  #expect_no_error(wt_get_view(api = "organization_recordings", organization = 5205)) # {limit: 1000, organizationId: 5205}
+  expect_no_error(wt_get_view(api = "organization_recordings", organization = 5205))
   expect_no_error(wt_get_view(api = "organization_image_sets", organization = 5205))
-  #expect_no_error(wt_get_view(api = "organization_usage_report", organization = 5205)) # organizationId GET
+  expect_no_error(wt_get_view(api = "organization_usage_report", organization = 5205))
   expect_no_error(wt_get_view(api = "project_aru_tasks", project = 620))
   expect_no_error(wt_get_view(api = "project_camera_tasks", project = 251))
   expect_no_error(wt_get_view(api = "project_point_counts", project = 804))

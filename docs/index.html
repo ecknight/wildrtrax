@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Environmental sensor data management and analytics to and from WildTrax • wildrtrax</title>
+<title>Environmental Sensor Data Management and Analytics to and from WildTrax • wildrtrax</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -15,7 +15,7 @@
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Environmental sensor data management and analytics to and from WildTrax">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Environmental Sensor Data Management and Analytics to and from WildTrax">
 <meta name="description" content="This R package contains functions to help manage and analyze environmental sensor data to and from WildTrax.">
 <meta property="og:description" content="This R package contains functions to help manage and analyze environmental sensor data to and from WildTrax.">
 <meta property="og:image" content="https://abbiodiversity.github.io/wildrtrax/logo.png">
@@ -162,7 +162,7 @@
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Download the main report</span></span>
-<span><span class="va">raw_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map_dfr.html" class="external-link">map_dfr</a></span><span class="op">(</span>.x <span class="op">=</span> <span class="va">projects</span>, .f <span class="op">=</span> <span class="op">~</span><span class="fu"><a href="reference/wt_download_report.html">wt_download_report</a></span><span class="op">(</span><span class="va">.x</span>, <span class="st">"ARU"</span>, weather_cols <span class="op">=</span> <span class="cn">F</span>, reports <span class="op">=</span> <span class="st">"main"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">raw_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map_dfr.html" class="external-link">map_dfr</a></span><span class="op">(</span>.x <span class="op">=</span> <span class="va">projects</span>, .f <span class="op">=</span> <span class="op">~</span><span class="fu"><a href="reference/wt_download_report.html">wt_download_report</a></span><span class="op">(</span><span class="va">.x</span>, <span class="st">"ARU"</span>, reports <span class="op">=</span> <span class="st">"main"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Format to occupancy for OVEN</span></span>
 <span><span class="va">dat.occu</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_format_occupancy.html">wt_format_occupancy</a></span><span class="op">(</span><span class="va">raw_data</span>, species<span class="op">=</span><span class="st">"OVEN"</span>, siteCovs<span class="op">=</span><span class="cn">NULL</span><span class="op">)</span></span>
@@ -194,7 +194,7 @@
 <span><span class="co"># Authenticate to WildTrax</span></span>
 <span><span class="fu"><a href="reference/wt_auth.html">wt_auth</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_download_report.html">wt_download_report</a></span><span class="op">(</span>project_id <span class="op">=</span> <span class="fl">1144</span>, sensor_id <span class="op">=</span> <span class="st">"ARU"</span>, reports <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"main"</span>, <span class="st">"ai"</span><span class="op">)</span>,  weather_cols <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_download_report.html">wt_download_report</a></span><span class="op">(</span>project_id <span class="op">=</span> <span class="fl">1144</span>, sensor_id <span class="op">=</span> <span class="st">"ARU"</span>, reports <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"main"</span>, <span class="st">"ai"</span><span class="op">)</span>,  <span class="va">ALSE</span><span class="op">)</span></span>
 <span>                           </span>
 <span><span class="va">eval</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_evaluate_classifier.html">wt_evaluate_classifier</a></span><span class="op">(</span><span class="va">data</span>, classifier <span class="op">=</span> <span class="st">"hawkears"</span>, resolution <span class="op">=</span> <span class="st">"task"</span>, remove_species <span class="op">=</span> <span class="cn">TRUE</span>, thresholds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">99</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -224,7 +224,7 @@
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Download data</span></span>
-<span><span class="va">raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map_dfr.html" class="external-link">map_dfr</a></span><span class="op">(</span>.x <span class="op">=</span> <span class="va">projects</span>, .f <span class="op">=</span> <span class="op">~</span><span class="fu"><a href="reference/wt_download_report.html">wt_download_report</a></span><span class="op">(</span><span class="va">.x</span>, <span class="st">"CAM"</span>, weather_cols <span class="op">=</span> <span class="cn">F</span>, reports <span class="op">=</span> <span class="st">"main"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map_dfr.html" class="external-link">map_dfr</a></span><span class="op">(</span>.x <span class="op">=</span> <span class="va">projects</span>, .f <span class="op">=</span> <span class="op">~</span><span class="fu"><a href="reference/wt_download_report.html">wt_download_report</a></span><span class="op">(</span><span class="va">.x</span>, <span class="st">"CAM"</span>, reports <span class="op">=</span> <span class="st">"main"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Get individual detections</span></span>
 <span><span class="va">individual_detections</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_ind_detect.html">wt_ind_detect</a></span><span class="op">(</span><span class="va">raw</span>, <span class="fl">30</span>, <span class="st">"minutes"</span><span class="op">)</span></span></code></pre></div>
@@ -252,7 +252,7 @@
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Download the data</span></span>
-<span><span class="va">raw_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map_dfr.html" class="external-link">map_dfr</a></span><span class="op">(</span>.x <span class="op">=</span> <span class="va">projects</span>, .f <span class="op">=</span> <span class="op">~</span><span class="fu"><a href="reference/wt_download_report.html">wt_download_report</a></span><span class="op">(</span><span class="va">.x</span>, <span class="st">"ARU"</span>, weather_cols <span class="op">=</span> <span class="cn">F</span>, reports <span class="op">=</span> <span class="st">"main"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">raw_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map_dfr.html" class="external-link">map_dfr</a></span><span class="op">(</span>.x <span class="op">=</span> <span class="va">projects</span>, .f <span class="op">=</span> <span class="op">~</span><span class="fu"><a href="reference/wt_download_report.html">wt_download_report</a></span><span class="op">(</span><span class="va">.x</span>, <span class="st">"ARU"</span>, reports <span class="op">=</span> <span class="st">"main"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Experimental</span></span>
 <span><span class="va">raw_data</span> <span class="op">|&gt;</span></span>
@@ -267,10 +267,10 @@
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># An ARU project</span></span>
-<span><span class="va">an_aru_project</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_download_report.html">wt_download_report</a></span><span class="op">(</span>project_id <span class="op">=</span> <span class="fl">620</span>, sensor_id <span class="op">=</span> <span class="st">'ARU'</span>, reports <span class="op">=</span> <span class="st">"main"</span>, weather_cols <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span>
+<span><span class="va">an_aru_project</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_download_report.html">wt_download_report</a></span><span class="op">(</span>project_id <span class="op">=</span> <span class="fl">620</span>, sensor_id <span class="op">=</span> <span class="st">'ARU'</span>, reports <span class="op">=</span> <span class="st">"main"</span>, <span class="op">)</span></span>
 <span></span>
 <span><span class="co"># An ARU project as point count format</span></span>
-<span><span class="va">aru_as_pc</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_download_report.html">wt_download_report</a></span><span class="op">(</span>project_id <span class="op">=</span> <span class="fl">620</span>, sensor_id <span class="op">=</span> <span class="st">'PC'</span>, reports <span class="op">=</span> <span class="st">"main"</span>, weather_cols <span class="op">=</span> <span class="cn">F</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">aru_as_pc</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_download_report.html">wt_download_report</a></span><span class="op">(</span>project_id <span class="op">=</span> <span class="fl">620</span>, sensor_id <span class="op">=</span> <span class="st">'PC'</span>, reports <span class="op">=</span> <span class="st">"main"</span>, <span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">

@@ -9,7 +9,11 @@ vignette: >
 
 ## Overview
 
-The purpose of this vignette 
+The purpose of this vignette is to provide a clear introduction to accessing and interacting with WildTrax through our R package. 
+
+An *API* (Application Programming Interface) is a way for one program to communicate with another over the internet. In this case, the WildTrax APIs lets R talk to WildTrax servers to retrieve project data, recordings or tag information without using the website's user interface manually. 
+
+`wildrtrax` *wraps* the WildTrax API in R functions, so you can easily authenticate, request data, and work with it in your analysis. You don’t have to write HTTP requests or handle tokens directly—our package handles these details and provides user-friendly R functions to interact with WildTrax programmatically.
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
@@ -29,7 +33,8 @@ load("package.RData")
 
 ## Authenticating to WildTrax
 
-To obtain an Auth0 token, you must login into WildTrax using Auth0 (Google authorization is currently not supported). You also need to store your WildTrax user name and password as environment variables.
+Before accessing WildTrax data, you need to authenticate to obtain a token. This token lets the server recognize you and grant access to your data. Currently, authentication is done via **Auth0 login** (Google login is not supported). To simplify repeated use, store your WildTrax username and password as environment variables in R. This allows the package to securely use your credentials without requiring you to type them each time.
+
 
 ```{r echo=TRUE, eval=TRUE}
 # Note that you need to use 'WT_USERNAME' and 'WT_PASSWORD'
@@ -129,7 +134,7 @@ spp_table |> arrange(species_code)
 
 You can also determine which species are allowed in and out of projects via the `wt_get_project_species()` function. The `included` column will expose which species have been currently tagged in the Project. 
 
-```{r, echo=T, include=T, eval=F, warning=F, message = FALSE}
+```{r, echo=T, include=T, eval=T, warning=F, message = FALSE}
 my_project_species <- wt_get_project_species(620)
 
 my_project_species |>
@@ -185,6 +190,7 @@ head(discover)
 ## Accessing WildTrax data with `wt_get_sync()` and `wt_get_view()`
 
 `wt_get_sync()` and `wt_get_view()` provide programmatic access to WildTrax data through various APIs. `wt_get_sync()` interfaces with the synchronization (sync) endpoints, which expose data associated with Organizations and Projects. These endpoints return data objects related to locations, visits, deployments, equipment, project tasks, and tags. The sync APIs are primarily intended for workflows that require advanced or batch manipulation. `wt_get_view()` provides access to the user interface views and tables that present structured representations of WildTrax data. These views are optimized for reporting and analysis and may aggregate or normalize information. Used together, `wt_get_sync()` and `wt_get_view()` allow users to retrieve operational data from the WildTrax system and work with analysis-ready representations of those data within R.
+
 
 ![How `wt_get_sync()` and `wt_get_view()` relate to Organization locations](syncs.png)
 

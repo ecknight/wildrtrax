@@ -82,7 +82,7 @@ projects <- wt_get_projects("ARU") |>
   pull()
 
 # Download the main report
-raw_data <- map_dfr(.x = projects, .f = ~wt_download_report(.x, "ARU", weather_cols = F, reports = "main"))
+raw_data <- map_dfr(.x = projects, .f = ~wt_download_report(.x, "ARU", reports = "main"))
 
 # Format to occupancy for OVEN
 dat.occu <- wt_format_occupancy(raw_data, species="OVEN", siteCovs=NULL)
@@ -120,7 +120,7 @@ Sys.setenv(WT_USERNAME = "*****", WT_PASSWORD = "*****")
 # Authenticate to WildTrax
 wt_auth()
 
-data <- wt_download_report(project_id = 1144, sensor_id = "ARU", reports = c("main", "ai"),  weather_cols = FALSE)
+data <- wt_download_report(project_id = 1144, sensor_id = "ARU", reports = c("main", "ai"),  ALSE)
                            
 eval <- wt_evaluate_classifier(data, classifier = "hawkears", resolution = "task", remove_species = TRUE, thresholds = c(10, 99))
 
@@ -151,7 +151,7 @@ projects <- wt_get_projects("CAM") |>
   pull()
 
 # Download data
-raw <- map_dfr(.x = projects, .f = ~wt_download_report(.x, "CAM", weather_cols = F, reports = "main"))
+raw <- map_dfr(.x = projects, .f = ~wt_download_report(.x, "CAM", reports = "main"))
 
 # Get individual detections
 individual_detections <- wt_ind_detect(raw, 30, "minutes")
@@ -180,7 +180,7 @@ projects <- wt_get_projects("ARU") |> # Bat projects are under the ARU sensor
   pull()
 
 # Download the data
-raw_data <- map_dfr(.x = projects, .f = ~wt_download_report(.x, "ARU", weather_cols = F, reports = "main"))
+raw_data <- map_dfr(.x = projects, .f = ~wt_download_report(.x, "ARU", reports = "main"))
 
 # Experimental
 raw_data |>
@@ -196,10 +196,10 @@ library(wildrtrax)
 library(tidyverse)
 
 # An ARU project
-an_aru_project <- wt_download_report(project_id = 620, sensor_id = 'ARU', reports = "main", weather_cols = F)
+an_aru_project <- wt_download_report(project_id = 620, sensor_id = 'ARU', reports = "main", )
 
 # An ARU project as point count format
-aru_as_pc <- wt_download_report(project_id = 620, sensor_id = 'PC', reports = "main", weather_cols = F)
+aru_as_pc <- wt_download_report(project_id = 620, sensor_id = 'PC', reports = "main", )
 ```
 
 ## Issues
