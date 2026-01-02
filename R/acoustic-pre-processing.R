@@ -111,7 +111,7 @@ wt_audio_scanner <- function(path, file_type, extra_cols = F) {
     dfs <- c("df_wav", "df_wac", "df_flac")
     dfs <- dfs[dfs %in% ls()]
     if (length(dfs)) {
-      df_final <- dplyr::bind_rows(mget(dfs))
+      df_final <- bind_rows(mget(dfs))
     }
   }
   # Return final data frame
@@ -727,7 +727,7 @@ wt_make_aru_tasks <- function(input, output=NULL, task_method = c("1SPM","1SPT",
 #'
 #' @importFrom dplyr relocate mutate select rename group_by ungroup rowwise case_when mutate_at
 #' @importFrom tibble as_tibble add_column
-#' @importFrom readr read_csv write_csv
+#' @importFrom readr read_csv write_csv cols
 #' @importFrom tidyr drop_na separate separate_rows
 #'
 #' @export
@@ -743,7 +743,7 @@ wt_kaleidoscope_tags <- function (input, output = NULL, freq_bump = T) {
 
   #Check to see if the input exists and reading it in
   if (file.exists(input)) {
-    in_tbl <- readr::read_csv(input, col_names = TRUE, na = c("", "NA"), col_types = readr::cols())
+    in_tbl <- read_csv(input, col_names = TRUE, na = c("", "NA"), col_types = cols())
   } else {
     stop ("File cannot be found")
   }
@@ -819,11 +819,11 @@ wt_kaleidoscope_tags <- function (input, output = NULL, freq_bump = T) {
 #' @param input Character; The path to the input csv
 #' @param output Character; Path where the output file will be stored
 #' @param output_file Character; Path of the output file
-#' @param species_code Character; Short-hand code for the species (see `wt_get_species()`)
+#' @param species Character; Short-hand code for the species (see `wt_get_species()`)
 #' @param vocalization Character; The vocalization type from either Song, Call, Non-Vocal, Nocturnal flight call and Feeding Buzz
-#' @param task_method Character; Include options from 1SPT, 1SPM or None
+#' @param method Character; Include options from 1SPT, 1SPM or None
 #' @param score_filter Numeric; Filter the detections by a score threshold
-#' @param task_duration Numeric; length of the task in seconds
+#' @param duration Numeric; length of the task in seconds
 #' @param sample_freq Numeric; The sampling frequency in Hz of the recording
 #'
 #' @importFrom dplyr rename mutate filter select group_by ungroup relocate
@@ -835,16 +835,16 @@ wt_kaleidoscope_tags <- function (input, output = NULL, freq_bump = T) {
 #'
 #' @return A csv formatted as a WildTrax tag template
 
-wt_songscope_tags <- function (input, output = c("env","csv"), output_file=NULL, species_code, vocalization, score_filter, task_method = c("USPM","1SPT"), task_duration, sample_freq) {
+wt_songscope_tags <- function (input, output = c("env","csv"), output_file=NULL, species, vocalization, score_filter, method = c("USPM","1SPT"), duration, sample_freq) {
 
   # Check to see if the input exists and reading it in
   if (file.exists(input)) {
-    in_tbl <- read_table(input, col_names = F)
+    in_tbl <- read_table(input, col_names = F, show_col_types = F)
   } else {
     stop ("File cannot be found")
   }
 
-  if ((output == "csv") & is.null(my_output_file)) {
+  if ((output == "csv") & is.null(output_file)) {
     stop("Specify an output file name for the tag csv")
   } else if (output == "env") {
     print("Reading file...")
@@ -860,61 +860,65 @@ wt_songscope_tags <- function (input, output = c("env","csv"), output_file=NULL,
     rename("Score" = 6) |>
     rename("recognizer" = 7) |>
     rename("comments"= 8) |>
-    mutate(file_name = strsplit(basename(file_path), "\\.")[[1]]) |>
+    mutate(file_name = sub("\\.[^.]+$", "", sub("^.*\\\\", "", file_path))) |>
     separate(file_name, into = c("location", "recording_date_time"), sep = "(?:_0\\+1_|_|__0__|__1__)", extra = "merge", remove = F) |>
     mutate(tag_start_time = as.numeric(tag_start_time)) |>
-    mutate(recording_date_time = sub('.+?(?:__)', '', recording_date_time)) |>
-    mutate(recording_date_time = as.POSIXct(strptime(recording_date_time, format = "%Y-%m-%d %H:%M:%S")))
+    mutate(recording_date_time = as.POSIXct(recording_date_time, format = "%Y%m%d_%H%M%S"))
 
   if (method == "USPM") {
+
     in_tbl_wtd <- in_tbl_wtd |>
-      add_column(task_method = "USPM", .after = "recording_date_time") |>
-      relocate(task_duration, .after = "task_method") |>
-      add_column(observer = "Not Assigned", .after = "task_duration") |>
-      relocate(species_code, .after = "observer") |>
-      group_by(location, recording_date_time, task_duration, species_code) |>
-      mutate(individual_number = row_number()) |>
+      filter(Score >= score_filter) |>
+      mutate(task_method = method, .after = "recording_date_time") |>
+      mutate(task_duration = duration, .after = "task_method") |>
+      mutate(observer = "Not Assigned", .after = "tag_duration") |>
+      mutate(species_code = species, .after = "observer") |>
+      group_by(location, recording_date_time, task_method, task_duration, observer, species_code) |>
+      mutate(individual_number = 1) |>
       ungroup() |>
+      mutate(`vocalization` = vocalization, .after = individual_number) |>
       add_column(abundance = 1, .after= "vocalization") |>
       relocate(tag_start_time, .after = abundance) |>
       relocate(tag_duration, .after = tag_start_time) |>
       add_column(min_tag_freq = "", .after= "tag_duration") |>
       add_column(max_tag_freq = "", .after= "min_tag_freq") |>
-      add_column(species_individual_comments = paste(level, Quality, Score, recognizer, sep = "/"), .after = "max_tag_freq") |>
-      add_column(tag_is_hidden_for_verification = TRUE) |>
-      add_column(internal_tag_id = "", .after = "max_tag_freq") |>
+      mutate(species_individual_comments = paste(`level`, Quality, Score, recognizer, sep = "/"), .after = "max_tag_freq") |>
+      mutate(tag_is_hidden_for_verification = FALSE) |>
+      mutate(recording_sampling_frequency = 44100) |>
+      mutate(internal_tag_id = "", .after = "max_tag_freq") |>
       select(location, recording_date_time, task_duration, task_method, observer, species_code,
              individual_number, vocalization, abundance, tag_start_time, tag_duration,
-             tag_min_freq, tag_max_freq, internal_tag_id, Quality, Score) |>
-      filter(Score >= score_filter)
+             min_tag_freq, max_tag_freq, species_individual_comments, tag_is_hidden_for_verification, recording_sampling_frequency, internal_tag_id)
   } else if (method == "1SPT") {
     in_tbl_wtd <- in_tbl_wtd |>
+      filter(Score >= score_filter) |>
       add_column(task_method = "1SPT", .after = "recording_date_time") |>
-      add_column(task_duration = task_duration, .after = "task_method") |>
+      add_column(task_duration = duration, .after = "task_method") |>
       add_column(observer = "Not Assigned", .after = "task_duration") |>
-      add_column(species_code = species_code, .after = "observer") |>
+      add_column(species_code = species, .after = "observer") |>
       group_by(location, recording_date_time, task_duration, species_code) |>
       mutate(individual_number = row_number()) |>
       ungroup() |>
       filter(!species_individual_number > 1) |>
-      mutate(vocalization = vocalization) |>
+      mutate(`vocalization` = vocalization) |>
       add_column(abundance = 1, .after= "vocalization") |>
       relocate(tag_start_time, .after = abundance) |>
       relocate(tag_duration, .after = tag_start_time) |>
       add_column(min_tag_freq = "", .after= "tag_duration") |>
       add_column(max_tag_freq = "", .after= "min_tag_freq") |>
-      add_column(species_individual_comments = paste(level, Quality, Score, recognizer, sep = "/"), .after = "max_tag_freq") |>
-      add_column(tag_is_hidden_for_verification = TRUE) |>
+      add_column(species_individual_comments = paste(`level`, Quality, Score, recognizer, sep = "/"), .after = "max_tag_freq") |>
+      add_column(tag_is_hidden_for_verification = FALSE) |>
+      mutate(recording_sampling_frequency = 44100) |>
       add_column(internal_tag_id = "", .after = "max_tag_freq") |>
       select(location, recording_date_time, task_method, task_duration, observer, species_code,
              individual_number, vocalization, abundance, tag_start_time, tag_duration,
-             min_tag_freq, max_tag_freq, internal_tag_id, Quality, Score) |>
+             min_tag_freq, max_tag_freq, species_individual_comments, tag_is_hidden_for_verification, recording_sampling_frequency, internal_tag_id) |>
       filter(Score >= score_filter)
   } else {
     stop("Only USPM and 1SPT uploads are supported at this time")
   }
 
-  if (max(in_tbl_wtd$startTime > task_length)) {
+  if (max(in_tbl_wtd$tag_start_time > duration)) {
     message("Warning: there are tags outside the length of the chosen task. You will not be able to sync these tags since they exceed the task duration")
   }
 
@@ -958,7 +962,7 @@ wt_guano_tags <- function(path, output = NULL, output_file = NULL) {
 
   read_chunk <- function(con) {
     id <- tryCatch(rawToChar(readBin(con, "raw", 4)), error   = function(e) NA_character_, warning = function(w) NA_character_)
-    size <- readBin(con, "integer", 1, size = 4, endian = "little", signed = FALSE)
+    size <- readBin(con, "integer", 1, size = 4, endian = "little")
     data <- readBin(con, "raw", size)
     list(id = id, size = size, data = data)
   }

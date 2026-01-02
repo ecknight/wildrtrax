@@ -638,10 +638,7 @@ wt_format_data <- function(input, format = c('FWMIS','NABAT')){
   spps_tibble <- map_dfr(spp_fwmis, ~ tibble(species_id = .x$sfw_species_id, sfw_name = .x$sfw_name, sfw_name_cam = .x$sfw_name_cam)) |>
     inner_join(wt_get_species() |> select(species_id, species_common_name), by = ("species_id"))
 
-    output <- output |>
-      select(all_of(new_column_order))
-
-    return(output)
+    return(spps_tibble)
   }
 
 #' Get EXIF metadata from images

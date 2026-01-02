@@ -91,7 +91,7 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
       x <- x |>
         group_by({{ project_col }}, {{ station_col }}, {{ image_set_id }}) |>
         mutate(day = list(seq.Date(start_date, end_date, by = "day"))) |>
-        tidyr::unnest(day) |>
+        unnest(day) |>
         mutate(year = as.integer(format(day, "%Y"))) |>
         select({{ project_col }}, {{ station_col }}, {{ image_set_id }}, year, day) |>
         ungroup()
@@ -102,7 +102,7 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
         group_by({{ project_col }}, {{ station_col }}, {{ image_set_id }}) |>
         arrange({{ date_time_col }}) |>
         mutate(period = rep(seq_along(rle(image_fov)$lengths), rle(image_fov)$lengths)) |>
-        filter(image_fov == "WITHIN") |>
+        filter(image_fov == "OOR") |>
         group_by({{ project_col }}, {{ station_col }}, {{ image_set_id }},  period) |>
         summarise(
           start_date = as.Date(min({{ date_time_col }})),
@@ -113,13 +113,14 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
       if (any(c(is.na(x$start_date), is.na(x$end_date)))) {
         message("Parsing of image date time produced NAs, these will be dropped")
         x <- drop_na(x)
+
       }
 
       # Expand the time ranges into individual days of operation (smallest unit)
       x <- x |>
         group_by({{ project_col }}, {{ station_col }}, {{ image_set_id }}, period) |>
         mutate(day = list(seq.Date(start_date, end_date, by = "day"))) |>
-        tidyr::unnest(day) |>
+        unnest(day) |>
         mutate(year = as.integer(format(day, "%Y"))) |>
         select({{ project_col }}, {{ station_col }}, {{ image_set_id }}, year, day)
     }
@@ -172,7 +173,7 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
       mutate(n_days_effort = 1) |>
       crossing(sp) |>
       left_join(y) |>
-      mutate(across(6:8, ~ tidyr::replace_na(.x, 0)))
+      mutate(across(6:8, ~ replace_na(.x, 0)))
   } else if (time_interval == "week") {
     x <- x |>
       mutate(week = as.numeric(format(day, "%V"))) |>
@@ -182,7 +183,7 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
     z <- x |>
       crossing(sp) |>
       left_join(y) |>
-      mutate(across(7:9, ~ tidyr::replace_na(.x, 0)))
+      mutate(across(7:9, ~ replace_na(.x, 0)))
   } else if (time_interval == "month") {
     x <- x |>
       mutate(month = format(day, "%B")) |>
@@ -192,12 +193,12 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
     z <- x |>
       crossing(sp) |>
       left_join(y) |>
-      mutate(across(7:9, ~ tidyr::replace_na(.x, 0)))
+      mutate(across(7:9, ~ replace_na(.x, 0)))
   } else if (time_interval == "full") {
     z <- x |>
       crossing(sp) |>
       left_join(y) |>
-      mutate(across(all_vars, ~ tidyr::replace_na(.x, 0))) |>
+      mutate(across(everything(), ~ replace_na(.x, 0))) |>
       group_by({{ project_col }}, {{ station_col }}, year, {{ species_col }}) |>
       summarise(detections = sum(detections),
                 counts = sum(counts),
@@ -208,10 +209,10 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
   # Make wide if desired
   if (output_format == "wide") {
     z <- z |>
-      tidyr::pivot_wider(id_cols = 1:5, names_from = {{ species_col }}, values_from = {{ variable }}, names_sep = ".")
+      pivot_wider(id_cols = 1:5, names_from = {{ species_col }}, values_from = {{ variable }}, names_sep = ".")
   } else if (output_format == "long") {
-    z <- z |> dplyr::select(1:6, {{ variable }}) |>
-      tidyr::pivot_longer(cols = {{ variable }}, names_to = "variable", values_to = "value")
+    z <- z |> select(1:6, {{ variable }}) |>
+      pivot_longer(cols = {{ variable }}, names_to = "variable", values_to = "value")
   }
 
   return(z)

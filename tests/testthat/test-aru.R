@@ -3,8 +3,28 @@ library(testthat)
 Sys.setenv(WT_USERNAME = "guest", WT_PASSWORD = "Apple123")
 wt_auth(force = TRUE)
 cypress_hills <- wt_download_report(620, 'ARU', 'main')
+fake <- ""
 
-################################### ARU Test suite
+test_that('Audio scanner', {
+  expect_no_error(wt_audio_scanner(".", file_type = "wav", extra_cols = T))
+})
+
+test_that('Audio scanner', {
+  expect_no_error(wt_audio_scanner(".", file_type = "all", extra_cols = T))
+})
+
+test_that('Audio scanner', {
+  file <- wt_audio_scanner(".", file_type = "wav", extra_cols = T)
+  expect_no_error(wt_make_aru_tasks(file, output = NULL, task_method = "1SPT", task_length = 60))
+})
+
+test_that('Guano tags', {
+  file <- wt_audio_scanner(".", file_type = "wav", extra_cols = T) |>
+    filter(location == "S4U08993") |>
+    select(file_path) |>
+    pull()
+  expect_no_error(wt_guano_tags(path = file))
+})
 
 test_that("Authentication works correctly", {
   expect_true(!is.null(wt_get_projects(sensor = 'ARU')))
@@ -60,13 +80,82 @@ test_that('Occupancy formatting', {
   expect_true(class(occu)[1] == 'unmarkedFrameOccu')
 })
 
-test_that('Classifier functions', {
-  rep <- wt_download_report(620, 'ARU', c('main','ai'))
-  eval <- wt_evaluate_classifier(rep, "task", remove_species = TRUE, thresholds = c(0.01,0.99))
+rep <- wt_download_report(620, 'ARU', c('main','ai'))
+rep2 <- wt_download_report(84, 'ARU', c('main','ai'))
+
+test_that('Expect error wrong data', {
+  expect_error(wt_evaluate_classifier(fake, resolution = "task"))
+})
+
+test_that('Expect error wrong data', {
+  expect_no_error(wt_evaluate_classifier(rep, resolution = "task", remove_species = F))
+})
+
+test_that('Classifier functions by resolution recording', {
+  eval <- wt_evaluate_classifier(rep, resolution = "task", remove_species = TRUE, thresholds = c(0.01,0.99))
   e1 <- wt_classifier_threshold(eval)
-  add_sp <- wt_additional_species(rep, remove_species = TRUE, threshold = min(e1$threshold), resolution = "task")
+  add_sp <- wt_additional_species(rep, remove_species = TRUE, threshold = min(e1$threshold), resolution = "recording")
   expect_true(!is.null(add_sp))
 })
 
+test_that('Classifier functions by minute', {
+  expect_error(wt_evaluate_classifier(rep, "minute", remove_species = TRUE, thresholds = c(0.01,0.99)))
+})
 
-#wt_guano_tags()
+test_that('Classifier functions by resolution location', {
+  eval <- wt_evaluate_classifier(rep, resolution = "task", remove_species = TRUE, thresholds = c(0.01,0.99))
+  e1 <- wt_classifier_threshold(eval)
+  add_sp <- wt_additional_species(rep, remove_species = TRUE, threshold = min(e1$threshold), resolution = "location")
+  expect_true(!is.null(add_sp))
+})
+
+test_that('Classifier functions by resolution project', {
+  eval <- wt_evaluate_classifier(rep, resolution = "task", remove_species = TRUE, thresholds = c(0.01,0.99))
+  e1 <- wt_classifier_threshold(eval)
+  add_sp <- wt_additional_species(rep, remove_species = TRUE, threshold = min(e1$threshold), resolution = "project")
+  expect_true(!is.null(add_sp))
+})
+
+test_that('Classifier functions export tags', {
+  eval <- wt_evaluate_classifier(rep, resolution = "task", remove_species = TRUE, thresholds = c(0.01,0.99))
+  e1 <- wt_classifier_threshold(eval)
+  add_sp <- wt_additional_species(rep, remove_species = TRUE, threshold = min(e1$threshold), resolution = "location", format_to_tags = T)
+  expect_true(!is.null(add_sp))
+})
+
+test_that('Classifier functions by minute with a 1SPM project', {
+  expect_no_error(wt_evaluate_classifier(rep2, "minute", remove_species = TRUE, thresholds = c(0.01,0.99)))
+})
+
+test_that('Classifier functions by resolution project', {
+  expect_no_error(wt_evaluate_classifier(rep, resolution = "recording", remove_species = TRUE, thresholds = c(0.01,0.99)))
+})
+
+# test_that('Classifier functions by task', {
+#   eval <- wt_evaluate_classifier(rep, "task", remove_species = TRUE, thresholds = c(0.01,0.99))
+#   e1 <- wt_classifier_threshold(eval)
+#   add_sp <- wt_additional_species(rep, remove_species = TRUE, threshold = min(e1$threshold), resolution = "task")
+#   expect_true(!is.null(add_sp))
+# })
+
+# test_that('Classifier functions by recording', {
+#   eval <- wt_evaluate_classifier(rep, "recording", remove_species = TRUE, thresholds = c(0.01,0.99))
+#   e1 <- wt_classifier_threshold(eval)
+#   add_sp <- wt_additional_species(rep, remove_species = TRUE, threshold = min(e1$threshold), resolution = "task")
+#   expect_true(!is.null(add_sp))
+# })
+
+test_that("Kaleidoscope tags", {
+  expect_no_error(
+    wt_songscope_tags(
+      testthat::test_path("CONI.txt"),
+      output = "env",
+      species = "CONI",
+      vocalization = "SONG",
+      score_filter = 10,
+      method = "USPM",
+      duration = 180,
+      sample_freq = 44100
+    )
+  )
+})

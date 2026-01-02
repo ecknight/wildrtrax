@@ -22,7 +22,7 @@
 #'
 #' @return A tibble containing columns for precision, recall, and F-score for each of the requested thresholds.
 
-wt_evaluate_classifier <- function(data, resolution = "recording", remove_species = TRUE,  species = NULL, thresholds = c(0.01, 0.9)){
+wt_evaluate_classifier <- function(data, resolution = NULL, remove_species = TRUE,  species = NULL, thresholds = c(0.01, 0.99)){
 
   # Check if the data object is in the right format
   if (!inherits(data, "list") && !grepl("ai", names(data)[[2]]) && !grepl("main", names(data))[[1]]) {
@@ -50,7 +50,7 @@ wt_evaluate_classifier <- function(data, resolution = "recording", remove_specie
   if(resolution=="task"){
     detections <- class |>
       rename(start_s = detection_time) |>
-      inner_join(data[[2]] |> dplyr::select(recording_id, task_id, task_duration) |> distinct(), by = c("recording_id" = "recording_id")) |>
+      inner_join(data[[2]] |> select(recording_id, task_id, task_duration) |> distinct(), by = c("recording_id" = "recording_id")) |>
       filter(!start_s > task_duration) |>
       group_by(location_id, recording_id, version, species_common_name) |>
       summarise(confidence = max(confidence), .groups="keep") |>
@@ -58,15 +58,15 @@ wt_evaluate_classifier <- function(data, resolution = "recording", remove_specie
       mutate(classifier = 1)
   } else if(resolution=="minute"){
     detections <- class |>
-      mutate(minute = ifelse(start_s==0, 1, ceiling(start_s/60))) |>
+      mutate(minute = ifelse(detection_time==0, 1, ceiling(detection_time/60))) |>
       group_by(location_id, recording_id, version, species_common_name, minute) |>
-      summarize(confidence = max(confidence), .groups="keep") |>
+      summarise(confidence = max(confidence), .groups="keep") |>
       ungroup() |>
       mutate(classifier = 1)
   } else if(resolution=="recording"){
     detections <- class |>
       group_by(location_id, recording_id, version, species_common_name) |>
-      summarize(confidence = max(confidence),  .groups="keep") |>
+      summarise(confidence = max(confidence), .groups="keep") |>
       ungroup() |>
       mutate(classifier = 1)
   } else { stop("A resolution was not specified.")}
@@ -79,13 +79,13 @@ wt_evaluate_classifier <- function(data, resolution = "recording", remove_specie
       mutate(human = 1)
   } else if(resolution=="minute"){
     main <- wt_tidy_species(data[[2]], remove=c("mammal", "amphibian", "abiotic", "insect", "human", "unknown")) |>
-      mutate(minute = ifelse(start_s==0, 1, ceiling(start_s/60))) |>
+      mutate(minute = ifelse(detection_time==0, 1, ceiling(detection_time/60))) |>
       select(location_id, recording_id, species_common_name, minute) |>
       unique() |>
       mutate(human = 1)
   } else if(resolution=="recording"){
     main <- wt_tidy_species(data[[2]], remove=c("mammal", "amphibian", "abiotic", "insect", "human", "unknown")) |>
-      dplyr::select(location_id, recording_id, species_common_name) |>
+      select(location_id, recording_id, species_common_name) |>
       unique() |>
       mutate(human = 1)
   } else {stop("A resolution was not specified.")}
@@ -100,7 +100,7 @@ wt_evaluate_classifier <- function(data, resolution = "recording", remove_specie
 
   #Filter to just species of interest if requested
   if(!is.null(species)){
-    both <- dplyr::filter(both, species_common_name %in% species)
+    both <- filter(both, species_common_name %in% species)
   }
 
   #Total number of human detections
@@ -117,12 +117,7 @@ wt_evaluate_classifier <- function(data, resolution = "recording", remove_specie
     left_join(human_totals, by = "version") |>
     filter(!is.na(version)) |>
     group_split(version) |>
-    map_dfr(function(df) {
-      map_dfr(thresholds_vec, ~ .wt_calculate_prf(
-        threshold = .x,
-        data = df,
-        human_total = unique(df$human_total)
-      )) |>
+    map_dfr(function(df) {map_dfr(thresholds_vec, ~ .wt_calculate_prf(threshold = .x, data = df, human_total = unique(df$human_total))) |>
         mutate(classifier = unique(df$version))
     }) |>
     distinct()
@@ -158,7 +153,7 @@ wt_classifier_threshold <- function(data){
   highest_fscore <- data |>
     group_by(classifier) |>
     mutate(fscore = round(fscore, 2)) |>
-    dplyr::filter(fscore == max(fscore, na.rm = TRUE)) |>
+    filter(fscore == max(fscore, na.rm = TRUE)) |>
     ungroup()
 
   # Return the highest threshold of highest F-score as a single numeric value
@@ -202,16 +197,16 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 0.5, 
   #Get the classifier report and filter species as requested
   if(remove_species==TRUE){
     class <- data[[1]] |>
-      dplyr::filter(is_species_allowed_in_project==TRUE) |>
-      dplyr::filter(confidence >= threshold)
+      filter(is_species_allowed_in_project==TRUE) |>
+      filter(confidence >= threshold)
   } else {
     class <- data[[1]]
   }
 
   #Clean things up
   class <- class |>
-    dplyr::rename(ai_detection_time = detection_time) |>
-    dplyr::left_join(data[[2]] |> dplyr::select(task_id, recording_id) |> distinct(), by = "recording_id")
+    rename(ai_detection_time = detection_time) |>
+    left_join(data[[2]] |> select(task_id, recording_id) |> distinct(), by = "recording_id")
 
   #Summarize the reports and put together at the desired resolution
 
@@ -219,27 +214,27 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 0.5, 
 
     #Classifier report
     detections <- class |>
-      dplyr::inner_join(data[[2]] |> dplyr::select(recording_id, task_duration, detection_time), by = c("recording_id" = "recording_id")) |>
-      dplyr::filter(!ai_detection_time > task_duration) |>
-      dplyr::group_by(location_id, recording_id, task_id, species_common_name) |>
-      dplyr::summarise(confidence = max(confidence)) |>
-      dplyr::ungroup()
+      inner_join(data[[2]] |> select(recording_id, task_id, task_duration, detection_time), by = c("recording_id" = "recording_id")) |>
+      filter(!ai_detection_time > task_duration) |>
+      group_by(location_id, recording_id, task_id, species_common_name) |>
+      summarise(confidence = max(confidence)) |>
+      ungroup()
 
     #Main report
     main <- wt_tidy_species(data[[2]], remove=c("mammal", "amphibian", "abiotic", "insect", "human", "unknown")) |>
-      dplyr::select(location_id, recording_id, task_id, species_common_name) |>
-      dplyr::distinct()
+      select(location_id, recording_id, task_id, species_common_name) |>
+      distinct()
 
     #Put together
-    new <- dplyr::anti_join(detections, main, by=c("location_id", "recording_id", "task_id", "species_common_name")) |>
-      dplyr::left_join(class, by=c("location_id", "recording_id", "task_id", "species_common_name", "confidence"), multiple="all")
+    new <- anti_join(detections, main, by=c("location_id", "recording_id", "task_id", "species_common_name")) |>
+      left_join(class, by=c("location_id", "recording_id", "task_id", "species_common_name", "confidence"), multiple="all")
     if (nrow(new) == 0) {
       stop("There were no additional species detected.")
     } else {
       new <- new |>
-        dplyr::group_by(location_id, recording_id,task_id, species_common_name, confidence) |>
-        dplyr::sample_n(1) |>
-        dplyr::ungroup()
+        group_by(location_id, recording_id,task_id, species_common_name, confidence) |>
+        sample_n(1) |>
+        ungroup()
     }
   }
 
@@ -247,21 +242,21 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 0.5, 
 
     #Classifier report
     detections <- class |>
-      dplyr::group_by(location_id, recording_id, species_common_name) |>
-      dplyr::summarise(confidence = max(confidence),  .groups="keep") |>
-      dplyr::ungroup()
+      group_by(location_id, recording_id, species_common_name) |>
+      summarise(confidence = max(confidence), .groups="keep") |>
+      ungroup()
 
     #Main report
     main <- wt_tidy_species(data[[2]], remove=c("mammal", "amphibian", "abiotic", "insect", "human", "unknown")) |>
-      dplyr::select(location_id, recording_id, species_common_name) |>
-      dplyr::distinct()
+      select(location_id, recording_id, species_common_name) |>
+      distinct()
 
     #Put together
-    new <- dplyr::anti_join(detections, main, by=c("location_id", "recording_id", "species_common_name")) |>
-      dplyr::left_join(class, by=c("location_id", "recording_id", "species_common_name", "confidence")) |>
-      dplyr::group_by(location_id, recording_id, species_common_name, confidence) |>
-      dplyr::sample_n(1) |>
-      dplyr::ungroup()
+    new <- anti_join(detections, main, by=c("location_id", "recording_id", "species_common_name")) |>
+      left_join(class, by=c("location_id", "recording_id", "species_common_name", "confidence")) |>
+      group_by(location_id, recording_id, species_common_name, confidence) |>
+      sample_n(1) |>
+      ungroup()
 
   }
 
@@ -269,22 +264,22 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 0.5, 
 
     #Classifier report
     detections <- class |>
-      dplyr::filter(confidence >= threshold) |>
-      dplyr::group_by(location_id, species_common_name) |>
-      dplyr::summarise(confidence = max(confidence),  .groups="keep") |>
-      dplyr::ungroup()
+      filter(confidence >= threshold) |>
+      group_by(location_id, species_common_name) |>
+      summarise(confidence = max(confidence),  .groups="keep") |>
+      ungroup()
 
     #Main report
     main <- wt_tidy_species(data[[2]], remove=c("mammal", "amphibian", "abiotic", "insect", "human", "unknown")) |>
-      dplyr::select(location_id, species_common_name) |>
-      dplyr::distinct()
+      select(location_id, species_common_name) |>
+      distinct()
 
     #Put together
     new <- anti_join(detections, main, by=c("location_id", "species_common_name")) |>
-      dplyr::left_join(class, by=c("location_id", "species_common_name", "confidence"), multiple="all") |>
-      dplyr::group_by(location_id, species_common_name, confidence) |>
-      dplyr::sample_n(1) |>
-      dplyr::ungroup()
+      left_join(class, by=c("location_id", "species_common_name", "confidence"), multiple="all") |>
+      group_by(location_id, species_common_name, confidence) |>
+      sample_n(1) |>
+      ungroup()
 
   }
 
@@ -292,22 +287,22 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 0.5, 
 
     #Classifier report
     detections <- class |>
-      dplyr::filter(confidence >= threshold) |>
-      dplyr::group_by(species_common_name) |>
-      dplyr::summarise(confidence = max(confidence),  .groups="keep") |>
-      dplyr::ungroup()
+      filter(confidence >= threshold) |>
+      group_by(species_common_name) |>
+      summarise(confidence = max(confidence),  .groups="keep") |>
+      ungroup()
 
     #Main report
     main <- wt_tidy_species(data[[2]], remove=c("mammal", "amphibian", "abiotic", "insect", "human", "unknown")) |>
-      dplyr::select(species_common_name) |>
-      dplyr::distinct()
+      select(species_common_name) |>
+      distinct()
 
     #Put together
     new <- anti_join(detections, main, by=c("species_common_name")) |>
-      dplyr::left_join(class, by=c("species_common_name", "confidence"), multiple="all") |>
-      dplyr::group_by(species_common_name, confidence) |>
-      dplyr::sample_n(1) |>
-      dplyr::ungroup()
+      left_join(class, by=c("species_common_name", "confidence"), multiple="all") |>
+      group_by(species_common_name, confidence) |>
+      sample_n(1) |>
+      ungroup()
 
   }
 
@@ -343,7 +338,7 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 0.5, 
 
     return(new_export)
 
-    #readr::write_csv(new_export, paste0(output, "/ai_tags.csv"))
+    write_csv(new_export, paste0(output, "/ai_tags.csv"))
 
   } else {
 

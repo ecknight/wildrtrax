@@ -318,7 +318,8 @@ wt_get_species <- function(){
 #'
 #' @param project The project id associated with the desired species list
 #'
-#' @import purrr
+#' @import dplyr
+#' @importFrom tibble as_tibble
 #' @export
 #'
 #' @examples
@@ -334,20 +335,20 @@ wt_get_project_species <- function(project) {
     stop("You need to supply a project ID.", call. = FALSE)
   }
 
-  resp <- httr2::request("https://www-api.wildtrax.ca") |>
-    httr2::req_url_path_append("bis/get-project-species-details") |>
-    httr2::req_url_query(projectId = project) |>
-    httr2::req_headers(
+  resp <- request("https://www-api.wildtrax.ca") |>
+    req_url_path_append("bis/get-project-species-details") |>
+    req_url_query(projectId = project) |>
+    req_headers(
       Authorization = paste("Bearer", ._wt_auth_env_$access_token)
     ) |>
     req_user_agent(.gen_ua()) |>
-    httr2::req_method("GET") |>
-    httr2::req_perform()
+    req_method("GET") |>
+    req_perform()
 
-  json <- httr2::resp_body_json(resp, simplifyVector = TRUE)
+  json <- resp_body_json(resp, simplifyVector = TRUE)
 
-  project_species <- tibble::as_tibble(json$Included) |>
-    dplyr::transmute(
+  project_species <- as_tibble(json$Included) |>
+    transmute(
       speciesId = as.integer(speciesId),
       included  = as.logical(exists)
     ) |>
@@ -769,13 +770,19 @@ wt_location_photos <- function(organization, output = NULL) {
 
   org_numeric <- .get_org_id(organization)
 
-  r <- .wt_api_gr(
-    path = "/bis/get-location-image-summary",
-    organizationId = 1,
-    sort = "locationName",
-    order = "asc",
-    limit = 1e9
-  )
+  r <- request("https://www-api.wildtrax.ca") |>
+    req_url_path_append("bis/get-location-image-summary") |>
+    req_url_query(
+      limit = 500,
+      page = 1,
+      organizationId = organization
+    ) |>
+    req_headers(
+      Authorization = paste("Bearer", ._wt_auth_env_$access_token)
+    ) |>
+    req_user_agent(.gen_ua()) |>
+    req_method("GET") |>
+    req_perform()
 
   photos <- resp_body_string(r)
   results_raw <- sub('.*"results"\\s*:\\s*\\[', '[', photos)

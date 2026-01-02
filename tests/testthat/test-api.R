@@ -1,5 +1,15 @@
 library(testthat)
 
+test_that("errors when WT_USERNAME or WT_PASSWORD are missing", {
+  withr::with_envvar(
+    c(WT_USERNAME = "", WT_PASSWORD = ""),
+    expect_error(
+      .wt_auth(),
+      "Environment variables are not set"
+    )
+  )
+})
+
 aoi <- list(
   c(-112.85438, 57.13472),
   c(-113.14364, 54.74858),
@@ -20,7 +30,7 @@ test_that("Download without authentication or boundary; single-species", {
   expect_true(!is.null(wt_dd_summary(sensor = 'ARU', species = 'White-throated Sparrow', boundary = NULL)))
 })
 
-test_that("Download without authentication or boundary; single-species", {
+test_that("Download without authentication with boundary; single-species", {
   expect_true(!is.null(wt_dd_summary(sensor = 'ARU', species = 'White-throated Sparrow', boundary = aoi)))
 })
 
@@ -32,8 +42,20 @@ test_that("Download without authentication, boundary; multiple single-species", 
   expect_true(!is.null(wt_dd_summary(sensor = 'ARU', species = c('White-throated Sparrow','Hermit Thrush'), boundary = aoi)))
 })
 
+test_that("Try to do something without authorization", {
+  expect_error(wt_download_report(620, 'ARU', 'main'))
+})
+
 Sys.setenv(WT_USERNAME = "guest", WT_PASSWORD = "Apple123")
 wt_auth(force = TRUE)
+
+# test_that("Try to get projects without a sensor id", {
+#   expect_error(wt_get_projects())
+# })
+
+test_that("Try to download something without a report specified", {
+  expect_error(wt_download_report(620, 'ARU'))
+})
 
 test_that("Download with authentication with boundary; single-species", {
   expect_true(!is.null(wt_dd_summary(sensor = 'ARU', species = 'White-throated Sparrow', boundary = aoi)))
@@ -90,4 +112,66 @@ test_that("Get functions for all API combinations with specific project restrict
   expect_no_error(wt_get_view(api = "project_point_counts", project = 804))
 })
 
+test_that("Project species", {
+  expect_no_error(wt_get_project_species(620))
+})
+
+test_that("Download media", {
+  tmp_dir <- withr::local_tempdir()
+  report <- wt_download_report(620, "ARU", "recording") |>
+    dplyr::slice(1)
+  expect_no_error(
+    wt_download_media(
+      report,
+      type = "recording",
+      output = tmp_dir
+    )
+  )
+})
+
+test_that("Download media", {
+  tmp_dir <- withr::local_tempdir()
+  report <- wt_download_report(620, "ARU", "tag") |>
+    dplyr::slice(1)
+  expect_no_error(
+    wt_download_media(
+      report,
+      type = "tag_clip_audio",
+      output = tmp_dir
+    )
+  )
+})
+
+test_that("Download media", {
+  tmp_dir <- withr::local_tempdir()
+  report <- wt_download_report(620, "ARU", "tag") |>
+    dplyr::slice(1)
+  expect_no_error(
+    wt_download_media(
+      report,
+      type = "tag_clip_spectrogram",
+      output = tmp_dir
+    )
+  )
+})
+
+test_that("Download media", {
+  tmp_dir <- withr::local_tempdir()
+  report <- wt_download_report(251, "CAM", "image_report") |>
+    dplyr::slice(1)
+  expect_no_error(wt_download_media(report, type = "image", output = tmp_dir))
+})
+
+test_that("Download media", {
+  tmp_dir <- withr::local_tempdir()
+  report <- wt_download_report(620, "ARU", "recording") |>
+    dplyr::slice(1)
+  tmp_file <- wt_download_media(
+    report,
+    type = "recording",
+    output = tmp_dir
+  )
+
+  expect_no_error(wt_audio_scanner(tmp_dir, file_type = "flac", extra_cols = T))
+})
 

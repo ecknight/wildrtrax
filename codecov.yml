@@ -1,19 +1,27 @@
+# Disable automatic comments in PRs
 comment: false
 
 coverage:
   status:
+    # Coverage checks for the entire project
     project:
       default:
-        target: auto
-        threshold: 1%
-        informational: true
+        target: auto       # automatically determine target coverage
+        threshold: 1%      # fail if coverage drops more than 1%
+        informational: true  # report as informational, not blocking
+
+    # Coverage checks for changed files (patch)
     patch:
       default:
         target: auto
         threshold: 1%
         informational: true
 
-- name: Upload coverage reports to Codecov
+# Upload coverage reports to Codecov
+- name: Upload coverage reports
   uses: codecov/codecov-action@v4.0.1
   with:
     token: ${{ secrets.CODECOV_TOKEN }}
+    fail_ci_if_error: true     # fail the workflow if upload fails
+    verbose: true              # verbose logging for debugging
+    files: ./coverage/*.xml    # specify coverage files if needed

@@ -6,10 +6,10 @@
 \usage{
 wt_evaluate_classifier(
   data,
-  resolution = "recording",
+  resolution = NULL,
   remove_species = TRUE,
   species = NULL,
-  thresholds = c(0.01, 0.9)
+  thresholds = c(0.01, 0.99)
 )
 }
 \arguments{

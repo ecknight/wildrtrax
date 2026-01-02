@@ -227,52 +227,6 @@
 
 }
 
-#' An internal function to handle generic PUT requests to WildTrax
-#' `r lifecycle::badge("experimental")`
-#'
-#' @description Generic function to handle certain PUT requests
-#'
-#' @param path The path to the API
-#' @param body A named list to include in the request body (JSON)
-#' @param max_time The maximum number of seconds an API request can take. By default 300.
-#'
-#' @keywords internal
-#'
-#' @import httr2
-
-.wt_api_put <- function(path, body = list(), max_time = 300) {
-
-  # Check if authentication has expired:
-  if (.wt_auth_expired()) {stop("Please authenticate with wt_auth().", call. = FALSE)}
-
-  ## User agent
-  u <- .gen_ua()
-
-  r <- request("https://www-api.wildtrax.ca") |>
-    req_url_path_append(path) |>
-    req_headers(
-      Authorization = paste("Bearer", ._wt_auth_env_$access_token),
-      `Content-Type` = "application/json"
-    ) |>
-    req_user_agent(u) |>
-    req_body_json(body) |>
-    req_method("PUT") |>
-    req_timeout(max_time) |>
-    req_perform()
-
-  # Handle errors
-  if (resp_status(r) >= 400) {
-    stop(sprintf(
-      "PUT request failed [%s]\n%s",
-      resp_status(r),
-      message),
-      call. = FALSE)
-  } else {
-    return(r)
-  }
-
-}
-
 #' Column assignments
 #'
 #' @description Assign correct column types for reports

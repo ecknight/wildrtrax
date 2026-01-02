@@ -80,7 +80,7 @@ test_that("output format 'wide' works correctly", {
 })
 
 test_that("Megadetector stuff", {
-  md_test |> view()
+  expect_true(nrow(md_test) > 1)
 })
 
 test_that("valid time intervals are handled", {
@@ -88,11 +88,11 @@ test_that("valid time intervals are handled", {
   result_day <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, time_interval = "day", output_format = "long")
   result_week <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, time_interval = "week", output_format = "long")
   result_month <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, time_interval = "month", output_format = "long")
-  #result_full <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, time_interval = "full", output_format = "long")
+  result_full <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, time_interval = "full", output_format = "long")
   result_day_w <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, time_interval = "day", output_format = "wide")
   result_week_w <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, time_interval = "week", output_format = "wide")
   result_month_w <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, time_interval = "month", output_format = "wide")
-  #result_full_w <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, time_interval = "full", output_format = "wide")
+  result_full_w <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, time_interval = "full", output_format = "wide")
 
   expect_equal(nrow(result_day), 657968)  # Adjust this based on the actual expected number of rows for each case
   expect_equal(nrow(result_week), 98646)
@@ -108,13 +108,11 @@ test_that("all specified variables are included in the summarised output", {
   expect_true(!is.null(result))
 })
 
-# test_that("exclude_out_of_range removes data outside of the camera's field of view", {
-#   result <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, exclude_out_of_range = TRUE, time_interval = "day", output_format = "long", variable = "counts")
-#   result_out <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, exclude_out_of_range = FALSE, time_interval = "day", output_format = "long", variable = "counts")
-#   expect_true(nrow(result_out) > nrow(result))
-# })
-
-#wt_get_exif()
+test_that("exclude_out_of_range removes data outside of the camera's field of view", {
+  result <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, exclude_out_of_range = TRUE, time_interval = "day", output_format = "long", variable = "counts")
+  result_out <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, exclude_out_of_range = FALSE, time_interval = "day", output_format = "long", variable = "counts")
+  expect_true(nrow(result_out) > nrow(result))
+})
 
 
 
