@@ -18,6 +18,7 @@ A csv formatted as a WildTrax tag template
 }
 \description{
 \code{wt_guano_tags} Takes the embeded classifier output and converts them into a WildTrax tag template for upload
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 }
 \examples{
 \dontrun{

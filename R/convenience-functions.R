@@ -644,6 +644,7 @@ wt_format_data <- function(input, format = c('FWMIS','NABAT')){
 #' Get EXIF metadata from images
 #'
 #' @description This function gets all relevant EXIF metadata from images in Projects
+#' `r lifecycle::badge("experimental")`
 #'
 #' @param data `wt_download_report(reports = c(image_report))` object containing
 #'

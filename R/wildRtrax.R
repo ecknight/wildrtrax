@@ -5,7 +5,7 @@
 #' @name wildrtrax
 "_PACKAGE"
 
-# Define global variables
+# Define global variables. Ideally run lintr::lint_package() regularly to ensure variables are properly defined. Run against wt_get_sync() and wt_download_report() to ensure standard naming conventions. wt_get_view() columns require renaming due to direct API interfacing.
 utils::globalVariables(
   c(
     ".",

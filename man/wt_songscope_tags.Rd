@@ -8,11 +8,11 @@ wt_songscope_tags(
   input,
   output = c("env", "csv"),
   output_file = NULL,
-  species_code,
+  species,
   vocalization,
   score_filter,
-  task_method = c("USPM", "1SPT"),
-  task_duration,
+  method = NULL,
+  duration,
   sample_freq
 )
 }
@@ -23,15 +23,15 @@ wt_songscope_tags(
 
 \item{output_file}{Character; Path of the output file}
 
-\item{species_code}{Character; Short-hand code for the species (see \code{wt_get_species()})}
+\item{species}{Character; Short-hand code for the species (see \code{wt_get_species()})}
 
 \item{vocalization}{Character; The vocalization type from either Song, Call, Non-Vocal, Nocturnal flight call and Feeding Buzz}
 
 \item{score_filter}{Numeric; Filter the detections by a score threshold}
 
-\item{task_method}{Character; Include options from 1SPT, 1SPM or None}
+\item{method}{Character; Include options from 1SPT, 1SPM or None}
 
-\item{task_duration}{Numeric; length of the task in seconds}
+\item{duration}{Numeric; length of the task in seconds}
 
 \item{sample_freq}{Numeric; The sampling frequency in Hz of the recording}
 }

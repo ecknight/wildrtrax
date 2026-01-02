@@ -33,3 +33,7 @@ test_that('Get an org ID', {
   expect_no_error(.get_org_id("ABMI"))
 })
 
+test_that("Language", {
+  expect_no_error(.language("en"))
+  expect_no_error(.language("fr"))
+})

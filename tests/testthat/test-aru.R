@@ -3,6 +3,7 @@ library(testthat)
 Sys.setenv(WT_USERNAME = "guest", WT_PASSWORD = "Apple123")
 wt_auth(force = TRUE)
 cypress_hills <- wt_download_report(620, 'ARU', 'main')
+pc_proj <- wt_download_report(881, 'PC', 'main')
 fake <- ""
 
 test_that('Audio scanner', {
@@ -145,7 +146,7 @@ test_that('Classifier functions by resolution project', {
 #   expect_true(!is.null(add_sp))
 # })
 
-test_that("Kaleidoscope tags", {
+test_that("Songscope tags USPM", {
   expect_no_error(
     wt_songscope_tags(
       testthat::test_path("CONI.txt"),
@@ -158,4 +159,43 @@ test_that("Kaleidoscope tags", {
       sample_freq = 44100
     )
   )
+})
+
+test_that("Songscope tags 1SPT", {
+  expect_no_error(
+    wt_songscope_tags(
+      testthat::test_path("CONI.txt"),
+      output = "env",
+      species = "CONI",
+      vocalization = "SONG",
+      score_filter = 10,
+      method = "1SPT",
+      duration = 180,
+      sample_freq = 44100
+    )
+  )
+})
+
+test_that("Kaleidoscope tags", {
+  expect_no_error(
+    wt_kaleidoscope_tags(
+      testthat::test_path("id.csv"),
+      output = NULL,
+      freq_bump = T
+    )
+  )
+})
+
+test_that("Kaleidoscope tags", {
+  expect_no_error(
+    wt_kaleidoscope_tags(
+      testthat::test_path("id.csv"),
+      output = NULL,
+      freq_bump = F
+    )
+  )
+})
+
+test_that("Wide with PC", {
+  expect_no_error(wt_make_wide(pc_proj))
 })
