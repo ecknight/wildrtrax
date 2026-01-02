@@ -18,7 +18,7 @@
              0x69)))
 
   # Initialize request to Auth0
-  req <-  httr2::request("https://abmi.auth0.com/")
+  req <-  request("https://abmi.auth0.com/")
 
   if (Sys.getenv("WT_USERNAME") == "" || Sys.getenv("WT_PASSWORD") == "") {
     stop(
@@ -30,27 +30,29 @@
   }
 
   r <- req |>
-    httr2::req_url_path("oauth/token") |>
-    httr2::req_body_form(
+    req_url_path("oauth/token") |>
+    req_body_form(
       audience = "http://www.wildtrax.ca",
       grant_type = "password",
       client_id = cid,
-      username = Sys.getenv('WT_USERNAME'),
-      password = Sys.getenv('WT_PASSWORD')) |>
-    httr2::req_perform()
+      username = Sys.getenv("WT_USERNAME"),
+      password = Sys.getenv("WT_PASSWORD")
+    ) |>
+    req_error(is_error = function(resp) FALSE) |>
+    req_perform()
 
   # Check for authentication errors
-  if (httr2::resp_is_error(r)) {
+  if (resp_is_error(r)) {
     stop(sprintf(
       "Authentication failed [%s]\n%s",
-      httr2::resp_status(r),
-      httr2::resp_body_json(r)$error_description
+      resp_status(r),
+      resp_body_json(r)$error_description
     ),
     call. = FALSE)
   }
 
   # Parse the JSON response
-  x <- httr2::resp_body_json(r)
+  x <- resp_body_json(r)
 
   # Calculate token expiry time
   t0 <- Sys.time()
