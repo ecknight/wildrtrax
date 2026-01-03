@@ -1,14 +1,15 @@
 #' Scan acoustic data to a standard format
 #'
-#' @description Scans directories of audio data and returns the standard naming conventions
+#' @description Scans directories of audio data
 #'
-#' @param path Character; The path to the directory with audio files you wish to scan. Can be done recursively.
-#' @param file_type Character; Takes one of four values: wav, wac, flac or all. Use "all" if your directory contains many types of files.
-#' @param extra_cols Boolean; Default set to FALSE for speed. If TRUE, returns additional columns for file duration, sample rate and number of channels.
+#' @param path Character; The path to the directory with audio files
+#' @param file_type Character; File types of wav, wac, flac or all
+#' @param extra_cols Boolean; TRUE returns duration, sample rate and channels
 #'
 #' @importFrom fs dir_ls file_size
 #' @importFrom tibble as_tibble
-#' @importFrom dplyr mutate select filter case_when arrange group_by row_number ungroup bind_rows
+#' @importFrom dplyr mutate select filter case_when arrange
+#' @importFrom dplyr group_by row_number ungroup bind_rows
 #' @importFrom tuneR readWave
 #' @importFrom purrr map map_dbl pluck
 #' @importFrom tidyr separate pivot_longer unnest_longer
@@ -21,7 +22,7 @@
 #'
 #' @return A tibble with a summary of your audio files.
 
-wt_audio_scanner <- function(path, file_type, extra_cols = F) {
+wt_audio_scanner <- function(path, file_type, extra_cols = FALSE) {
 
   # Create regex for file_type
   if (file_type == "wav" || file_type == "WAV") {
@@ -33,21 +34,25 @@ wt_audio_scanner <- function(path, file_type, extra_cols = F) {
   } else if (file_type == "all") {
     file_type_reg <- "\\.wav$|\\.wac$|\\.WAV$|\\.flac$"
   } else {
-    # Throw error if the file_type is not set to wav, wac, flac, or all..
-    stop (
-      "For now, this function can only be used for wav, wac and/or flac files. Please specify either 'wac', 'wav', 'flac' or 'all' with the file_type argument."
-    )
+    stop("Please specify wac, wav, flac or all for file_type.")
   }
 
   # Scan files, gather metadata
   message("Reading files from directory... \n")
-  df <- as_tibble(x = path) |> mutate(file_path = map(.x = value, .f = ~ dir_ls(path = .x, regexp = file_type_reg, recurse = TRUE, fail = FALSE)))
+  df <- as_tibble(x = path) |>
+    mutate(file_path = map(
+      .x = value,
+      .f = ~ dir_ls(
+        path = .x,
+        regexp = file_type_reg,
+        recurse = TRUE,
+        fail = FALSE
+      )
+    ))
 
   # Check if nothing was returned
-  if (nrow(df) == 0) {
-    stop (
-      "No files of the specified file type were found in this directory."
-    )
+  if(nrow(df) == 0) {
+    stop("No files of the specified file type were found in this directory.")
   }
 
   # Create the main tibble
@@ -56,7 +61,7 @@ wt_audio_scanner <- function(path, file_type, extra_cols = F) {
     mutate(size_Mb = round(map_dbl(.x = file_path, .f = ~file_size(.x)) / 10e5, digits = 2), # Convert file sizes to megabytes
                   file_path = as.character(file_path)) |>
     select(file_path, size_Mb) |>
-    filter(!size_Mb < 1) |> # zero-length file protection
+    filter(!size_Mb < 1) |>
     mutate(file_name = sub("\\..*", "", basename(file_path)), file_type = sub('.*\\.(\\w+)$', '\\1', basename(file_path))) |>
     # Parse location, recording date time and other temporal columns
     separate(file_name, into = c("location", "recording_date_time"), sep = "(?:_0\\+1_|_|__0__|__1__)", extra = "merge", remove = FALSE) |>
@@ -76,8 +81,8 @@ wt_audio_scanner <- function(path, file_type, extra_cols = F) {
     # Scan the wav files first
     if ("wav" %in% df$file_type) {
       df_wav <- df |>
-        filter(file_type == "wav") %>%
-        mutate(data = map(.x = file_path, .f = ~ readWave(.x, from = 0, to = Inf, units = "seconds", header = TRUE))) %>%
+        filter(file_type == "wav") |>
+        mutate(data = map(.x = file_path, .f = ~ readWave(.x, from = 0, to = Inf, units = "seconds", header = TRUE))) |>
         mutate(length_seconds = map_dbl(.x = data, .f = ~ round(pluck(.x[["samples"]]) / pluck(.x[["sample.rate"]]), 2)),
                       sample_rate = map_dbl(.x = data, .f = ~ round(pluck(.x[["sample.rate"]]), 2)),
                       n_channels = map_dbl(.x = data, .f = ~ pluck(.x[["channels"]]))) %>%
@@ -86,21 +91,21 @@ wt_audio_scanner <- function(path, file_type, extra_cols = F) {
     #Then wac files
     if ("wac" %in% df$file_type) {
       df_wac <- df |>
-        filter(file_type == "wac") %>%
+        filter(file_type == "wac") |>
         mutate(wac_info = map(.x = file_path, .f = ~ wt_wac_info(.x)),
                       sample_rate = map_dbl(.x = wac_info, .f = ~ pluck(.x[["sample_rate"]])),
                       length_seconds = map_dbl(.x = wac_info, .f = ~ round(pluck(.x[["length_seconds"]]), 2)),
-                      n_channels = map_dbl(.x = wac_info, .f = ~ pluck(.x[["n_channels"]]))) %>%
+                      n_channels = map_dbl(.x = wac_info, .f = ~ pluck(.x[["n_channels"]]))) |>
         select(-wac_info)
     }
     #Finally flac
     if ("flac" %in% df$file_type) {
       df_flac <- df |>
-        filter(file_type == "flac") %>%
+        filter(file_type == "flac") |>
         mutate(flac_info = map(.x = file_path, .f = ~ wt_flac_info(.x)),
                       sample_rate = map_dbl(.x = flac_info, .f = ~ pluck(.x, 1)),
                       length_seconds = map_dbl(.x = flac_info, .f = ~ round(pluck(.x, 3), 2)),
-                      n_channels = 0) %>%
+                      n_channels = 0) |>
         select(-flac_info)
     }
   }
@@ -295,7 +300,7 @@ wt_run_ap <- function(x = NULL, fp_col = file_path, audio_dir = NULL, output_dir
 #'
 #' @return Output will return the merged tibble with all information, the summary plots of the indices and the LDFC
 
-wt_glean_ap <- function(x = NULL, input_dir, purpose = c("quality","abiotic","biotic"), include_ind = TRUE, include_ldfcs = TRUE, borders = F) {
+wt_glean_ap <- function(x = NULL, input_dir, purpose = c("quality","abiotic","biotic"), include_ind = TRUE, include_ldfcs = TRUE, borders = FALSE) {
 
   # Check to see if the input exists and reading it in
   files <- x
@@ -314,14 +319,14 @@ wt_glean_ap <- function(x = NULL, input_dir, purpose = c("quality","abiotic","bi
   # Check to see if the input exists and reading it in
   if (dir.exists(input_dir)) {
     ind <-
-      dir_ls(input_dir, regexp = "*.Indices.csv", recurse = T) |>
-        map_dfr( ~ readr::read_csv(.x, show_col_types = F)) |>
+      dir_ls(input_dir, regexp = "*.Indices.csv", recurse = TRUE) |>
+        map_dfr( ~ read_csv(.x, show_col_types = FALSE)) |>
         relocate(c(FileName, ResultMinute)) |>
         select(-c(ResultStartSeconds, SegmentDurationSeconds,RankOrder,ZeroSignal)) |>
         pivot_longer(!c(FileName, ResultMinute), names_to = "index_variable", values_to = "index_value")
 
     ldfcs <-
-      dir_info(input_dir, regexp = "*__2Maps.png", recurse = T) |>
+      dir_info(input_dir, regexp = "*__2Maps.png", recurse = TRUE) |>
       select(path) |>
       rename("image" = 1) |>
       mutate(file_name = sub('__2Maps.png$', '', basename(image)))

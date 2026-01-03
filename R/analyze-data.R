@@ -138,7 +138,7 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
   }
 
   # Based on the desired timeframe, assess when each detection occurred
-  if (time_interval == "day" | time_interval == "full") {
+  if (time_interval == "day" || time_interval == "full") {
     y <- detect_data |>
       mutate(year = as.integer(format({{ start_col_det }}, "%Y")),
              day = as.Date({{ start_col_det }}))

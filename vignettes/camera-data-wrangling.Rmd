@@ -95,8 +95,7 @@ projects <- wt_get_projects("CAM") |>
   select(project_id) |>
   pull()
 
-raw_data <- map_dfr(\(projects), 
-                    .f = ~wt_download_report(projects, "CAM", reports = "main"))
+raw_data <- map_dfr(projects, ~ wt_download_report(.x, "CAM", reports = "main"))
 
 summarised <- wt_ind_detect(raw_data, 30, "minutes") |>
   wt_summarise_cam(raw_data, "day", "detections", "long")

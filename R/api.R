@@ -63,7 +63,9 @@ wt_get_projects <- function(sensor) {
     sensorId = sensor
   )
 
-  if(is.null(r)) {stop('No response was returned or the response was NULL.')}
+  if(is.null(r)) {
+    stop('No response was returned or the response was NULL.')
+    }
 
   statuses <- resp_body_json(r)$options$statusIds |>
     map_dfr(as_tibble)
