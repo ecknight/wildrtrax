@@ -974,7 +974,7 @@ wt_get_sync <- function(api, project = NULL, organization = NULL, max_seconds = 
 
       req_perform(req, path = tmp)
 
-      org_df <- read_csv(tmp, show_col_types = F)
+      org_df <- read_csv(tmp, show_col_types = FALSE)
 
       return(org_df)
 
@@ -992,7 +992,7 @@ wt_get_sync <- function(api, project = NULL, organization = NULL, max_seconds = 
 
     req_perform(req, path = tmp)
 
-    org_df <- read_csv(tmp, show_col_types = F)
+    org_df <- read_csv(tmp, show_col_types = FALSE)
 
     return(org_df)
 
@@ -1034,7 +1034,7 @@ wt_get_sync <- function(api, project = NULL, organization = NULL, max_seconds = 
 
     req_perform(req, path = tmp)
 
-    proj_df <- read_csv(tmp, show_col_types = F)
+    proj_df <- read_csv(tmp, show_col_types = FALSE)
 
     return(proj_df)
 

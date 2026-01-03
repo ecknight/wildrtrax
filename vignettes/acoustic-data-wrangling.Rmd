@@ -12,7 +12,6 @@ The recommended workflow to wrangle together data for analysis in `wildrtrax` is
 - Remove unneeded species: `wt_tidy_species()`
 - Convert TMTT counts to numeric: `wt_replace_tmtt()`
 - Convert the species to a wide format: `wt_make_wide()`
-- Calculate statistical offsets to account for imperfection detection following the [QPAD method](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.12106): `wt_qpad_offsets()`
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(

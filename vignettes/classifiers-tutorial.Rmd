@@ -86,7 +86,7 @@ wt_auth()
 
 data <- wt_download_report(620, 'ARU', c('main','ai'))
 
-eval <- wt_evaluate_classifier(data, resolution = "task", remove_species = T, species = NULL, thresholds = c(0.25,0.99))
+eval <- wt_evaluate_classifier(data, resolution = "task", remove_species = TRUE, species = NULL, thresholds = c(0.25,0.99))
 
 plot.pr.e <- ggplot(eval) +
   geom_smooth(aes(x=recall, y=precision, colour=classifier), linewidth=1.5) +

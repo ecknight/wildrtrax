@@ -35,6 +35,8 @@ load("package.RData")
 
 Before accessing WildTrax data, you need to authenticate to obtain a token. This token lets the server recognize you and grant access to your data. Currently, authentication is done via **Auth0 login** (Google login is not supported). To simplify repeated use, store your WildTrax username and password as environment variables in R. This allows the package to securely use your credentials without requiring you to type them each time.
 
+![Ensure you use your Auth0 credentials used to login to WildTrax](auth.png)
+
 
 ```{r echo=TRUE, eval=TRUE}
 # Note that you need to use 'WT_USERNAME' and 'WT_PASSWORD'
@@ -63,37 +65,36 @@ my_projects <- wt_get_projects(sensor = 'ARU')
 head(my_projects)
 ```
 
-Using the project_id number in the download summary you can then use `wt_download_report()` to access the species data. You can also find the project_id number in the url of a WildTrax project, e.g. https://portal.wildtrax.ca/home/aru-tasks.html?projectId=605&sensorId=ARU.
+Using the project_id number in the download summary you can then use `wt_download_report()` to access the species data. You can also find the project_id number in the url of a WildTrax project, e.g. https://portal.wildtrax.ca/home/aru-tasks.html?projectId=620&sensorId=ARU. Corresponds to downloading the data from the Project dashboard like illustrated below.
 
 ```{r echo=TRUE, include=TRUE, eval=F, warning = FALSE, message = FALSE}
 # Download the project report
-my_report <- wt_download_report(project_id = 620, sensor_id = 'ARU', reports = "main") %>%
-  tibble::as_tibble()
+my_report <- wt_download_report(project_id = 620, sensor_id = 'ARU', reports = "main")
 ```
 ```{r echo=F, include=F, eval=T, warning = FALSE, message = FALSE}
 # Download the project report
-my_report <- wt_download_report(project_id = 620, sensor_id = 'ARU', reports = "main") %>%
-  tibble::as_tibble()
+my_report <- wt_download_report(project_id = 620, sensor_id = 'ARU', reports = "main")
 ```
 ```{r, eval=T}
 head(my_report)
 
 ```
 
+![Project dashboard for downloading reports](dashboard.png)
+
+
 An easy way to download multiple projects at once is to use `wt_get_projects()` and then filter by a substring in order to get the project ids to download the data.
 
 ```{r echo=T, include=T, eval=FALSE, warning = F, message = F}
 # Download all of the published Ecosystem Health ARU data to a single object
-wt_get_projects(sensor_id = "ARU") %>%
-  tibble::as_tibble() %>%
+wt_get_projects(sensor_id = "ARU") |>
   dplyr::filter(grepl('^Ecosystem Health',project)) %>%
   dplyr::mutate(data = purrr::map(.x = project_id, .f = ~wt_download_report(project_id = .x, sensor_id = "ARU", reports = "main")))
 
 ```
 ```{r echo=T, include=F, eval=F, warning = F, message = F}
 # Download all of the published Ecosystem Health ARU data to a single object
-wt_get_projects(sensor_id = "ARU") %>%
-  tibble::as_tibble() %>%
+wt_get_projects(sensor_id = "ARU") |>
   dplyr::filter(grepl('^Ecosystem Health',project)) %>%
   dplyr::mutate(data = purrr::map(.x = project_id, .f = ~wt_download_report(project_id = .x, sensor_id = "ARU", reports = "main")))
 
@@ -140,6 +141,8 @@ my_project_species <- wt_get_project_species(620)
 my_project_species |>
   filter(included == TRUE)
 ```
+
+![Project species table with included species in list on the right](projectspecies.png)
 
 ## Data Discover
 
@@ -191,8 +194,7 @@ head(discover)
 
 `wt_get_sync()` and `wt_get_view()` provide programmatic access to WildTrax data through various APIs. `wt_get_sync()` interfaces with the synchronization (sync) endpoints, which expose data associated with Organizations and Projects. These endpoints return data objects related to locations, visits, deployments, equipment, project tasks, and tags. The sync APIs are primarily intended for workflows that require advanced or batch manipulation. `wt_get_view()` provides access to the user interface views and tables that present structured representations of WildTrax data. These views are optimized for reporting and analysis and may aggregate or normalize information. Used together, `wt_get_sync()` and `wt_get_view()` allow users to retrieve operational data from the WildTrax system and work with analysis-ready representations of those data within R.
 
-
-![How `wt_get_sync()` and `wt_get_view()` relate to Organization locations](syncs.png)
+![How wt_get_sync() and wt_get_view() relate to Organization locations](syncs.png)
 
 ```{r, echo=T, include=T, eval=F, warning=F, message = FALSE}
 # Extracting location information from all API functions
@@ -209,5 +211,4 @@ wt_get_sync(api = "project_locations", project = 326)
 wt_download_report(project_id = 326, sensor_id = 'ARU', reports = 'location')
 
 ```
-  
-![How wildrtrax functions relate to various parts of the Project dashboard](api-compare.png)
+

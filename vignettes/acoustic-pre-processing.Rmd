@@ -9,12 +9,6 @@ vignette: >
 
 The following set of functions help to pre-process and organize audio and corresponding metadata. In conjunction, these tools allow you to select recordings parameterized to a specific study design.
 
-- \code`wt_audio_scanner()` scans a directory of audio files and prepares them in a tibble with WildTrax formatted columns
-- \code`wt_run_ap()` allows you to generate acoustic indices and false-colour spectrograms from a \code`wt_audio_scanner()` tibble, while \code`wt_glean_ap()` wrangles the output into summary plots and long-duration false-colour spectrograms
-- \code`wt_signal_level()` detects signals in audio based on amplitude thresholds
-- \code`wt_chop()` divides a large audio file into shorter segments
-- \code`wt_make_aru_tasks()` allow you to link media to tasks and to generate tags from recognizer or classifier results
-
 ```{r, include = FALSE, echo = F, include = T, warning = F, message = F}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -135,10 +129,10 @@ my_files <- wt_audio_scanner(path = '/my/BigGrid/files', file_type = 'all', extr
 And then download the project data you wish to compare it to:
 
 ```{r eval=F, message=FALSE, warning=FALSE, include=T}
-my_projects <- wt_get_projects(sensor_id = 'ARU') |>
+my_projects <- wt_get_projects(sensor_id = "ARU") |>
   tibble::as_tibble() |>
-  filter(grepl('Big Grids',project)) |> # Customized as needed
-  mutate(data = purrr::map(\(project_id), wt_download_report(project_id = project_id, sensor_id = 'ARU', reports = 'main')))
+  dplyr::filter(grepl("Big Grids", project)) %>%
+  dplyr::mutate(data = purrr::map_dfr(project_id, ~ wt_download_report(project_id = .x, sensor_id  = "ARU", reports = "main")))
 ```
 
-Alternatively, go to WildTrax to Organization > Recordings > Manage > Download Recordings to get a list of all recordings. Then either filter out or do an anti-join on `location` and `recording_date_time`. That should give you the remaining list of media that has not been processed or uploaded to WildTrax yet.
+Alternatively use `wt_get_sync("organization_recordings")` to get a list of all recordings,tThen either filter out or do an `dplyr::anti_join()` on location and recording_date_time. That should give you the remaining list of media that has not been processed or uploaded to WildTrax yet.

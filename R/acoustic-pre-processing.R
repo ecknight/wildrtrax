@@ -182,9 +182,9 @@ wt_flac_info <- function(path) {
     stop("This is not a flac file.")
   }
 
-  newfile <- gsub(".flac", ".wav", path)
-  wav2flac(path, reverse = T)
-  info <- readWave(newfile, header = T)
+  newfile <- gsub("\\.flac", ".wav", path)
+  wav2flac(path, reverse = TRUE)
+  info <- readWave(newfile, header = TRUE)
   file.remove(newfile)
 
   return(out = list(sample_rate = info$sample.rate,
@@ -614,6 +614,10 @@ wt_chop <- function(input = NULL, segment_length = NULL, output_folder = NULL) {
 #'
 #' @param input_dir Character string. The path to the top-level directory containing Audiomoth folders and audio files.
 #'
+#' @importFrom dplyr rename mutate filter
+#' @importFrom tibble as_tibble
+#' @importFrom purrr pwalk
+#'
 #' @return A tibble with the original filepaths and the corresponding new filepaths. Files are renamed in place.
 #'
 #' @examples
@@ -625,7 +629,9 @@ wt_chop <- function(input = NULL, segment_length = NULL, output_folder = NULL) {
 
 wt_format_audiomoth_filenames <- function(input_dir) {
 
-  if(dir.exists(input_dir) == FALSE) {stop(message("This directory does not exist."))}
+  if(dir.exists(input_dir) == FALSE) {
+    stop(message("This directory does not exist."))
+    }
 
   files <- list.files(input_dir, pattern = "\\.wav$", recursive = TRUE, full.names = TRUE) |>
       as_tibble() |>
@@ -684,7 +690,7 @@ wt_make_aru_tasks <- function(input, output=NULL, task_method = c("1SPM","1SPT",
     stop("This isn't an accepted method. Use 1SPM, 1SPT or None.")
   }
 
-  if ((is.numeric(task_length) & task_length >= 1 & task_length < 1800) == FALSE) {
+  if ((is.numeric(task_length) && task_length >= 1 && task_length < 1800) == FALSE) {
     stop("task_length must be a number and between 1 and 1800 seconds.")
   }
 
@@ -739,12 +745,12 @@ wt_make_aru_tasks <- function(input, output=NULL, task_method = c("1SPM","1SPT",
 #'
 #' @examples
 #' \dontrun{
-#' wt_kaleidoscope_tags(input = input.csv, output = tags.csv, freq_bump = T)
+#' wt_kaleidoscope_tags(input = input.csv, output = tags.csv, freq_bump = TRUE)
 #' }
 #'
 #' @return A csv formatted as a WildTrax tag template
 
-wt_kaleidoscope_tags <- function (input, output = NULL, freq_bump = T) {
+wt_kaleidoscope_tags <- function (input, output = NULL, freq_bump = TRUE) {
 
   #Check to see if the input exists and reading it in
   if (file.exists(input)) {
@@ -754,12 +760,9 @@ wt_kaleidoscope_tags <- function (input, output = NULL, freq_bump = T) {
   }
 
   # Cleaning things up for the tag template
-
-  print(in_tbl)
-
   in_tbl_wtd <- in_tbl |>
     select(INDIR, `IN FILE`, DURATION, OFFSET, Dur, `AUTO ID*`, `MANUAL ID`, Fmin, Fmax) |>
-    separate(`IN FILE`, into = c("location", "recording_date_time"), sep = "(?:_0\\+1_|_|__0__|__1__)", extra = "merge", remove = F) |>
+    separate(`IN FILE`, into = c("location", "recording_date_time"), sep = "(?:_0\\+1_|_|__0__|__1__)", extra = "merge", remove = FALSE) |>
     separate_rows(`MANUAL ID`, sep = ",\\s*") |>
     relocate(location, .before = everything()) |>
     relocate(recording_date_time, .after = location) |>
@@ -847,7 +850,7 @@ wt_songscope_tags <- function (input, output = c("env","csv"), output_file=NULL,
 
   # Check to see if the input exists and reading it in
   if (file.exists(input)) {
-    in_tbl <- read_table(input, col_names = F, show_col_types = F)
+    in_tbl <- read_table(input, col_names = FALSE, show_col_types = FALSE)
   } else {
     stop ("File cannot be found")
   }
@@ -869,7 +872,7 @@ wt_songscope_tags <- function (input, output = c("env","csv"), output_file=NULL,
     rename("recognizer" = 7) |>
     rename("comments"= 8) |>
     mutate(file_name = sub("\\.[^.]+$", "", sub("^.*\\\\", "", file_path))) |>
-    separate(file_name, into = c("location", "recording_date_time"), sep = "(?:_0\\+1_|_|__0__|__1__)", extra = "merge", remove = F) |>
+    separate(file_name, into = c("location", "recording_date_time"), sep = "(?:_0\\+1_|_|__0__|__1__)", extra = "merge", remove = FALSE) |>
     mutate(tag_start_time = as.numeric(tag_start_time)) |>
     mutate(recording_date_time = as.POSIXct(recording_date_time, format = "%Y%m%d_%H%M%S"))
 
@@ -954,9 +957,9 @@ wt_songscope_tags <- function (input, output = c("env","csv"), output_file=NULL,
 #' @param output Character; Path where the output file will be stored
 #' @param output_file Character; Path of the output file
 
-#' @import dplyr
-#' @import tibble
-#' @import readr
+#' @importFrom dplyr rename
+#' @importFrom tidyr pivot_longer
+#' @importFrom tibble as_tibble
 #'
 #' @export
 #'
