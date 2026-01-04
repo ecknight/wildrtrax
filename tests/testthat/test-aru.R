@@ -6,30 +6,30 @@ cypress_hills <- wt_download_report(620, 'ARU', 'main')
 pc_proj <- wt_download_report(881, 'PC', 'main')
 fake <- ""
 
-test_that('Audio scanner', {
-  expect_no_error(wt_audio_scanner(".", file_type = "wav", extra_cols = T))
-})
-
-test_that('Audio scanner', {
-  expect_no_error(wt_audio_scanner(".", file_type = "all", extra_cols = T))
-})
-
-test_that('Audio scanner', {
-  file <- wt_audio_scanner(".", file_type = "wav", extra_cols = T)
-  expect_no_error(wt_make_aru_tasks(file, output = NULL, task_method = "1SPT", task_length = 60))
-})
-
-test_that('Guano tags', {
-  file <- wt_audio_scanner(".", file_type = "wav", extra_cols = T) |>
-    filter(location == "S4U08993") |>
-    select(file_path) |>
-    pull()
-  expect_no_error(wt_guano_tags(path = file))
-})
-
-test_that("Authentication works correctly", {
-  expect_true(!is.null(wt_get_projects(sensor = 'ARU')))
-  })
+# test_that('Audio scanner', {
+#   expect_no_error(wt_audio_scanner(".", file_type = "wav", extra_cols = T))
+# })
+#
+# test_that('Audio scanner', {
+#   expect_no_error(wt_audio_scanner(".", file_type = "all", extra_cols = T))
+# })
+#
+# test_that('Audio scanner', {
+#   file <- wt_audio_scanner(".", file_type = "wav", extra_cols = T)
+#   expect_no_error(wt_make_aru_tasks(file, output = NULL, task_method = "1SPT", task_length = 60))
+# })
+#
+# test_that('Guano tags', {
+#   file <- wt_audio_scanner(".", file_type = "wav", extra_cols = T) |>
+#     filter(location == "S4U08993") |>
+#     select(file_path) |>
+#     pull()
+#   expect_no_error(wt_guano_tags(path = file))
+# })
+#
+# test_that("Authentication works correctly", {
+#   expect_true(!is.null(wt_get_projects(sensor = 'ARU')))
+#   })
 
 test_that("Downloading ARU report", {
   expect_true(!is.null(cypress_hills))

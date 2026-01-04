@@ -22,11 +22,12 @@ load("classifiers.RData")
 #save.image("classifiers.RData")
 ```
 
-# Deep learning in acoustic processing
+## Deep learning in acoustic processing
 
 Recent advances in deep learning have led to the development of neural network models that can classify the sounds within acoustic recordings, such as those captured by autonomous recording units (ARUs). These classifiers can be trained to detect just a single focal species, or to classify thousands of species. The process of using automated classifiers to extract species detections from acoustic recordings is collectively called "computer listening". This tutorial will show you how to access and work with classifier results for recordings in WildTrax.
 
 ## Classifiers
+
 Classifier scores can be converted to species detections by setting a threshold (e.g., 0.8) above which to consider a species present within a given spectrogram @wood2024guidelines. False positives can still occur at high score thresholds, so often verification by a human observer is still necessary.
 
 
@@ -294,6 +295,6 @@ Visit the [BirdNET Github repository](https://github.com/birdnet-team/BirdNET-An
 
 1. With presence / absence data, a classifier is unlikely to be reliably to confirm absences due to the low recall.
 
-2. Classifier data can be used for occupancy modelling (@wood_2023), and there are approaches that can accommodate false positive error rates to preclude verification of all detections (@rhinehart2022). However, users should keep in mind that occupancy modelling is recommended only for detection probabilities > 30% and that recall from BirdNET may be too low for reliable occupancy estimates for many species (@knight_2017).
+2. Classifier data can be used for occupancy modelling (@wood_2023), and there are approaches that can accommodate false positive error rates to preclude verification of all detections (@rhinehart2022). However, users should keep in mind that occupancy modelling is recommended only for detection probabilities >30% and that recall from BirdNET may be too low for reliable occupancy estimates for many species (@knight_2017).
 
 See @perez-granados_2023 for a full review of some classifier applications and performance.
