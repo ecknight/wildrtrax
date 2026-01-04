@@ -314,21 +314,14 @@ wt_make_wide <- function(data, sound="all"){
   if("survey_url" %in% colnames(data)){
 
     #Make it wide and return field names to point count format
-    wide <- summed |>
-      mutate(
-        individual_count = case_when(
-          grepl("^C", individual_count) ~ NA_real_,
-          TRUE ~ as.numeric(individual_count)
-        )
-      ) |>
-      pivot_wider(
-        id_cols = organization:task_method,
-        names_from = "species_code",
-        values_from = "individual_count",
-        values_fn = sum,
-        values_fill = 0,
-        names_sort = TRUE
-      )
+    wide <- data |>
+      mutate(individual_count = case_when(is.na(individual_count) & species_code == "NONE" ~ "0", grepl("^C",  individual_count) ~ NA_character_, TRUE ~ as.character(individual_count)) |> as.numeric()) |>
+      pivot_wider(id_cols = organization:survey_duration_method,
+                         names_from = "species_code",
+                         values_from = "individual_count",
+                         values_fn = sum,
+                         values_fill = 0,
+                         names_sort = TRUE)
 
   }
 

@@ -4,7 +4,7 @@
 
 ## Major changes
 
-* Migrated to support [**WildTrax 2.0 APIs**](https://www.wildtrax.ca). The legacy function `wt_get_download_summary()` has been replaced by `wt_get_projects()`.
+* Migrated to support [**WildTrax 2.0 APIs**](https://portal.wildtrax.ca/). The legacy function `wt_get_download_summary()` has been replaced by `wt_get_projects()`.
 * Added `wt_format_audiomoth_filenames()` to prepend location prefixes to [AudioMoth](https://www.openacousticdevices.info/audiomoth) recordings that contain only date–time stamps.
 * Added `wt_get_exif()` to extract and return EXIF metadata from image files associated with Projects.
 * Added `wt_guano_tags()` to convert embedded GUANO metadata into a WildTrax-compatible tag template for upload.
