@@ -1047,6 +1047,7 @@ wt_get_sync <- function(api, project = NULL, organization = NULL, max_seconds = 
 #' Get data from WildTrax views
 #'
 #' @description Fetch data for tables and views in WildTrax. You must specify at least one of `project` or `organization` depending on the API
+#' `r lifecycle::badge("experimental")`
 #'
 #' @param api A string specifying the API to query. Must be one of:
 #' \itemize{

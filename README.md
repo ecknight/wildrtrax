@@ -169,7 +169,7 @@ wt_auth()
 
 # Get a project id
 projects <- wt_get_projects("ARU") |>
-  filter(project == "BATS & LATS") |>
+  filter(project == "A bat project") |> # Enter your bat project name here
   pull(project_id) |>
   wt_download_report(sensor_id = "ARU", reports = "main")
 ```

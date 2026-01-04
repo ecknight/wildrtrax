@@ -240,7 +240,7 @@
 <span></span>
 <span><span class="co"># Get a project id</span></span>
 <span><span class="va">projects</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_get_projects.html">wt_get_projects</a></span><span class="op">(</span><span class="st">"ARU"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">project</span> <span class="op">==</span> <span class="st">"BATS &amp; LATS"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">project</span> <span class="op">==</span> <span class="st">"A bat project"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># Enter your bat project name here</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">project_id</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/wt_download_report.html">wt_download_report</a></span><span class="op">(</span>sensor_id <span class="op">=</span> <span class="st">"ARU"</span>, reports <span class="op">=</span> <span class="st">"main"</span><span class="op">)</span></span></code></pre></div>
 </div>

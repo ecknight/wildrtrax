@@ -120,8 +120,7 @@ test_that('Classifier functions by resolution project', {
 test_that('Classifier functions export tags', {
   eval <- wt_evaluate_classifier(rep, resolution = "task", remove_species = TRUE, thresholds = c(0.01,0.99))
   e1 <- wt_classifier_threshold(eval)
-  add_sp <- wt_additional_species(rep, remove_species = TRUE, threshold = min(e1$threshold), resolution = "location", format_to_tags = T)
-  expect_true(!is.null(add_sp))
+  expect_error(wt_additional_species(rep, remove_species = TRUE, threshold = min(e1$threshold), resolution = "location", format_to_tags = T))
 })
 
 test_that('Classifier functions by minute with a 1SPM project', {
@@ -132,19 +131,19 @@ test_that('Classifier functions by resolution project', {
   expect_no_error(wt_evaluate_classifier(rep, resolution = "recording", remove_species = TRUE, thresholds = c(0.01,0.99)))
 })
 
-# test_that('Classifier functions by task', {
-#   eval <- wt_evaluate_classifier(rep, "task", remove_species = TRUE, thresholds = c(0.01,0.99))
-#   e1 <- wt_classifier_threshold(eval)
-#   add_sp <- wt_additional_species(rep, remove_species = TRUE, threshold = min(e1$threshold), resolution = "task")
-#   expect_true(!is.null(add_sp))
-# })
+test_that('Classifier functions by task', {
+  eval <- wt_evaluate_classifier(rep, "task", remove_species = TRUE, thresholds = c(0.01,0.99))
+  e1 <- wt_classifier_threshold(eval)
+  add_sp <- wt_additional_species(rep, remove_species = TRUE, threshold = min(e1$threshold), resolution = "task")
+  expect_true(!is.null(add_sp))
+})
 
-# test_that('Classifier functions by recording', {
-#   eval <- wt_evaluate_classifier(rep, "recording", remove_species = TRUE, thresholds = c(0.01,0.99))
-#   e1 <- wt_classifier_threshold(eval)
-#   add_sp <- wt_additional_species(rep, remove_species = TRUE, threshold = min(e1$threshold), resolution = "task")
-#   expect_true(!is.null(add_sp))
-# })
+test_that('Classifier functions by recording', {
+  eval <- wt_evaluate_classifier(rep, "recording", remove_species = TRUE, thresholds = c(0.01,0.99))
+  e1 <- wt_classifier_threshold(eval)
+  add_sp <- wt_additional_species(rep, remove_species = TRUE, threshold = min(e1$threshold), resolution = "task")
+  expect_true(!is.null(add_sp))
+})
 
 test_that("Songscope tags USPM", {
   expect_no_error(

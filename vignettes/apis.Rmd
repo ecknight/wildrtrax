@@ -13,7 +13,7 @@ The purpose of this vignette is to provide a clear introduction to accessing and
 
 An *API* (Application Programming Interface) is a way for one program to communicate with another over the internet. In this case, the WildTrax APIs lets R talk to WildTrax servers to retrieve project data, recordings or tag information without using the website's user interface manually. 
 
-`wildrtrax` *wraps* the WildTrax API in R functions, so you can easily authenticate, request data, and work with it in your analysis. You don’t have to write HTTP requests or handle tokens directly—our package handles these details and provides user-friendly R functions to interact with WildTrax programmatically.
+`wildrtrax` *wraps* the WildTrax API in R functions, so you can easily authenticate, request data, and work with it in your analysis. You don’t have to write HTTP requests or handle tokens directly as functions in the package handle these details and provides user-friendly R functions to interact with WildTrax programmatically.
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
@@ -27,8 +27,8 @@ knitr::opts_chunk$set(
 library(wildrtrax)
 library(dplyr)
 
-load("package.RData")
-#save.image("package.RData")
+load("apis.RData")
+#save.image("apis.RData")
 ```
 
 ## Authenticating to WildTrax
@@ -122,7 +122,7 @@ Downloading the WildTrax species table with `wt_get_species()` also grants you a
 
 ```{r, echo=T, include=T, eval=F, warning=F, message = FALSE}
 # Download the WildTrax species table
-spp_table <- wt_get_species()
+wt_get_species() |> arrange(species_code)
 ```
 ```{r, echo=F, include=F, eval=T, warning=F, message = FALSE}
 # Download the WildTrax species table
@@ -167,9 +167,9 @@ my_aoi <- list(
   c(-113.96068, 56.23817)
 )
 
-discover <- wt_dd_summary(sensor = "ARU", species = "White-throated Sparrow", boundary = my_aoi)
+discover_with_aoi <- wt_dd_summary(sensor = "ARU", species = "White-throated Sparrow", boundary = my_aoi)
 
-head(discover)
+head(discover_with_aoi)
 
 ```
 

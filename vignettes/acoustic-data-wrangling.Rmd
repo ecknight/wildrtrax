@@ -19,7 +19,8 @@ knitr::opts_chunk$set(
   comment = '#>'
 )
 
-load("package.RData")
+load("acoustic_wrangling.RData")
+#save.image("acoustic_wrangling.RData")
 ```
 
 ```{r setup, echo=FALSE, include=FALSE, eval=TRUE}

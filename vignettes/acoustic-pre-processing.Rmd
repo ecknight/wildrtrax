@@ -9,7 +9,7 @@ vignette: >
 
 The following set of functions help to pre-process and organize audio and corresponding metadata. In conjunction, these tools allow you to select recordings parameterized to a specific study design.
 
-```{r include = FALSE, echo = F, include = T, warning = F, message = F}
+```{r include = FALSE, echo = F, warning = F, message = F}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = '#>'
@@ -17,10 +17,6 @@ knitr::opts_chunk$set(
 
 library(wildrtrax)
 library(dplyr)
-
-# Set the directory path
-load("package.RData")
-#save.image("package.RData")
 
 ```
 
@@ -35,13 +31,13 @@ wt_audio_scanner(path = ".", file_type = "wav", extra_cols = T)
 
 You might want to select recordings between certain times of day or year, or filter recordings based on some criteria.
 
-```{r echo=TRUE, include=TRUE, eval=T, warning = F, message = F}
+```{r echo=TRUE, include=TRUE, eval=F, warning = F, message = F}
 files |>
   dplyr::select(-file_path)
 
 ```
 
-```{r echo=TRUE, include=TRUE, eval=T, warning = F, message = F}
+```{r echo=TRUE, include=TRUE, eval=F, warning = F, message = F}
 files |>
   dplyr::mutate(hour = as.numeric(format(recording_date_time, "%H"))) |>
   dplyr::filter(julian == 176, 

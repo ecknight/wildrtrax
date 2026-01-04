@@ -48,11 +48,15 @@ wt_evaluate_classifier <- function(data, resolution = NULL, remove_species = TRU
 
   #Summarize the classifier report to the requested resolution
   if(resolution=="task"){
+
+    class <- class |>
+      inner_join(data[[2]] |> select(recording_id, task_id) |> distinct(), by = "recording_id")
+
     detections <- class |>
       rename(start_s = detection_time) |>
-      inner_join(data[[2]] |> select(recording_id, task_id, task_duration) |> distinct(), by = c("recording_id" = "recording_id")) |>
+      inner_join(data[[2]] |> select(recording_id, task_id, task_duration) |> distinct(), by = c("recording_id" = "recording_id", "task_id" = "task_id")) |>
       filter(!start_s > task_duration) |>
-      group_by(location_id, recording_id, version, species_common_name) |>
+      group_by(location_id, recording_id, task_id, version, species_common_name) |>
       summarise(confidence = max(confidence), .groups="keep") |>
       ungroup() |>
       mutate(classifier = 1)
@@ -203,18 +207,18 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 0.5, 
     class <- data[[1]]
   }
 
-  #Clean things up
-  class <- class |>
-    rename(ai_detection_time = detection_time) |>
-    left_join(data[[2]] |> select(task_id, recording_id) |> distinct(), by = "recording_id")
-
   #Summarize the reports and put together at the desired resolution
 
   if(resolution=="task"){
 
+    #Clean things up
+    class <- class |>
+      rename(ai_detection_time = detection_time) |>
+      inner_join(data[[2]] |> select(recording_id, task_id) |> distinct(), by = "recording_id")
+
     #Classifier report
     detections <- class |>
-      inner_join(data[[2]] |> select(recording_id, task_id, task_duration, detection_time), by = c("recording_id" = "recording_id")) |>
+      inner_join(data[[2]] |> select(recording_id, task_id, task_duration) |> distinct(), by = c("recording_id" = "recording_id", "task_id" = "task_id")) |>
       filter(!ai_detection_time > task_duration) |>
       group_by(location_id, recording_id, task_id, species_common_name) |>
       summarise(confidence = max(confidence)) |>

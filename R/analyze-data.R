@@ -102,7 +102,7 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
         group_by({{ project_col }}, {{ station_col }}, {{ image_set_id }}) |>
         arrange({{ date_time_col }}) |>
         mutate(period = rep(seq_along(rle(image_fov)$lengths), rle(image_fov)$lengths)) |>
-        filter(image_fov == "OOR") |>
+        filter(image_fov != "OOR") |> #issue 81
         group_by({{ project_col }}, {{ station_col }}, {{ image_set_id }},  period) |>
         summarise(
           start_date = as.Date(min({{ date_time_col }})),
