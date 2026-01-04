@@ -13,7 +13,7 @@
 
 ## Minor changes 
 
-* Vignette constructed for ultrasonic workflows; others improved and updated
+* Vignettes improved and updated
 * `wt_download_report()` no longer explicitly removes weather columns
 * Queries benchmarked as 2-3x on new production server at the University of Alberta in Edmonton, Canada
 * Continued code coverage and testing improvements

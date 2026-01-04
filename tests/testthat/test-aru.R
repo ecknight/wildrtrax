@@ -240,3 +240,12 @@ filter(ecosys21_wide, location_id == ecosys21_mod_row$location_id) |>
   mutate(tot_birds = sum(c_across(matches("^....$") & !matches("^NONE$")), na.rm = TRUE)) |>
   pull(tot_birds) |>
   expect_equal(0)
+
+test_that('Getting QPAD offsets', {
+  library(QPAD)
+  cypress_hills_tidy <- wt_tidy_species(cypress_hills, remove = c("mammal", "abiotic", "amphibian", "unknown"), zerofill = T)
+  cypress_hills_tmtt <- wt_replace_tmtt(cypress_hills_tidy, calc = "round")
+  cypress_hills_wide <- wt_make_wide(cypress_hills_tmtt, sound = "all")
+  cypress_hills_qpad <- wt_qpad_offsets(cypress_hills_wide, species = "all", version = 3, together = F)
+  expect_true(ncol(cypress_hills_qpad) > 1)
+})
