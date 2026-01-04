@@ -16,6 +16,7 @@ A folder of photos or an object containing the download information for said pho
 }
 \description{
 Download location photos from an Organization
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 }
 \examples{
 \dontrun{
