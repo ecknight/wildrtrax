@@ -32,6 +32,7 @@ A tibble with column headers for the specified API call.
 }
 \description{
 Fetch data for tables and views in WildTrax. You must specify at least one of \code{project} or \code{organization} depending on the API
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 }
 \examples{
 \dontrun{

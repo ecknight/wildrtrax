@@ -52,9 +52,33 @@ test_that("Try to do something without authorization", {
 Sys.setenv(WT_USERNAME = "guest", WT_PASSWORD = "Apple123")
 wt_auth(force = TRUE)
 
-# test_that("Try to get projects without a sensor id", {
-#   expect_error(wt_get_projects())
-# })
+test_that("Try to get projects without a sensor id", {
+  expect_error(wt_get_projects())
+})
+
+test_that("Multiple projects", {
+  expect_no_error(wt_get_projects('ARU') |>
+  filter(grepl('Public', project_status)) |>
+  slice(1:2) |>
+  pull(project_id) |>
+  wt_download_report('ARU', 'main'))
+})
+
+test_that("Multiple projects multiple reports", {
+  expect_no_error(wt_get_projects('ARU') |>
+    filter(grepl('Public', project_status)) |>
+    slice(1:2) |>
+    pull(project_id) |>
+    wt_download_report('ARU', c('main','ai')))
+})
+
+test_that("Multiple projects multiple reports CAM", {
+  expect_no_error(wt_get_projects('CAM') |>
+                    filter(grepl('Public', project_status)) |>
+                    slice(1:2) |>
+                    pull(project_id) |>
+                    wt_download_report('CAM', c('main','megadetector')))
+})
 
 test_that("Try to download something without a report specified", {
   expect_error(wt_download_report(620, 'ARU'))

@@ -197,7 +197,13 @@ wt_download_report <- function(project_id, sensor_id, reports, max_seconds=300) 
     stop("Please supply a valid report type. Use ?wt_download_report to view options.", call. = TRUE)
   }
 
-  projectIds <- project_id
+  if (length(project_id) > 1) {
+    body_json <- list(projectIds = project_id)
+  } else if (length(project_id) == 1) {
+    body_json <- list(projectIds = list(project_id))
+  } else {
+    stop("At least one project id must be supplied.")
+  }
 
   query_params <- list(
     locationReport = "true",
@@ -210,7 +216,6 @@ wt_download_report <- function(project_id, sensor_id, reports, max_seconds=300) 
     sensorId = sensor_id
   )
 
-  body_json <- list(projectIds = list(project_id))
   tmp <- tempfile(fileext = ".zip")
   td <- tempdir()
   u <- .gen_ua()
@@ -218,13 +223,13 @@ wt_download_report <- function(project_id, sensor_id, reports, max_seconds=300) 
   req <- request("https://www-api.wildtrax.ca") |>
     req_url_path_append("bis/download-report") |>
     req_url_query(!!!query_params) |>
+    req_body_json(body_json) |>
     req_headers(
       Authorization = paste("Bearer", ._wt_auth_env_$access_token),
       `Content-Type` = "application/json"
     ) |>
     req_user_agent(u) |>
     req_method("POST") |>      # Use POST instead of GET here
-    req_body_json(body_json) |>
     req_timeout(max_seconds)
 
   resp <- tryCatch(
@@ -320,7 +325,7 @@ wt_get_species <- function(){
 #'
 #' @param project The project id associated with the desired species list
 #'
-#' @import dplyr
+#' @import dplyr httr2
 #' @importFrom tibble as_tibble
 #' @export
 #'
@@ -406,8 +411,8 @@ wt_download_media <- function(input, output, type = c("recording","image", "tag_
   }
 
   download_file <- function(url, output_file) {
-    req <- httr2::request(url)
-    httr2::req_perform(req, path = output_file)
+    req <- request(url)
+    req_perform(req, path = output_file)
     return(paste("Downloaded to", output_file))
   }
 
@@ -419,7 +424,7 @@ wt_download_media <- function(input, output, type = c("recording","image", "tag_
         file_type = sub('.*\\.(\\w+)$', '\\1', basename(recording_url)),
         clip_file_name = paste0(output, "/", location, "_", format(recording_date_time, "%Y%m%d_%H%M%S"), ".", file_type)
       ) %>%
-      { purrr::map2_chr(.$recording_url, .$clip_file_name, download_file) }
+      { map2_chr(.$recording_url, .$clip_file_name, download_file) }
     # Tag spectrograms
   } else if (type == "tag_clip_spectrogram" & "spectrogram_url" %in% colnames(input_data)) {
     output_data <- input_data |>
@@ -430,7 +435,7 @@ wt_download_media <- function(input, output, type = c("recording","image", "tag_
           species_code, "__", individual_order, "__", detection_time, ".jpeg"
         ))
       ) %>%
-      { purrr::map2_chr(.$spectrogram_url, .$clip_file_name, download_file) }
+      { map2_chr(.$spectrogram_url, .$clip_file_name, download_file) }
     # Tag spectrogram and tag clip
   } else if (all(c("spectrogram_url", "clip_url") %in% colnames(input_data)) & any(type %in% c("tag_clip_spectrogram", "tag_clip_audio"))) {
     output_data <- input_data |>
@@ -447,8 +452,8 @@ wt_download_media <- function(input, output, type = c("recording","image", "tag_
         ))
       ) %>%
       {
-        purrr::map2_chr(.$spectrogram_url, .$clip_file_name_spec, download_file)
-        purrr::map2_chr(.$clip_url, .$clip_file_name_audio, download_file)
+        map2_chr(.$spectrogram_url, .$clip_file_name_spec, download_file)
+        map2_chr(.$clip_url, .$clip_file_name_audio, download_file)
       }
     # Images
   } else if ("media_url" %in% colnames(input_data)){
@@ -458,7 +463,7 @@ wt_download_media <- function(input, output, type = c("recording","image", "tag_
       {
         print(paste("Media URL:", .$media_url))
         print(paste("Image Name:", .$image_name))
-        purrr::map2_chr(.$media_url, .$image_name, download_file)
+        map2_chr(.$media_url, .$image_name, download_file)
       }
   } else {
     stop("Required columns are either 'recording_url', 'media_url', 'spectrogram_url', or 'clip_url'. Use wt_download_report(reports = 'recording', 'image_report' or 'tag') to get the correct media.")
@@ -476,7 +481,7 @@ wt_download_media <- function(input, output, type = c("recording","image", "tag_
 #' @param species The species you want to search for (e.g. 'White-throated Sparrow'). Multiple species can be included.
 #' @param boundary The custom boundary you want to use. Must be a list of at least four latitude and longitude points where the last point is a duplicate of the first, or an object of class "bbox" (as produced by sf::st_bbox)
 #'
-#' @import dplyr tibble httr2
+#' @import dplyr tibble httr2 purrr
 #' @export
 #'
 #' @examples
@@ -745,6 +750,7 @@ wt_dd_summary <- function(sensor = c('ARU','CAM','PC'), species = NULL, boundary
 #' Batch download location photos
 #'
 #' @description Download location photos from an Organization
+#' `r lifecycle::badge("experimental")`
 #'
 #' @param organization Character; The Organization acronym from which photos are being downloaded
 #' @param output Character; Directory where location photos would be stored on your machine

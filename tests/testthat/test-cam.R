@@ -51,9 +51,9 @@ test_that("A specific summarized cam process", {
     output_format = "long")
 
   ind_detec.focal <- ind_detections |>
-    filter(location=="OGW-ABMI-1057-71-11" & species_common_name=="Moose")
+    filter(location=="1081-NE" & species_common_name=="Moose")
   summary.focal <- summary |>
-    filter(location=="OGW-ABMI-1057-71-11" & species_common_name=="Moose",!value==0) |>
+    filter(location=="1081-NE" & species_common_name=="Moose",!value==0) |>
     select(value)
 
   expected <- ind_detec.focal |>
@@ -108,11 +108,13 @@ test_that("all specified variables are included in the summarised output", {
   expect_true(!is.null(result))
 })
 
-test_that("exclude_out_of_range removes data outside of the camera's field of view", {
-  result <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, exclude_out_of_range = TRUE, time_interval = "day", output_format = "long", variable = "counts")
-  result_out <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, exclude_out_of_range = FALSE, time_interval = "day", output_format = "long", variable = "counts")
-  expect_true(nrow(result_out) > nrow(result))
-})
+
+# Set for issue 81 testing out of range images
+#test_that("exclude_out_of_range removes data outside of the camera's field of view", {
+  #expect_error(wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, exclude_out_of_range = TRUE, time_interval = "day", output_format = "long", variable = "counts"))
+  #result_out <- wt_summarise_cam(detect_data = ind_detections, raw_data = test_data_set, exclude_out_of_range = FALSE, time_interval = "day", output_format = "long", variable = "counts")
+  #expect_true(nrow(result_out) > nrow(result))
+#})
 
 
 

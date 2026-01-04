@@ -76,6 +76,7 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
   if (!missing(raw_data)) {
 
     if (exclude_out_of_range == FALSE) {
+
       x <- raw_data |>
         group_by({{ project_col }}, {{ station_col }}, {{ image_set_id }}) |>
         summarise(start_date = as.Date(min({{ date_time_col }})),
@@ -102,7 +103,7 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
         group_by({{ project_col }}, {{ station_col }}, {{ image_set_id }}) |>
         arrange({{ date_time_col }}) |>
         mutate(period = rep(seq_along(rle(image_fov)$lengths), rle(image_fov)$lengths)) |>
-        filter(image_fov != "OOR") |> #issue 81
+        filter(image_fov != "OOR" | is.na(image_fov)) |> #issue 81
         group_by({{ project_col }}, {{ station_col }}, {{ image_set_id }},  period) |>
         summarise(
           start_date = as.Date(min({{ date_time_col }})),
@@ -113,7 +114,10 @@ wt_summarise_cam <- function(detect_data, raw_data, time_interval = "day",
       if (any(c(is.na(x$start_date), is.na(x$end_date)))) {
         message("Parsing of image date time produced NAs, these will be dropped")
         x <- drop_na(x)
+      }
 
+      if(nrow(x) == 0) {
+        stop("The remaining images in the dataset were all out of the field of view.")
       }
 
       # Expand the time ranges into individual days of operation (smallest unit)
