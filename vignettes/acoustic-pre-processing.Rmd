@@ -9,7 +9,7 @@ vignette: >
 
 The following set of functions help to pre-process and organize audio and corresponding metadata. In conjunction, these tools allow you to select recordings parameterized to a specific study design.
 
-```{r, include = FALSE, echo = F, include = T, warning = F, message = F}
+```{r include = FALSE, echo = F, include = T, warning = F, message = F}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = '#>'
@@ -28,20 +28,20 @@ load("package.RData")
 
 The `wt_audio_scanner()` function reads in audio files (either wac, wav or flac format) from a local directory and outputs useful metadata.
 
-```{r, echo=TRUE, include=TRUE, eval=F, warning = F, message = F}
+```{r echo=TRUE, include=TRUE, eval=F, warning = F, message = F}
 wt_audio_scanner(path = ".", file_type = "wav", extra_cols = T)
 
 ```
 
 You might want to select recordings between certain times of day or year, or filter recordings based on some criteria.
 
-```{r, echo=TRUE, include=TRUE, eval=T, warning = F, message = F}
+```{r echo=TRUE, include=TRUE, eval=T, warning = F, message = F}
 files |>
   dplyr::select(-file_path)
 
 ```
 
-```{r, echo=TRUE, include=TRUE, eval=T, warning = F, message = F}
+```{r echo=TRUE, include=TRUE, eval=T, warning = F, message = F}
 files |>
   dplyr::mutate(hour = as.numeric(format(recording_date_time, "%H"))) |>
   dplyr::filter(julian == 176, 
@@ -62,7 +62,7 @@ wt_run_ap(x = my_files, output_dir = paste0(root, 'ap_outputs'), path_to_ap = '/
 
 Then use `wt_glean_ap()` to plot the acoustic index and long-duration false-colour spectrogram (LDFC) results.
 
-```{r, echo=T, include=T, eval=F, warning=F, message, prompt=T, comment=""}
+```{r echo=T, include=T, eval=F, warning=F, message, prompt=T, comment=""}
 # This example is from ABMI's Ecosystem Health Monitoring program
 
 my_files <- wt_audio_scanner(".../ABMI-986-SE", file_type = "wav", extra_cols = )
@@ -129,10 +129,61 @@ my_files <- wt_audio_scanner(path = '/my/BigGrid/files', file_type = 'all', extr
 And then download the project data you wish to compare it to:
 
 ```{r eval=F, message=FALSE, warning=FALSE, include=T}
-my_projects <- wt_get_projects(sensor_id = "ARU") |>
-  tibble::as_tibble() |>
-  dplyr::filter(grepl("Big Grids", project)) %>%
-  dplyr::mutate(data = purrr::map_dfr(project_id, ~ wt_download_report(project_id = .x, sensor_id  = "ARU", reports = "main")))
+my_projects <- wt_get_projects("ARU") |>
+  dplyr::filter(grepl("Cypress", project)) |>
+  dplyr::pull(project_id) |>
+  wt_download_report(sensor_id  = "ARU", reports = "main")
+
 ```
 
-Alternatively use `wt_get_sync("organization_recordings")` to get a list of all recordings,tThen either filter out or do an `dplyr::anti_join()` on location and recording_date_time. That should give you the remaining list of media that has not been processed or uploaded to WildTrax yet.
+Alternatively use `wt_get_sync("organization_recordings")` to get a list of all recordings. Then either filter out or do an `dplyr::anti_join()` on location and recording_date_time. That should give you the remaining list of media that has not been processed or uploaded to WildTrax yet.
+
+## Integrating legacy data from classifiers
+
+The `wildrtrax` package provides tools for integrating classifier outputs from Wildlife Acoustics’ [Kaleidoscope](https://www.wildlifeacoustics.com/products/kaleidoscope-pro) and [Songscope](https://answers.wildlifeacoustics.com/) into WildTrax-compatible data formats using the `wt_songscope_tags()` and `wt_kaleidoscope_tags()` functions. These functions convert classifier-generated detections into WildTrax tags, allowing each detection to be uploaded as an individual task-associated tag. This supports workflows where audio data have already been processed by external classifiers, enabling existing detections to be reformatted, aligned with media, and uploaded to WildTrax for further review and analysis.
+
+```{r include = FALSE, eval = T}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
+Sys.setenv(WT_USERNAME = "guest", WT_PASSWORD = "Apple123")
+
+```
+
+Here is some raw Songscope output:
+
+```{r eval=T, message=FALSE, warning=FALSE, include=T}
+# Convert Songscope output into WildTrax tags
+
+readr::read_table("./CONI.txt")
+
+```
+
+And here's in the transformation with `wt_songscope_tags()`:
+
+```{r eval=T, message=FALSE, warning=FALSE, include=T}
+wt_songscope_tags(
+  input = "./CONI.txt",
+  output = "env",
+  output_file = NULL,
+  species = "CONI",
+  vocalization = "SONG",
+  score_filter = 10,
+  method = "1SPT",
+  duration = 180,
+  sample_freq = 44100
+)
+```
+
+Similarly, a Kaleidoscope output can be converted similarly:
+
+```{r eval=T, message=FALSE, warning=FALSE, include=T}
+wt_kaleidoscope_tags(
+  input = "./id.csv",
+  output = NULL,
+  freq_bump = T) # Add a 20000 Hz frequency buffer to the tag
+
+```
+

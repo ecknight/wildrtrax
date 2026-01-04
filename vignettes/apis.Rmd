@@ -60,7 +60,7 @@ Once authenticated, you can now use various functions that call upon the WildTra
 
 ```{r echo=TRUE, eval=TRUE, wanring=F, message=F}
 # Download the project summary you have access to
-my_projects <- wt_get_projects(sensor = 'ARU')
+my_projects <- wt_get_projects('ARU')
 
 head(my_projects)
 ```
@@ -126,10 +126,7 @@ spp_table <- wt_get_species()
 ```
 ```{r, echo=F, include=F, eval=T, warning=F, message = FALSE}
 # Download the WildTrax species table
-spp_table <- wt_get_species()
-```
-```{r, eval=T}
-spp_table |> arrange(species_code)
+wt_get_species() |> arrange(species_code)
 
 ```
 

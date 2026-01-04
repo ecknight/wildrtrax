@@ -49,7 +49,6 @@
     <li><a class="dropdown-item" href="articles/classifiers-tutorial.html">Acoustic classifiers</a></li>
     <li><a class="dropdown-item" href="articles/camera-data-wrangling.html">Camera data wrangling</a></li>
     <li><a class="dropdown-item" href="articles/tutorials.html">Tutorials</a></li>
-    <li><a class="dropdown-item" href="articles/ultrasonic-workflows.html">Ultrasonic workflows</a></li>
   </ul>
 </li>
 <li class="nav-item dropdown">
@@ -134,8 +133,8 @@
 <span><span class="fu"><a href="reference/wt_dd_summary.html">wt_dd_summary</a></span><span class="op">(</span>sensor <span class="op">=</span> <span class="st">'ARU'</span>, species <span class="op">=</span> <span class="st">'White-throated Sparrow'</span>, boundary <span class="op">=</span> <span class="va">my_aoi</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Alberta bounding box</span></span>
-<span><span class="va">abbox</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html" class="external-link">read_sf</a></span><span class="op">(</span><span class="st">"...shp"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># Shapefile of Alberta</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">Province</span> <span class="op">==</span> <span class="st">"Alberta"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span><span class="va">abbox</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html" class="external-link">read_sf</a></span><span class="op">(</span><span class="st">"...shp"</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">Province</span> <span class="op">==</span> <span class="st">"Alberta"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># A shapefile of Alberta</span></span>
 <span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html" class="external-link">st_transform</a></span><span class="op">(</span>crs <span class="op">=</span> <span class="fl">4326</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_bbox.html" class="external-link">st_bbox</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
@@ -149,7 +148,7 @@
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://abbiodiversity.github.io/wildrtrax/">wildrtrax</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># OAuth logins only. Google OAuth2 will be supported soon.</span></span>
+<span><span class="co"># Login with your OAuth</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span>WT_USERNAME <span class="op">=</span> <span class="st">"*****"</span>, WT_PASSWORD <span class="op">=</span> <span class="st">"*****"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Authenticate to WildTrax</span></span>
@@ -158,14 +157,11 @@
 <span><span class="co"># Get a project id</span></span>
 <span><span class="va">projects</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_get_projects.html">wt_get_projects</a></span><span class="op">(</span><span class="st">"ARU"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">project</span> <span class="op">==</span> <span class="st">"Ecosystem Health 2023"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">project_id</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Download the main report</span></span>
-<span><span class="va">raw_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map_dfr.html" class="external-link">map_dfr</a></span><span class="op">(</span>.x <span class="op">=</span> <span class="va">projects</span>, .f <span class="op">=</span> <span class="op">~</span><span class="fu"><a href="reference/wt_download_report.html">wt_download_report</a></span><span class="op">(</span><span class="va">.x</span>, <span class="st">"ARU"</span>, reports <span class="op">=</span> <span class="st">"main"</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">project_id</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/wt_download_report.html">wt_download_report</a></span><span class="op">(</span>sensor_id <span class="op">=</span> <span class="st">"ARU"</span>, reports <span class="op">=</span> <span class="st">"main"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Format to occupancy for OVEN</span></span>
-<span><span class="va">dat.occu</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_format_occupancy.html">wt_format_occupancy</a></span><span class="op">(</span><span class="va">raw_data</span>, species<span class="op">=</span><span class="st">"OVEN"</span>, siteCovs<span class="op">=</span><span class="cn">NULL</span><span class="op">)</span></span>
+<span><span class="va">dat.occu</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_format_occupancy.html">wt_format_occupancy</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">raw_data</span>, species<span class="op">=</span><span class="st">"OVEN"</span>, siteCovs<span class="op">=</span><span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Run the model</span></span>
 <span><span class="fu">unmarked</span><span class="fu">::</span><span class="fu"><a href="https://ecoverseR.github.io/unmarked/reference/occu.html" class="external-link">occu</a></span><span class="op">(</span><span class="op">~</span> <span class="fl">1</span> <span class="op">~</span> <span class="fl">1</span>, <span class="va">dat.occu</span><span class="op">)</span></span></code></pre></div>
@@ -175,14 +171,14 @@
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Scan files and filter results</span></span>
-<span><span class="va">my_files</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_audio_scanner.html">wt_audio_scanner</a></span><span class="op">(</span>path <span class="op">=</span> <span class="st">"."</span>, file_type <span class="op">=</span> <span class="st">"wav"</span>, extra_cols <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>              <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>hour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">recording_date_time</span>, <span class="st">"%H"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>              <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">julian</span> <span class="op">==</span> <span class="fl">176</span>, <span class="va">hour</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span><span class="op">:</span><span class="fl">8</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">my_files</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_audio_scanner.html">wt_audio_scanner</a></span><span class="op">(</span>path <span class="op">=</span> <span class="st">"."</span>, file_type <span class="op">=</span> <span class="st">"wav"</span>, extra_cols <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>              <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>hour <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">recording_date_time</span>, <span class="st">"%H"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>              <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">julian</span> <span class="op">==</span> <span class="fl">176</span>, <span class="va">hour</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span><span class="op">:</span><span class="fl">8</span><span class="op">)</span><span class="op">)</span></span>
 <span>              </span>
 <span><span class="co"># Run acoustic indices and LDFCs</span></span>
 <span><span class="fu"><a href="reference/wt_run_ap.html">wt_run_ap</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">my_files</span>, output_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">root</span>, <span class="st">'ap_outputs'</span><span class="op">)</span>, path_to_ap <span class="op">=</span> <span class="st">'/where/you/store/AP'</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="reference/wt_glean_ap.html">wt_glean_ap</a></span><span class="op">(</span><span class="va">my_files</span>, input_dir <span class="op">=</span> <span class="st">".../ap_outputs"</span>, purpose <span class="op">=</span> <span class="st">"biotic"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="reference/wt_glean_ap.html">wt_glean_ap</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">my_files</span>, input_dir <span class="op">=</span> <span class="st">".../ap_outputs"</span>, purpose <span class="op">=</span> <span class="st">"biotic"</span>, include_ldfcs <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>Evaluate the performance of BirdNET on a project, and search for false negatives missed by human taggers. See <a href="https://abbiodiversity.github.io/wildrtrax/articles/classifiers-tutorial.html">Classifiers Tutorial</a> for more information.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://abbiodiversity.github.io/wildrtrax/">wildrtrax</a></span><span class="op">)</span></span>
@@ -194,14 +190,14 @@
 <span><span class="co"># Authenticate to WildTrax</span></span>
 <span><span class="fu"><a href="reference/wt_auth.html">wt_auth</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_download_report.html">wt_download_report</a></span><span class="op">(</span>project_id <span class="op">=</span> <span class="fl">1144</span>, sensor_id <span class="op">=</span> <span class="st">"ARU"</span>, reports <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"main"</span>, <span class="st">"ai"</span><span class="op">)</span>,  <span class="va">ALSE</span><span class="op">)</span></span>
+<span><span class="va">my_reports</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_download_report.html">wt_download_report</a></span><span class="op">(</span>project_id <span class="op">=</span> <span class="fl">1144</span>, sensor_id <span class="op">=</span> <span class="st">"ARU"</span>, reports <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"main"</span>, <span class="st">"ai"</span><span class="op">)</span><span class="op">)</span></span>
 <span>                           </span>
-<span><span class="va">eval</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_evaluate_classifier.html">wt_evaluate_classifier</a></span><span class="op">(</span><span class="va">data</span>, classifier <span class="op">=</span> <span class="st">"hawkears"</span>, resolution <span class="op">=</span> <span class="st">"task"</span>, remove_species <span class="op">=</span> <span class="cn">TRUE</span>, thresholds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">99</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">eval</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_evaluate_classifier.html">wt_evaluate_classifier</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">my_reports</span>, resolution <span class="op">=</span> <span class="st">"task"</span>, remove_species <span class="op">=</span> <span class="cn">TRUE</span>, thresholds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.01</span>,<span class="fl">0.99</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">threshold_use</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_classifier_threshold.html">wt_classifier_threshold</a></span><span class="op">(</span><span class="va">eval</span><span class="op">)</span></span>
+<span><span class="va">e1</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_classifier_threshold.html">wt_classifier_threshold</a></span><span class="op">(</span><span class="va">eval</span><span class="op">)</span> </span>
 <span></span>
-<span><span class="co"># Find additional species</span></span>
-<span><span class="fu"><a href="reference/wt_additional_species.html">wt_additional_species</a></span><span class="op">(</span><span class="va">data</span>, classifier <span class="op">=</span> <span class="st">"hawkears"</span>, remove_species <span class="op">=</span> <span class="cn">TRUE</span>, threshold <span class="op">=</span> <span class="va">threshold_use</span>, resolution<span class="op">=</span><span class="st">"task"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># Select the lowest threshold across classifiers and find additional species (false negatives)</span></span>
+<span><span class="fu"><a href="reference/wt_additional_species.html">wt_additional_species</a></span><span class="op">(</span><span class="va">my_reports</span>, remove_species <span class="op">=</span> <span class="cn">TRUE</span>, threshold <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">e1</span><span class="op">$</span><span class="va">threshold</span><span class="op">)</span>, resolution<span class="op">=</span><span class="st">"task"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="camera-work-flows">Camera work flows<a class="anchor" aria-label="anchor" href="#camera-work-flows"></a>
@@ -217,17 +213,14 @@
 <span><span class="co"># Authenticate to WildTrax</span></span>
 <span><span class="fu"><a href="reference/wt_auth.html">wt_auth</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Get a project id</span></span>
-<span><span class="va">projects</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_get_projects.html">wt_get_projects</a></span><span class="op">(</span><span class="st">"CAM"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span><span class="co"># Get a camera project</span></span>
+<span><span class="va">raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_get_projects.html">wt_get_projects</a></span><span class="op">(</span><span class="st">"CAM"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">project</span> <span class="op">==</span> <span class="st">"ABMI Ecosystem Health 2014"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">project_id</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">project_id</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/wt_download_report.html">wt_download_report</a></span><span class="op">(</span>sensor_id <span class="op">=</span> <span class="st">"CAM"</span>, reports <span class="op">=</span> <span class="st">"main"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Download data</span></span>
-<span><span class="va">raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map_dfr.html" class="external-link">map_dfr</a></span><span class="op">(</span>.x <span class="op">=</span> <span class="va">projects</span>, .f <span class="op">=</span> <span class="op">~</span><span class="fu"><a href="reference/wt_download_report.html">wt_download_report</a></span><span class="op">(</span><span class="va">.x</span>, <span class="st">"CAM"</span>, reports <span class="op">=</span> <span class="st">"main"</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Get individual detections</span></span>
-<span><span class="va">individual_detections</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_ind_detect.html">wt_ind_detect</a></span><span class="op">(</span><span class="va">raw</span>, <span class="fl">30</span>, <span class="st">"minutes"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># Get individual species detections using various thresholds and time ranges</span></span>
+<span><span class="va">individual_detections</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_ind_detect.html">wt_ind_detect</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">raw</span>, threshold <span class="op">=</span> <span class="fl">30</span>, units <span class="op">=</span> <span class="st">"minutes"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="ultrasonic-work-flows">Ultrasonic work flows<a class="anchor" aria-label="anchor" href="#ultrasonic-work-flows"></a>
@@ -237,26 +230,19 @@
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://abbiodiversity.github.io/wildrtrax/">wildrtrax</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">input</span> <span class="op">&lt;-</span> <span class="st">".../bat.txt"</span> <span class="co"># Kaleidoscope output</span></span>
-<span><span class="va">output</span> <span class="op">&lt;-</span> <span class="st">".../bats"</span> <span class="co"># A folder to store the tags</span></span>
+<span><span class="va">input</span> <span class="op">&lt;-</span> <span class="st">".../bat.csv"</span> <span class="co"># A Kaleidoscope output file</span></span>
+<span><span class="va">output</span> <span class="op">&lt;-</span> <span class="st">".../bats"</span> <span class="co"># A folder to store the formatted csv</span></span>
 <span></span>
-<span><span class="fu"><a href="reference/wt_kaleidoscope_tags.html">wt_kaleidoscope_tags</a></span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">tz</span>, freq_bump <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="co"># Add a frequency buffer to the tag, e.g. 20000 kHz</span></span>
+<span><span class="fu"><a href="reference/wt_kaleidoscope_tags.html">wt_kaleidoscope_tags</a></span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, freq_bump <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## Authenticate to WildTrax, then upload the tags to a WildTrax project</span></span>
 <span><span class="fu"><a href="reference/wt_auth.html">wt_auth</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Get a project id</span></span>
-<span><span class="va">projects</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_get_projects.html">wt_get_projects</a></span><span class="op">(</span><span class="st">"ARU"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co"># Bat projects are under the ARU sensor</span></span>
+<span><span class="va">projects</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/wt_get_projects.html">wt_get_projects</a></span><span class="op">(</span><span class="st">"ARU"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">project</span> <span class="op">==</span> <span class="st">"BATS &amp; LATS"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">project_id</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Download the data</span></span>
-<span><span class="va">raw_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map_dfr.html" class="external-link">map_dfr</a></span><span class="op">(</span>.x <span class="op">=</span> <span class="va">projects</span>, .f <span class="op">=</span> <span class="op">~</span><span class="fu"><a href="reference/wt_download_report.html">wt_download_report</a></span><span class="op">(</span><span class="va">.x</span>, <span class="st">"ARU"</span>, reports <span class="op">=</span> <span class="st">"main"</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Experimental</span></span>
-<span><span class="va">raw_data</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="reference/wt_format_data.html">wt_format_data</a></span><span class="op">(</span>format <span class="op">=</span> <span class="st">'NABAT'</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">project_id</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/wt_download_report.html">wt_download_report</a></span><span class="op">(</span>sensor_id <span class="op">=</span> <span class="st">"ARU"</span>, reports <span class="op">=</span> <span class="st">"main"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="point-count-work-flows">Point count work flows<a class="anchor" aria-label="anchor" href="#point-count-work-flows"></a>
