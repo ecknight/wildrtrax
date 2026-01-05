@@ -30,10 +30,15 @@ reference:
   - wt_flac_info
   - wt_format_data
   - wt_format_occupancy
-  - wt_get_download_summary
+  - wt_format_audiomoth_filenames
+  - wt_get_exif
+  - wt_get_projects
+  - wt_get_project_species
   - wt_get_species
   - wt_get_sync
+  - wt_get_view
   - wt_glean_ap
+  - wt_guano_tags
   - wt_ind_detect
   - wt_kaleidoscope_tags
   - wt_location_distances
@@ -50,6 +55,7 @@ reference:
   - wt_wac_info
 news:
   releases:
+  - text: wildrtrax 1.5.0
   - text: wildrtrax 1.4.0
   - text: wildrtrax 1.3.3
   - text: wildrtrax 1.3.2

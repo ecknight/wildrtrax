@@ -14,3 +14,4 @@ docs
 .Rdata
 .httr-oauth
 .quarto
+.secrets

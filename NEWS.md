@@ -1,10 +1,28 @@
 # wildrtrax 
 
+# wildrtrax 1.5
+
+## Major changes
+
+* Migrated to support [**WildTrax 2.0 APIs**](https://portal.wildtrax.ca/). The legacy function `wt_get_download_summary()` has been replaced by `wt_get_projects()`.
+* Added `wt_format_audiomoth_filenames()` to prepend location prefixes to [AudioMoth](https://www.openacousticdevices.info/audiomoth) recordings that contain only date–time stamps.
+* Added `wt_get_exif()` to extract and return EXIF metadata from image files associated with Projects.
+* Added `wt_guano_tags()` to convert embedded GUANO metadata into a WildTrax-compatible tag template for upload.
+* Added `wt_get_view()` to access structured WildTrax API views and return results as tibbles.
+* Added `wt_get_project_species()` to retrieve species lists associated with a specific Project.
+
+## Minor changes 
+
+* Vignettes improved and updated
+* `wt_download_report()` no longer explicitly removes weather columns
+* Queries benchmarked as 2-3x on new production server at the University of Alberta in Edmonton, Canada
+* Continued code coverage and testing improvements
+
 # wildrtrax 1.4
 
 ## Major changes
 
-* New function, `wt_get_sync()`, allows users to get all columns and data from syncs (upload / download and table views) across the system. Huge development leap as users can now GET all relevant APIs. Functionally replaces `wt_get_recordings()`, `wt_get_locations()`, `wt_get_visits()`, `wt_get_image_sets()` in one smooth function relevant to the Organization and Project you want.
+* New function, `wt_get_sync()`, allows users to get columns and data from syncs (upload / download and table views) across the system. Functionally replaces `wt_get_recordings()`, `wt_get_locations()`, `wt_get_visits()`, `wt_get_image_sets()` in one smooth function relevant to the Organization or Project needed.
 * Fixed a bug that incorrectly adjusted time zones in `wt_qpad_offsets()`. This bug affected QPAD offsets used for [species with time since sunrise in the top model](https://github.com/borealbirds/QPAD-offsets-correction/blob/main/qpad_tssr_species.csv) and in areas outside the Mountain Time Zone (MST/MDT). For more information, please see the [BAM QPAD correction repository](https://github.com/borealbirds/QPAD-offsets-correction) for further details or email bamp@ualberta.ca for assistance.
 
 ## Minor changes

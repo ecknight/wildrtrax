@@ -15,7 +15,7 @@ We recommend using the latest **development release** for production workflows a
 
 ## Overview
 
-`wildrtrax` (pronounced *wild-r-tracks*) is an R package containing functions to help manage and analyze environmental sensor data. It helps to simplify the entire data life cycle by offering tools for data pre-processing, wrangling, and analysis, facilitating seamless data transfer to and from [WildTrax](https://wildtrax.ca/). With `wildrtrax`, users can effortlessly establish end-to-end workflows and ensure reproducibility in their analyses. By providing a consistent and organized framework, the package promotes transparency and integrity in research, making it effortless to share and replicate results.
+`wildrtrax` (pronounced *wild-r-tracks*) is an R package containing functions to help manage and analyze environmental sensor data to and from [WildTrax](https://wildtrax.ca/). It helps to simplify the entire data life cycle by offering tools for data pre-processing, wrangling, and analysis.
 
 ## Installation
 
@@ -60,8 +60,8 @@ my_aoi <- list(
 wt_dd_summary(sensor = 'ARU', species = 'White-throated Sparrow', boundary = my_aoi)
 
 # Alberta bounding box
-abbox <- read_sf("...shp") |> # Shapefile of Alberta
-  filter(Province == "Alberta") |>
+abbox <- read_sf("...shp") |> 
+  filter(Province == "Alberta") |> # A shapefile of Alberta
   st_transform(crs = 4326) |> 
   st_bbox()
 
@@ -76,23 +76,20 @@ Download data and run and a single-season single-species occupancy analysis. Con
 library(wildrtrax)
 library(tidyverse)
 
-# OAuth logins only. Google OAuth2 will be supported soon.
+# Login with your OAuth
 Sys.setenv(WT_USERNAME = "*****", WT_PASSWORD = "*****")
 
 # Authenticate to WildTrax
 wt_auth()
 
 # Get a project id
-projects <- wt_get_download_summary("ARU") |>
+projects <- wt_get_projects("ARU") |>
   filter(project == "Ecosystem Health 2023") |>
-  select(project_id) |>
-  pull()
-
-# Download the main report
-raw_data <- map_dfr(.x = projects, .f = ~wt_download_report(.x, "ARU", weather_cols = F, reports = "main"))
+  pull(project_id) |>
+  wt_download_report(sensor_id = "ARU", reports = "main")
 
 # Format to occupancy for OVEN
-dat.occu <- wt_format_occupancy(raw_data, species="OVEN", siteCovs=NULL)
+dat.occu <- wt_format_occupancy(data = raw_data, species="OVEN", siteCovs=NULL)
 
 # Run the model
 unmarked::occu(~ 1 ~ 1, dat.occu)
@@ -105,14 +102,14 @@ library(wildrtrax)
 library(tidyverse)
 
 # Scan files and filter results
-my_files <- wt_audio_scanner(path = ".", file_type = "wav", extra_cols = T) |>
-              mutate(hour = as.numeric(format(recording_date_time, "%H"))) |>
-              filter(julian == 176, hour %in% c(4:8))
+my_files <- wt_audio_scanner(path = ".", file_type = "wav", extra_cols = TRUE) |>
+              dplyr::mutate(hour = as.numeric(format(recording_date_time, "%H"))) |>
+              dplyr::filter(julian == 176, hour %in% c(4:8))
               
 # Run acoustic indices and LDFCs
 wt_run_ap(x = my_files, output_dir = paste0(root, 'ap_outputs'), path_to_ap = '/where/you/store/AP')
 
-wt_glean_ap(my_files, input_dir = ".../ap_outputs", purpose = "biotic")
+wt_glean_ap(x = my_files, input_dir = ".../ap_outputs", purpose = "biotic", include_ldfcs = TRUE)
 ```
 
 Evaluate the performance of BirdNET on a project, and search for false negatives missed by human taggers. See [Classifiers Tutorial](https://abbiodiversity.github.io/wildrtrax/articles/classifiers-tutorial.html) for more information.
@@ -127,14 +124,14 @@ Sys.setenv(WT_USERNAME = "*****", WT_PASSWORD = "*****")
 # Authenticate to WildTrax
 wt_auth()
 
-data <- wt_download_report(project_id = 1144, sensor_id = "ARU", reports = c("main", "birdnet"),  weather_cols = FALSE)
+my_reports <- wt_download_report(project_id = 1144, sensor_id = "ARU", reports = c("main", "ai"))
                            
-eval <- wt_evaluate_classifier(data, resolution = "task", remove_species = TRUE, thresholds = c(10, 99))
+eval <- wt_evaluate_classifier(data = my_reports, resolution = "task", remove_species = TRUE, thresholds = c(0.01,0.99))
 
-threshold_use <- wt_classifier_threshold(eval)
+e1 <- wt_classifier_threshold(eval) 
 
-# Find additional species
-wt_additional_species(data, remove_species = TRUE, threshold = threshold_use, resolution="task")
+# Select the lowest threshold across classifiers and find additional species (false negatives)
+wt_additional_species(my_reports, remove_species = TRUE, threshold = min(e1$threshold), resolution="task")
 ```
 
 ### Camera work flows
@@ -151,17 +148,14 @@ Sys.setenv(WT_USERNAME = "*****", WT_PASSWORD = "*****")
 # Authenticate to WildTrax
 wt_auth()
 
-# Get a project id
-projects <- wt_get_download_summary("CAM") |>
+# Get a camera project
+raw <- wt_get_projects("CAM") |>
   filter(project == "ABMI Ecosystem Health 2014") |>
-  select(project_id) |>
-  pull()
+  pull(project_id) |>
+  wt_download_report(sensor_id = "CAM", reports = "main")
 
-# Download data
-raw <- map_dfr(.x = projects, .f = ~wt_download_report(.x, "CAM", weather_cols = F, reports = "main"))
-
-# Get individual detections
-individual_detections <- wt_ind_detect(raw, 30, "minutes")
+# Get individual species detections using various thresholds and time ranges
+individual_detections <- wt_ind_detect(x = raw, threshold = 30, units = "minutes")
 ```
 
 ### Ultrasonic work flows
@@ -172,26 +166,19 @@ Format tags from [Kaleidoscope](https://www.wildlifeacoustics.com/products/kalei
 library(wildrtrax)
 library(tidyverse)
 
-input <- ".../bat.txt" # Kaleidoscope output
-output <- ".../bats" # A folder to store the tags
+input <- ".../bat.csv" # A Kaleidoscope output file
+output <- ".../bats" # A folder to store the formatted csv
 
-wt_kaleidoscope_tags(input, output, tz, freq_bump = T) # Add a frequency buffer to the tag, e.g. 20000 kHz
+wt_kaleidoscope_tags(input, output, freq_bump = T)
 
 ## Authenticate to WildTrax, then upload the tags to a WildTrax project
 wt_auth()
 
 # Get a project id
-projects <- wt_get_download_summary("ARU") |>
-  filter(project == "BATS & LATS") |>
-  select(project_id) |>
-  pull()
-
-# Download the data
-raw_data <- map_dfr(.x = projects, .f = ~wt_download_report(.x, "ARU", weather_cols = F, reports = "main"))
-
-# Experimental
-raw_data |>
-    wt_format_data(format = 'NABAT')
+projects <- wt_get_projects("ARU") |>
+  filter(project == "A bat project") |> # Enter your bat project name here
+  pull(project_id) |>
+  wt_download_report(sensor_id = "ARU", reports = "main")
 ```
 
 ### Point count work flows
@@ -203,10 +190,10 @@ library(wildrtrax)
 library(tidyverse)
 
 # An ARU project
-an_aru_project <- wt_download_report(project_id = 620, sensor_id = 'ARU', reports = "main", weather_cols = F)
+an_aru_project <- wt_download_report(project_id = 620, sensor_id = 'ARU', reports = "main", )
 
 # An ARU project as point count format
-aru_as_pc <- wt_download_report(project_id = 620, sensor_id = 'PC', reports = "main", weather_cols = F)
+aru_as_pc <- wt_download_report(project_id = 620, sensor_id = 'PC', reports = "main", )
 ```
 
 ## Issues
