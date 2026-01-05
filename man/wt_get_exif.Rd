@@ -19,7 +19,7 @@ This function gets all relevant EXIF metadata from images in Projects
 \examples{
 \dontrun{
 
-dat <- wt_download_report(reports = c("image_report")
+dat <- wt_download_report(reports = c("image_report"))
 exif.data <- wt_get_exif(dat)
 }
 }
