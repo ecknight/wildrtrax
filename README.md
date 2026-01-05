@@ -6,13 +6,6 @@
 
 <!-- badges: end -->
 
-# ⚠️ Package Status: Unstable (09/09/2025)
-
-**Important Notice:**  
-This package is currently **unstable** as we work towards the **v1.5 release** to align with upcoming **WildTrax 2.0 upgrades**.  
-
-We recommend using the latest **development release** for production workflows and following updates closely for changes.
-
 ## Overview
 
 `wildrtrax` (pronounced *wild-r-tracks*) is an R package containing functions to help manage and analyze environmental sensor data to and from [WildTrax](https://wildtrax.ca/). It helps to simplify the entire data life cycle by offering tools for data pre-processing, wrangling, and analysis.
