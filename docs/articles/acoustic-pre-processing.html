@@ -248,43 +248,13 @@ WildTrax for further review and analysis.</p>
 <span>  method <span class="op">=</span> <span class="st">"1SPT"</span>,</span>
 <span>  duration <span class="op">=</span> <span class="fl">180</span>,</span>
 <span>  sample_freq <span class="op">=</span> <span class="fl">44100</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Reading file..."</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 17</span></span></span>
-<span><span class="co">#&gt;   location   recording_date_time task_method task_duration observer species_code</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dttm&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> WLNP-CONI… 2018-07-20 <span style="color: #949494;">20:30:00</span> 1SPT                  180 Not Ass… CONI        </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 11 more variables: individual_number &lt;int&gt;, vocalization &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   abundance &lt;dbl&gt;, tag_start_time &lt;dbl&gt;, tag_duration &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   min_tag_freq &lt;chr&gt;, max_tag_freq &lt;chr&gt;, species_individual_comments &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   tag_is_hidden_for_verification &lt;lgl&gt;, recording_sample_frequency &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   internal_tag_id &lt;chr&gt;</span></span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 <p>Similarly, a Kaleidoscope output can be converted similarly:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/wt_kaleidoscope_tags.html">wt_kaleidoscope_tags</a></span><span class="op">(</span></span>
 <span>  input <span class="op">=</span> <span class="st">"./id.csv"</span>,</span>
 <span>  output <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  freq_bump <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="co"># Add a 20000 Hz frequency buffer to the tag</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 45 × 17</span></span></span>
-<span><span class="co">#&gt;    location recording_date_time task_method recording_sample_fre…¹ task_duration</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> A-RD-10… 2021-06-06 23:48:05 None        <span style="color: #949494;">""</span>                              8.29</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> A-RD-10… 2021-06-04 00:14:49 None        <span style="color: #949494;">""</span>                             15.3 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> A-RD-10… 2021-06-06 23:53:02 None        <span style="color: #949494;">""</span>                              7.46</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> A-RD-10… 2021-06-06 23:30:47 None        <span style="color: #949494;">""</span>                              7.16</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> A-RD-10… 2021-06-03 23:27:26 None        <span style="color: #949494;">""</span>                              9.44</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> A-RD-10… 2021-06-05 23:37:32 None        <span style="color: #949494;">""</span>                              7.7 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> A-RD-10… 2021-06-07 00:22:50 None        <span style="color: #949494;">""</span>                              6.77</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> A-RD-10… 2021-06-04 00:17:38 None        <span style="color: #949494;">""</span>                              7.64</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> A-RD-10… 2021-06-07 23:30:32 None        <span style="color: #949494;">""</span>                              8.35</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> A-RD-10… 2021-06-08 02:02:19 None        <span style="color: #949494;">""</span>                              7.62</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 35 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ abbreviated name: ¹​recording_sample_frequency</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 12 more variables: task_is_complete &lt;chr&gt;, observer &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   species_code &lt;chr&gt;, species_individual_comments &lt;chr&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   individual_number &lt;int&gt;, vocalization &lt;chr&gt;, abundance &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   tag_start_time &lt;dbl&gt;, tag_duration &lt;dbl&gt;, min_tag_freq &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   max_tag_freq &lt;dbl&gt;, internal_tag_id &lt;chr&gt;</span></span></span></code></pre></div>
+<span>  freq_bump <span class="op">=</span> <span class="cn">T</span><span class="op">)</span> <span class="co"># Add a 20000 Hz frequency buffer to the tag</span></span></code></pre></div>
 <div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
 <div id="ref-towsey2018" class="csl-entry">
 Towsey, Michael Towsey, Elizabeth Znidersic Znidersic, Julie Broken-Brow

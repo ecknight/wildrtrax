@@ -157,8 +157,8 @@ you can download data for.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>            <span style="text-decoration: underline;">5</span>396 Gov-QC            ARU                  <span style="text-decoration: underline;">1</span>191 Suivi-BdQc 2021   </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>            <span style="text-decoration: underline;">5</span>278 BSC-SK            ARU                  <span style="text-decoration: underline;">1</span>093 GBMP - Paired Hum…</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>            <span style="text-decoration: underline;">5</span>459 GRNP              ARU                  <span style="text-decoration: underline;">3</span>368 Grasslands Nation…</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 more variables: project_status &lt;chr&gt;, project_creation_date &lt;date&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   project_due_date &lt;date&gt;, task_count &lt;int&gt;, tasks_completed &lt;int&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 more variables: project_status &lt;chr&gt;, project_creation_date &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   project_due_date &lt;chr&gt;, task_count &lt;int&gt;, tasks_completed &lt;int&gt;</span></span></span></code></pre></div>
 <p>Using the project_id number in the download summary you can then use
 <code><a href="../reference/wt_download_report.html">wt_download_report()</a></code> to access the species data. You can
 also find the project_id number in the url of a WildTrax project,
@@ -262,21 +262,7 @@ currently tagged in the Project.</p>
 <code class="sourceCode R"><span><span class="va">my_project_species</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/wt_get_project_species.html">wt_get_project_species</a></span><span class="op">(</span><span class="fl">620</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">my_project_species</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">included</span> <span class="op">==</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 67 × 4</span></span></span>
-<span><span class="co">#&gt;    species_id included species_code species_common_name  </span></span>
-<span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>         26 TRUE     MOWI         Moderate wind        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>        795 TRUE     BHCO         Brown-headed Cowbird </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>        836 TRUE     GHOW         Great Horned Owl     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>       <span style="text-decoration: underline;">2</span>649 TRUE     WCSP         White-crowned Sparrow</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>       <span style="text-decoration: underline;">2</span>652 TRUE     YRWA         Yellow-rumped Warbler</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>       <span style="text-decoration: underline;">2</span>655 TRUE     CORA         Common Raven         </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>        884 TRUE     HAWO         Hairy Woodpecker     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>       <span style="text-decoration: underline;">2</span>710 TRUE     CANG         Canada Goose         </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>       <span style="text-decoration: underline;">2</span>636 TRUE     AMRO         American Robin       </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>       <span style="text-decoration: underline;">2</span>200 TRUE     CEDW         Cedar Waxwing        </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 57 more rows</span></span></span></code></pre></div>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">included</span> <span class="op">==</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <div class="float">
 <img src="projectspecies.png" alt="Project species table with included species in list on the right"><div class="figcaption">Project species table with included species in
 list on the right</div>

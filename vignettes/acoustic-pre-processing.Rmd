@@ -160,7 +160,7 @@ readr::read_table("./CONI.txt")
 
 And here's in the transformation with `wt_songscope_tags()`:
 
-```{r eval=T, message=FALSE, warning=FALSE, include=T}
+```{r eval=F, message=FALSE, warning=FALSE, include=T}
 wt_songscope_tags(
   input = "./CONI.txt",
   output = "env",
@@ -172,11 +172,12 @@ wt_songscope_tags(
   duration = 180,
   sample_freq = 44100
 )
+
 ```
 
 Similarly, a Kaleidoscope output can be converted similarly:
 
-```{r eval=T, message=FALSE, warning=FALSE, include=T}
+```{r eval=F, message=FALSE, warning=FALSE, include=T}
 wt_kaleidoscope_tags(
   input = "./id.csv",
   output = NULL,

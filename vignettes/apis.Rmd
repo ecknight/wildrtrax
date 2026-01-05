@@ -132,7 +132,7 @@ wt_get_species() |> arrange(species_code)
 
 You can also determine which species are allowed in and out of projects via the `wt_get_project_species()` function. The `included` column will expose which species have been currently tagged in the Project. 
 
-```{r, echo=T, include=T, eval=T, warning=F, message = FALSE}
+```{r, echo=T, include=T, eval=F, warning=F, message = FALSE}
 my_project_species <- wt_get_project_species(620)
 
 my_project_species |>
