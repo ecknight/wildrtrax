@@ -206,6 +206,7 @@ test_that("Download media", {
 #######
 
 test_that("Complex column check across reports and sync", {
+
 report_endpoints <- list(
   list(project = 620, type = "ARU", reports = c("main","ai","recording","tag","project","location")),
   list(project = 881, type = "PC", reports = "main"),
