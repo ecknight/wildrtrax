@@ -37,6 +37,7 @@ Imports:
     unmarked
 Suggests: 
     knitr,
+    QPAD,
     rmarkdown,
     testthat (>= 3.0.0),
     usethis,

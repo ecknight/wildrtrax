@@ -254,6 +254,9 @@ wt_replace_tmtt <- function(data, calc="round"){
   }
 
   # replace TMTT rows with predictions
+
+  print(dat.tmtt)
+
   dat.tmtt <- dat.tmtt |>
     mutate(individual_count = case_when(individual_count == "TMTT" ~ NA_real_, TRUE ~ as.numeric(individual_count))) |>
     rows_update(dat.tmt, by = c("location_id","species_code","observer_id","recording_date_time"))
@@ -744,8 +747,8 @@ wt_qpad_offsets <- function(data, species = c("all"), version = 3, together=FALS
 
   #Load QPAD estimates
   cat("\nLoading QPAD estimates... ")
-  load_BAM_version <- get("load_BAM_version",  envir = asNamespace("QPAD"))
-  load_BAM_version(version)
+  load_BAM_QPAD <- get("load_BAM_QPAD",  envir = asNamespace("QPAD"))
+  load_BAM_QPAD(version)
 
   #Make prediction object
   cat("Extracting covariates for offset calculation. This may take a moment.")
