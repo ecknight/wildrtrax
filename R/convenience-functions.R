@@ -782,7 +782,7 @@ wt_qpad_offsets <- function(data, species = c("all"), version = 3, together=FALS
         rename(survey_id=task_id,
                survey_date = recording_date_time,
                observer = observer_id) |>
-        dplyr::select(-durationMethod, -chardur, -chardurmax, -task_duration, -chardis, -chardismax, -distance1, -task_distance)
+        select(-durationMethod, -chardur, -chardurmax, -task_duration, -chardis, -chardismax, -distance1, -task_distance)
     }
 
     return(out)
