@@ -2,7 +2,7 @@
 # CITATION file created with {cffr} R package
 # See also: https://docs.ropensci.org/cffr/
 # --------------------------------------------
-
+ 
 cff-version: 1.2.0
 message: 'To cite package "wildrtrax" in publications use:'
 type: software
@@ -163,15 +163,6 @@ references:
     email: lionel@posit.co
   year: '2026'
   doi: 10.32614/CRAN.package.purrr
-- type: software
-  title: QPAD
-  abstract: 'QPAD: QPAD estimates'
-  notes: Imports
-  url: https://github.com/psolymos/QPAD
-  authors:
-  - family-names: Solymos
-    given-names: Peter
-  year: '2026'
 - type: software
   title: readr
   abstract: 'readr: Read Rectangular Text Data'
