@@ -232,6 +232,7 @@ utils::globalVariables(
     "taskId",
     "methodId",
     "isComplete",
+    "getBAMspecieslist",
     "transcriberUserId",
     "frequency",
     "uploadDate",

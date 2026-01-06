@@ -702,7 +702,7 @@ wt_get_exif <- function(data) {
 #'
 #' @references Solymos et al. 2013. Calibrating indices of avian density from non-standardized survey data: making the most of a messy situation. Methods in Ecology and Evolution, 4, 1047-1058.
 #'
-#' @import dplyr QPAD
+#' @import dplyr
 #' @export
 #'
 #' @examples
@@ -744,7 +744,8 @@ wt_qpad_offsets <- function(data, species = c("all"), version = 3, together=FALS
 
   #Load QPAD estimates
   cat("\nLoading QPAD estimates... ")
-  load_BAM_QPAD(version)
+  load_BAM_version <- get("load_BAM_version",  envir = asNamespace("QPAD"))
+  load_BAM_version(version)
 
   #Make prediction object
   cat("Extracting covariates for offset calculation. This may take a moment.")
