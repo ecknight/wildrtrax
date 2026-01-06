@@ -37,11 +37,11 @@ Imports:
     unmarked
 Suggests: 
     knitr,
-    QPAD,
     rmarkdown,
     testthat (>= 3.0.0),
     usethis,
     withr
+Remotes: borealbirds/QPAD
 VignetteBuilder: knitr, rmarkdown
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
