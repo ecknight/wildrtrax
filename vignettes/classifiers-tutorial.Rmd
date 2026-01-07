@@ -170,7 +170,7 @@ If you are adding additional tags to a human processed data set, the best approa
 
 ## Individual calls
 
-Another potential use for BirdNET and HawkEars in WildTrax is to use it to detect individual calls as opposed to just the first call in each task (1SPT) or minute (1SPM). This might be of interest if you're using call rate in a behavioural analysis, or if you're looking for detections for tool development like distance estimation or building a focal species recognizer. Let's try it for White-throated Sparrow (WTSP):
+Another potential use for BirdNET and HawkEars in WildTrax is to use it to detect individual calls as opposed to just the first call in each task (1SPT) or minute (1SPM). This might be of interest if you're using call rate in a behavioural analysis, or if you're looking for detections for tool development like distance estimation or building a focal species recognizer. Let's try it for White-crowned Sparrow (WCSP):
 
 ```{r, eval=F, message=F, warning=F}
 #Evaluate classifier performance
@@ -190,12 +190,11 @@ eval_wcsp[eval_wcsp$threshold==min(threshold_wcsp$threshold),]
 #Filter to detections
 detections_wcsp <- data[[1]] |>
   filter(species_common_name == "White-crowned Sparrow", 
-         confidence > min(threshold_wtsp$threshold))
-
+         confidence > min(threshold_wcsp$threshold))
 
 ```
 
-As before, you'll probably want to upload your detections to WildTrax for verification, even though the classifiers performance for White-throated Sparrow is pretty good. Let's take a look at our output as call rate to see if it's higher at the beginning of the season, as we would expect:
+As before, you'll probably want to upload your detections to WildTrax for verification, even though the classifiers performance for White-crowned Sparrow is pretty good. Let's take a look at our output as call rate to see if it's higher at the beginning of the season, as we would expect:
 
 ```{r, eval=T, include=T, message=F, warning=F}
 #Calculate detections per second and mean confidence in each recording

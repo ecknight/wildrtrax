@@ -277,12 +277,13 @@ wt_ind_detect <- function(x, threshold, units = "minutes", datetime_col = image_
   }
 
   # Tags to discard
-  t <- c("NONE", "STAFF/SETUP", "UNKNOWN", NA)
+  t <- c("NONE", "STAFF/SETUP", "UNKNOWN")
   if (remove_human) {
     # Standard WildTrax tags that refer to human(ish) objects
     t <- c(t, "Human", "Vehicle", "Unknown Vehicle", "All Terrain Vehicle", "Train", "Heavy Equipment")
   }
-  x <- filter(x, !species_common_name %in% t)
+  # Filter out unwanted tags, including NAs
+  x <- filter(x, !species_common_name %in% t & !is.na(species_common_name))
   if (remove_domestic) {
     # All tags in WildTrax that refer to domestic animals begin with 'Domestic __'
     x <- filter(x, !grepl("^Domestic", species_common_name))

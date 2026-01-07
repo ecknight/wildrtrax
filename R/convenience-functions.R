@@ -255,8 +255,6 @@ wt_replace_tmtt <- function(data, calc="round"){
 
   # replace TMTT rows with predictions
 
-  print(dat.tmtt)
-
   dat.tmtt <- dat.tmtt |>
     mutate(individual_count = case_when(individual_count == "TMTT" ~ NA_real_, TRUE ~ as.numeric(individual_count))) |>
     rows_update(dat.tmt, by = c("location_id","species_code","observer_id","recording_date_time"))
