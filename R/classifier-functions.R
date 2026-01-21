@@ -14,7 +14,7 @@
 #' @examples
 #' \dontrun{
 #' data <- wt_download_report(project_id = 1144, sensor_id = "ARU",
-#' reports = c("main", "ai"), weather_cols = FALSE)
+#' reports = c("main", "ai"))
 #'
 #' eval <- wt_evaluate_classifier(data, resolution = "recording",
 #' remove_species = TRUE, thresholds = c(0.1, 0.99))
@@ -141,7 +141,7 @@ wt_evaluate_classifier <- function(data, resolution = NULL, remove_species = TRU
 #' @examples
 #' \dontrun{
 #' data <- wt_download_report(project_id = 1144, sensor_id = "ARU",
-#' reports = c("main", "ai"), weather_cols = FALSE)
+#' reports = c("main", "ai"))
 #'
 #' eval <- wt_evaluate_classifier(data, resolution = "recording",
 #' remove_species = TRUE, thresholds = c(10, 99))
@@ -169,7 +169,7 @@ wt_classifier_threshold <- function(data){
 #'
 #' @description Check for species reported by BirdNET and HawkEars that the human listeners did not detect in our project.
 #'
-#' @param data Output from the `wt_download_report()` function when you request the `main` and `birdnet` reports
+#' @param data Output from the `wt_download_report()` function when you request the `main` and `ai` reports
 #' @param remove_species Logical; indicates whether species that are not allowed in the WildTrax project should be removed from the AI report
 #' @param threshold Numeric; the desired score threshold
 #' @param resolution Character; either "recording" to identify any new species for each recording or "location" to identify new species for each location
@@ -183,7 +183,7 @@ wt_classifier_threshold <- function(data){
 #' @examples
 #' \dontrun{
 #' data <- wt_download_report(project_id = 1144, sensor_id = "ARU",
-#' reports = c("main", "ai"), weather_cols = FALSE)
+#' reports = c("main", "ai"))
 #'
 #' new <- wt_additional_species(data, remove_species = TRUE,
 #' threshold = 80, resolution="location")
@@ -195,7 +195,7 @@ wt_additional_species <- function(data, remove_species = TRUE, threshold = 0.5, 
 
   # Check if the data object is in the right format
   if (!inherits(data, "list") && !grepl("ai", names(data)[[2]]) && !grepl("main", names(data))[[1]]) {
-    stop("The input should be the output of the `wt_download_report()` function with the argument `reports=c('main', 'birdnet')`")
+    stop("The input should be the output of the `wt_download_report()` function with the argument `reports=c('main', 'ai')`")
   }
 
   #Get the classifier report and filter species as requested
