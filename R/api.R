@@ -346,7 +346,7 @@ wt_get_project_species <- function(project) {
     req_url_path_append("bis/get-project-species-details") |>
     req_url_query(projectId = project) |>
     req_headers(
-      Authorization = paste("Bearer", ._wt_auth_env_$access_token)
+      Authorization = NULL
     ) |>
     req_user_agent(.gen_ua()) |>
     req_method("GET") |>
