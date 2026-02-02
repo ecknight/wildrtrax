@@ -254,7 +254,7 @@ wt_replace_tmtt <- function(data, calc="round"){
 
   # replace TMTT rows with predictions
 
-  dat.tmtt <- suppressMessages(dat.tmtt |>
+  dat.tmtt <- suppressWarnings(dat.tmtt |>
     mutate(abundance = case_when(abundance %in% c("TMTT", "TNPE") ~ NA_real_, TRUE ~ as.numeric(abundance))) |>
     rows_update(dat.tmt, by = c("id")) |>
     select(-id))
