@@ -1,6 +1,6 @@
 # wildrtrax 
 
-# wildrtrax 1.5
+# wildrtrax 1.5.0
 
 ## Major changes
 

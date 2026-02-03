@@ -1160,7 +1160,7 @@ wt_get_view <- function(api, project = NULL, organization = NULL, max_seconds = 
       req_user_agent(.gen_ua()) |>
       req_body_json(list(
         organizationId = organization,
-        limit          = 1e9,
+        limit          = 200000,
         orderBy        = "locationName",
         orderDirection = "asc"
       )) |>
