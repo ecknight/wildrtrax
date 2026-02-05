@@ -1160,7 +1160,7 @@ wt_get_view <- function(api, project = NULL, organization = NULL, max_seconds = 
       req_user_agent(.gen_ua()) |>
       req_body_json(list(
         organizationId = organization,
-        limit          = 200000,
+        limit          = 1e9,
         orderBy        = "locationName",
         orderDirection = "asc"
       )) |>
@@ -1201,6 +1201,8 @@ wt_get_view <- function(api, project = NULL, organization = NULL, max_seconds = 
 
       message('Depending on the number of recordings in your Organization, this may take a moment...')
 
+      max_page_size <- 10000
+
       resp <- request("https://www-api.wildtrax.ca") |>
         req_url_path_append(api_path) |>
         req_headers(
@@ -1212,7 +1214,7 @@ wt_get_view <- function(api, project = NULL, organization = NULL, max_seconds = 
           organizationId = organization,
           limit = 1e9
         )) |>
-        req_method("POST") |>
+        req_method("GET") |>
         req_timeout(max_seconds) |>
         req_perform()
 
