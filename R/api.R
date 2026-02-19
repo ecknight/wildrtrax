@@ -229,7 +229,7 @@ wt_download_report <- function(project_id, sensor_id, reports, max_seconds=300) 
       `Content-Type` = "application/json"
     ) |>
     req_user_agent(u) |>
-    req_method("POST") |>      # Use POST instead of GET here
+    req_method("POST") |>
     req_timeout(max_seconds)
 
   resp <- tryCatch(
@@ -242,24 +242,38 @@ wt_download_report <- function(project_id, sensor_id, reports, max_seconds=300) 
       }
     }
   )
+
+  # Write and unzip
   writeBin(httr2::resp_body_raw(resp), tmp)
   unzip(tmp, exdir = td)
-  abstract <- list.files(td, pattern = "*_abstract.csv", full.names = TRUE, recursive = TRUE)
+  print(tmp)        # path to zip
+  print(td)         # path to extraction folder
+  print(list.files(td, recursive = TRUE))
+
+  safe_windows_filename <- function(x) {
+    # Replace all characters illegal in Windows filenames
+    gsub("[:<>|*?\"/\\\\]", "_", x)
+  }
+
+  # Remove special characters from project names safely
+  list.files(td, pattern = "\\.csv$", full.names = TRUE, recursive = TRUE) %>%
+    purrr::walk(~ {
+      old_path <- .x
+      new_path <- file.path(dirname(.x), safe_windows_filename(basename(.x)))
+      if (!file.exists(new_path)) file.rename(old_path, new_path)
+    })
+
+  # Remove abstracts
+  abstract <- list.files(td, pattern = "_abstract\\.csv$", full.names = TRUE, recursive = TRUE)
   file.remove(abstract)
 
-  # Remove special characters from project names
-  list.files(td, pattern = "*.csv", full.names = TRUE) %>% map(~ {
-    directory <- dirname(.x)
-    old_filename <- basename(.x)
-    new_filename <- gsub("[:()?!~;/,]", "", old_filename)
-    new_path <- file.path(directory, new_filename)
-    file.rename(.x, new_path)
-  })
-
-  files.full <- list.files(td, pattern= "*.csv", full.names = TRUE)
+  # Get updated CSV lists
+  files.full <- list.files(td, pattern= "\\.csv$", full.names = TRUE, recursive = TRUE)
   files.less <- basename(files.full)
-  x <- purrr::map(.x = files.full, .f = ~ suppressWarnings(readr::read_csv(., show_col_types = FALSE, skip_empty_rows = TRUE, col_types = .wt_col_types, progress = FALSE))) %>%
-    purrr::set_names(files.less)
+
+  x <- purrr::map(.x = files.full, .f = ~ suppressWarnings(
+    readr::read_csv(.x, show_col_types = FALSE, skip_empty_rows = TRUE, col_types = .wt_col_types, progress = FALSE)
+  )) %>% purrr::set_names(files.less)
 
   # Return the requested report(s)
   report <- paste(paste0("_",reports), collapse = "|")
