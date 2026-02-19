@@ -1203,7 +1203,7 @@ wt_get_view <- function(api, project = NULL, organization = NULL, max_seconds = 
 
       max_page_size <- 10000
 
-      resp <- request("https://www-api.wildtrax.ca") |>
+      req <- request("https://www-api.wildtrax.ca") |>
         req_url_path_append(api_path) |>
         req_headers(
           Authorization = paste("Bearer", ._wt_auth_env_$access_token),
@@ -1212,14 +1212,35 @@ wt_get_view <- function(api, project = NULL, organization = NULL, max_seconds = 
         req_user_agent(.gen_ua()) |>
         req_body_json(list(
           organizationId = organization,
-          limit = 1e9
+          limit          = max_page_size,
+          orderBy        = "locationName",
+          orderDirection = "asc"
         )) |>
         req_method("GET") |>
-        req_timeout(max_seconds) |>
-        req_perform()
+        req_timeout(300)
 
-      json <- resp_body_json(resp, simplifyVector = TRUE)
-      org_df_recs <- as_tibble(json)
+      resp <- req_perform_iterative(req, iterate_with_offset("page_index"))
+
+      json <- resp_body_json(resp[[1]], simplifyVector = FALSE)
+
+      replace_nulls <- function(x) {
+        if (is.list(x)) {
+          x <- map(x, replace_nulls)  # recursively replace NULLs
+        } else if (is.null(x)) {
+          x <- NA
+        }
+        x
+      }
+
+      all_results <- map(resp, ~ {
+        json <- resp_body_json(.x, simplifyVector = FALSE)
+        map_dfr(json, ~ {
+          rec <- replace_nulls(.x)
+          as_tibble(rec)
+        })
+      })
+
+      org_df_recs <- bind_rows(all_results) |> distinct()
 
       return(org_df_recs)
 
