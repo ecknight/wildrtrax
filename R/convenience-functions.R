@@ -195,9 +195,9 @@ wt_tidy_species <- function(data,
 
 }
 
-#' Replace 'TMTT' abundance with model-predicted values
+#' Replace 'TMTT' individual count with model-predicted values
 #'
-#' @description This function uses a lookup table of model-predicted values to replace 'TMTT' entries in listener-processed ARU data from WildTrax. The model-predicted values were produced using estimated abundances for 'TMTT' entries in mixed effects model with a Poisson distribution and random effects for species and observer.
+#' @description This function uses a lookup table of model-predicted values to replace 'TMTT' entries in listener-processed ARU data from WildTrax. The model-predicted values were produced using estimated individual counts for 'TMTT' entries in mixed effects model with a Poisson distribution and random effects for species and observer.
 #'
 #' @param data Dataframe of WildTrax observations, for example the summary report.
 #' @param calc Character; method to convert model predictions to integer ("round", "ceiling", or "floor"). See `?round()` for details.
@@ -209,7 +209,7 @@ wt_tidy_species <- function(data,
 #' \dontrun{
 #' dat.tmtt <- wt_replace_tmtt(dat, calc="round")
 #' }
-#' @return A dataframe identical to input with 'TMTT' entries in the abundance column replaced by integer values.
+#' @return A dataframe identical to input with 'TMTT' entries in the individual count column replaced by integer values.
 
 wt_replace_tmtt <- function(data, calc="round"){
 
@@ -231,7 +231,7 @@ wt_replace_tmtt <- function(data, calc="round"){
   dat.tmtt <- mutate(data, id = row_number())
 
   # only TMTT rows for replacement
-  dat.tmt <- dat.tmtt |> filter(abundance %in% c("TMTT", "TNPE"))
+  dat.tmt <- dat.tmtt |> filter(individual_count %in% c("TMTT", "TNPE"))
 
   if(nrow(dat.tmt) > 0){
     dat.tmt <- dat.tmt |>
@@ -242,7 +242,7 @@ wt_replace_tmtt <- function(data, calc="round"){
       inner_join(.tmtt |> select(species_code, observer_id, pred),
                  by = c("species_code", "observer_id")) |>
       mutate(
-        abundance = case_when(
+        individual_count = case_when(
           calc == "round"   ~ round(pred),
           calc == "ceiling" ~ ceiling(pred),
           calc == "floor"   ~ floor(pred),
@@ -255,7 +255,7 @@ wt_replace_tmtt <- function(data, calc="round"){
   # replace TMTT rows with predictions
 
   dat.tmtt <- suppressWarnings(dat.tmtt |>
-    mutate(abundance = case_when(abundance %in% c("TMTT", "TNPE") ~ NA_real_, TRUE ~ as.numeric(abundance))) |>
+    mutate(individual_count = case_when(individual_count %in% c("TMTT", "TNPE") ~ NA_real_, TRUE ~ as.numeric(individual_count))) |>
     rows_update(dat.tmt, by = c("id")) |>
     select(-id))
 
@@ -264,7 +264,7 @@ wt_replace_tmtt <- function(data, calc="round"){
 
 #' Convert to a wide survey by species dataframe
 #'
-#' @description This function converts a long-formatted report into a wide survey by species dataframe of abundance values.
+#' @description This function converts a long-formatted report into a wide survey by species dataframe of individual_count values.
 #'
 #' @param data WildTrax main report or tag report from the `wt_download_report()` function.
 #' @param sound Character; vocalization type(s) to retain ("all", "Song", "Call", "Non-vocal"). Can be used to remove certain types of detections. Defaults to "all" (i.e., no filtering).
@@ -301,10 +301,10 @@ wt_make_wide <- function(data, sound="all"){
 
     #Make it wide
     wide <- summed |>
-      mutate(abundance = case_when(is.na(abundance) & species_code == "NONE" ~ "0", grepl("^C",  abundance) ~ NA_character_, TRUE ~ as.character(abundance)) |> as.numeric()) |>
+      mutate(individual_count = case_when(is.na(individual_count) & species_code == "NONE" ~ "0", grepl("^C",  individual_count) ~ NA_character_, TRUE ~ as.character(individual_count)) |> as.numeric()) |>
       pivot_wider(id_cols = organization:task_method,
                   names_from = "species_code",
-                  values_from = "abundance",
+                  values_from = "individual_count",
                   values_fn = sum,
                   values_fill = 0,
                   names_sort = TRUE)
@@ -316,10 +316,10 @@ wt_make_wide <- function(data, sound="all"){
 
     #Make it wide and return field names to point count format
     wide <- data |>
-      mutate(abundance = case_when(is.na(abundance) & species_code == "NONE" ~ "0", grepl("^C",  abundance) ~ NA_character_, TRUE ~ as.character(abundance)) |> as.numeric()) |>
+      mutate(individual_count = case_when(is.na(individual_count) & species_code == "NONE" ~ "0", grepl("^C",  individual_count) ~ NA_character_, TRUE ~ as.character(individual_count)) |> as.numeric()) |>
       pivot_wider(id_cols = organization:survey_duration_method,
                          names_from = "species_code",
-                         values_from = "abundance",
+                         values_from = "individual_count",
                          values_fn = sum,
                          values_fill = 0,
                          names_sort = TRUE)

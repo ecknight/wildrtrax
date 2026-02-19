@@ -1,5 +1,14 @@
 # wildrtrax 
 
+# wildrtrax 1.5.1
+
+## Minor changes 
+
+* `wt_get_sync()` and `wt_get_view()` more flexible with Organization acronyms and Project names now both being accepted along with ids.
+* Bug fixes on `wt_replace_tmtt()`
+* Additional point count columns supported in `.wt_col_types()`
+* Column name bug fixes mainly on ARU reports
+
 # wildrtrax 1.5.0
 
 ## Major changes
