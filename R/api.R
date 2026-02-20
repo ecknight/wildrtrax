@@ -243,25 +243,24 @@ wt_download_report <- function(project_id, sensor_id, reports, max_seconds=300) 
     }
   )
 
-  # Write and unzip
   writeBin(httr2::resp_body_raw(resp), tmp)
-  safe_td <- tempfile()
-  dir.create(safe_td)
-  unzip(tmp, exdir = safe_td)
-
-  # Get extracted files
-  files <- list.files(safe_td, recursive = TRUE, full.names = TRUE)
-
-  for (f in files) {
-    new_name <- gsub('[:*?"<>|]', "_", basename(f))
-    new_path <- file.path(dirname(f), new_name)
-    if (f != new_path) {
-      file.rename(f, new_path)
-    }
-  }
 
   safe_windows_filename <- function(x) {
     gsub("[:<>|*?\"/\\\\]", "_", x)
+  }
+
+  zip::unzip(tmp, exdir = td)
+
+  files_extracted <- list.files(td, recursive = TRUE, full.names = TRUE)
+
+  for (old_path in files_extracted) {
+
+    new_name <- safe_windows_filename(basename(old_path))
+    new_path <- file.path(dirname(old_path), new_name)
+
+    if (old_path != new_path) {
+      file.rename(old_path, new_path)
+    }
   }
 
   # Remove special characters from project names safely
@@ -276,12 +275,14 @@ wt_download_report <- function(project_id, sensor_id, reports, max_seconds=300) 
   abstract <- list.files(td, pattern = "_abstract\\.csv$", full.names = TRUE, recursive = TRUE)
   file.remove(abstract)
 
-  # Get updated CSV lists
   files.full <- list.files(td, pattern= "\\.csv$", full.names = TRUE, recursive = TRUE)
   files.less <- basename(files.full)
 
   x <- purrr::map(.x = files.full, .f = ~ suppressWarnings(
-    readr::read_csv(.x, show_col_types = FALSE, skip_empty_rows = TRUE, col_types = .wt_col_types, progress = FALSE)
+    readr::read_csv(.x, show_col_types = FALSE,
+                    skip_empty_rows = TRUE,
+                    col_types = .wt_col_types,
+                    progress = FALSE)
   )) %>% purrr::set_names(files.less)
 
   # Return the requested report(s)
