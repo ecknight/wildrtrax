@@ -227,6 +227,15 @@
 
 }
 
+#' Column switch assignments
+#'
+#' @description Assign correct column names
+#'
+#' @keywords internal
+#'
+
+.wt_col_switch <- list("abundance" = "individual_count")
+
 #' Column assignments
 #'
 #' @description Assign correct column types for reports
