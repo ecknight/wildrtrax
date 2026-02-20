@@ -245,13 +245,22 @@ wt_download_report <- function(project_id, sensor_id, reports, max_seconds=300) 
 
   # Write and unzip
   writeBin(httr2::resp_body_raw(resp), tmp)
-  unzip(tmp, exdir = td)
-  print(tmp)        # path to zip
-  print(td)         # path to extraction folder
-  print(list.files(td, recursive = TRUE))
+  safe_td <- tempfile()
+  dir.create(safe_td)
+  unzip(tmp, exdir = safe_td)
+
+  # Get extracted files
+  files <- list.files(safe_td, recursive = TRUE, full.names = TRUE)
+
+  for (f in files) {
+    new_name <- gsub('[:*?"<>|]', "_", basename(f))
+    new_path <- file.path(dirname(f), new_name)
+    if (f != new_path) {
+      file.rename(f, new_path)
+    }
+  }
 
   safe_windows_filename <- function(x) {
-    # Replace all characters illegal in Windows filenames
     gsub("[:<>|*?\"/\\\\]", "_", x)
   }
 
