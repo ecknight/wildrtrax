@@ -231,7 +231,7 @@ wt_replace_tmtt <- function(data, calc="round"){
   dat.tmtt <- mutate(data, id = row_number())
 
   # only TMTT rows for replacement
-  dat.tmt <- dat.tmtt |> filter(individual_count %in% c("TMTT", "TNPE"))
+  dat.tmt <- dat.tmtt |> filter(abundance %in% c("TMTT", "TNPE"))
 
   if(nrow(dat.tmt) > 0){
     dat.tmt <- dat.tmt |>
@@ -242,7 +242,7 @@ wt_replace_tmtt <- function(data, calc="round"){
       inner_join(.tmtt |> select(species_code, observer_id, pred),
                  by = c("species_code", "observer_id")) |>
       mutate(
-        individual_count = case_when(
+        abundance = case_when(
           calc == "round"   ~ round(pred),
           calc == "ceiling" ~ ceiling(pred),
           calc == "floor"   ~ floor(pred),
@@ -255,7 +255,7 @@ wt_replace_tmtt <- function(data, calc="round"){
   # replace TMTT rows with predictions
 
   dat.tmtt <- suppressWarnings(dat.tmtt |>
-    mutate(individual_count = case_when(individual_count %in% c("TMTT", "TNPE") ~ NA_real_, TRUE ~ as.numeric(individual_count))) |>
+    mutate(abundance = case_when(abundance %in% c("TMTT", "TNPE") ~ NA_real_, TRUE ~ as.numeric(abundance))) |>
     rows_update(dat.tmt, by = c("id")) |>
     select(-id))
 
