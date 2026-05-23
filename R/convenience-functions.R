@@ -235,8 +235,9 @@ wt_replace_tmtt <- function(data, calc="round"){
 
   if(nrow(dat.tmt) > 0){
     dat.tmt <- dat.tmt |>
+      rename(species_code_og = species_code) |>
       mutate(
-        species_code = ifelse(species_code %in% .tmtt$species_code, species_code, "species"),
+        species_code = ifelse(species_code_og %in% .tmtt$species_code, species_code_og, "species"),
         observer_id = as.integer(ifelse(observer_id %in% .tmtt$observer_id, observer_id, 0))
       ) |>
       inner_join(.tmtt |> select(species_code, observer_id, pred),
@@ -247,9 +248,10 @@ wt_replace_tmtt <- function(data, calc="round"){
           calc == "ceiling" ~ ceiling(pred),
           calc == "floor"   ~ floor(pred),
           TRUE ~ NA_real_
-        )
+        ),
+        species_code = species_code_og
       ) |>
-      select(-pred)
+      select(-pred, -species_code_og)
   }
 
   # replace TMTT rows with predictions
