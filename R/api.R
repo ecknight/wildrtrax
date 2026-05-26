@@ -278,12 +278,22 @@ wt_download_report <- function(project_id, sensor_id, reports, max_seconds=300) 
   files.full <- list.files(td, pattern= "\\.csv$", full.names = TRUE, recursive = TRUE)
   files.less <- basename(files.full)
 
-  x <- purrr::map(.x = files.full, .f = ~ suppressWarnings(
-    readr::read_csv(.x, show_col_types = FALSE,
-                    skip_empty_rows = TRUE,
-                    col_types = .wt_col_types,
-                    progress = FALSE)
-  )) %>% purrr::set_names(files.less)
+  if(sensor_id!="PC"){
+    x <- purrr::map(.x = files.full, .f = ~ suppressWarnings(
+      readr::read_csv(.x, show_col_types = FALSE,
+                      skip_empty_rows = TRUE,
+                      col_types = .wt_col_types,
+                      progress = FALSE)
+    )) %>% purrr::set_names(files.less)
+  } else {
+    x <- purrr::map(.x = files.full, .f = ~ suppressWarnings(
+      readr::read_csv(.x, show_col_types = FALSE,
+                      skip_empty_rows = TRUE,
+                      col_types = .wt_col_types_pc,
+                      progress = FALSE)
+    )) %>% purrr::set_names(files.less)
+  }
+
 
   # Return the requested report(s)
   report <- paste(paste0("_",reports), collapse = "|")
